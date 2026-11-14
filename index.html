@@ -174,16 +174,16 @@
                 <button onclick="jumpToScene(1)" id="tab-1" class="glass-pill px-3 py-1.5 rounded-xl text-left transition-all flex items-center gap-2 whitespace-nowrap">
                     <span class="mono text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">II</span>
                     <div>
-                        <div class="text-xs font-semibold text-white">Einstein "Hat" Monotile</div>
-                        <div class="text-[10px] text-slate-400 hidden sm:block">Z: 100→200 • H/T/P/F Inflation</div>
+                        <div class="text-xs font-semibold text-white">Einstein "Hat" IFS</div>
+                        <div class="text-[10px] text-slate-400 hidden sm:block">Z: 100→200 • H₇/H₈ Fractal IFS</div>
                     </div>
                 </button>
 
                 <button onclick="jumpToScene(2)" id="tab-2" class="glass-pill px-3 py-1.5 rounded-xl text-left transition-all flex items-center gap-2 whitespace-nowrap">
                     <span class="mono text-xs px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">III</span>
                     <div>
-                        <div class="text-xs font-semibold text-white">Natural Fractals</div>
-                        <div class="text-[10px] text-slate-400 hidden sm:block">Z: 200→300 • Fjord → Stomata</div>
+                        <div class="text-xs font-semibold text-white">Satellite Coast → Treeline</div>
+                        <div class="text-[10px] text-slate-400 hidden sm:block">Z: 200→300 • Orbit → Beach → Canopy</div>
                     </div>
                 </button>
             </nav>
@@ -233,9 +233,9 @@
             <div class="flex items-center justify-between text-[9px] mono text-slate-400 mb-1">
                 <span>0: IFS Gasket</span>
                 <span>55: Multibrot</span>
-                <span>150: Einstein Hat</span>
-                <span>240: Fjord</span>
-                <span>300: Leaf Veins</span>
+                <span>150: Hat IFS</span>
+                <span>235: Beach Cove</span>
+                <span>300: Treeline</span>
             </div>
             <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-white/10">
                 <div id="journeyProgressBar" class="h-full bg-gradient-to-r from-sky-400 via-amber-400 to-emerald-400 rounded-full transition-all duration-75" style="width: 6%;"></div>
@@ -251,7 +251,7 @@
             <span id="toggleControlsText">Hide Lab Controls</span>
         </button>
 
-        <div id="controlPanel" class="glass-panel rounded-2xl p-4 w-[calc(100vw-1.5rem)] sm:w-88 pointer-events-auto space-y-3 transition-all duration-300">
+        <div id="controlPanel" class="glass-panel rounded-2xl p-4 w-[calc(100vw-1.5rem)] sm:w-88 pointer-events-auto space-y-2.5 transition-all duration-300 max-h-[80vh] overflow-y-auto">
             
             <!-- Procedural Seed Generator & Mutator -->
             <div class="bg-slate-900/80 rounded-xl p-2.5 border border-white/10 flex items-center justify-between">
@@ -274,8 +274,36 @@
                 <input id="journeySlider" type="range" min="0" max="300" step="0.1" value="0.0">
                 <div class="flex justify-between text-[9px] mono text-slate-500 mt-0.5">
                     <span>10⁰× (Sierpinski)</span>
-                    <span>10⁹× (Einstein Hat)</span>
-                    <span>10¹⁸× (Leaf Cell)</span>
+                    <span>10⁹× (Hat IFS)</span>
+                    <span>10¹⁸× (Treeline)</span>
+                </div>
+            </div>
+
+            <!-- Stage II & Stage III Specialized Synthesis Selectors -->
+            <div class="grid grid-cols-1 gap-2 pt-0.5">
+                <div class="bg-slate-900/75 border border-amber-500/25 rounded-xl p-2">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="text-[9px] mono uppercase text-amber-300 font-semibold">Stage II: Einstein Hat IFS Mode</label>
+                        <button id="chaosIfsBtn" onclick="toggleChaosIFS()" class="text-[9px] mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-400/30 hover:bg-amber-500/35 transition">
+                            + Chaos Attractor: ON
+                        </button>
+                    </div>
+                    <select id="hatIfsModeSelect" onchange="updateHatIFSMode(this.value)" class="w-full bg-slate-950/90 border border-white/15 rounded-lg px-2 py-1 text-[11px] text-white mono outline-none focus:border-amber-400">
+                        <option value="0">Recursive Hat-IFS + H₇/H₈ Fractal Supertiles</option>
+                        <option value="1">Pure Substitution Inflation (H,T,P,F φ²=2.618)</option>
+                        <option value="2">Deep Contractive Hat-IFS Attractor Web</option>
+                    </select>
+                </div>
+
+                <div class="bg-slate-900/75 border border-emerald-500/25 rounded-xl p-2">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="text-[9px] mono uppercase text-emerald-300 font-semibold">Stage III: Aerial Coastline Mode</label>
+                        <span class="text-[9px] mono text-emerald-400">Shoreline-Locked</span>
+                    </div>
+                    <select id="aerialModeSelect" onchange="updateAerialMode(this.value)" class="w-full bg-slate-950/90 border border-white/15 rounded-lg px-2 py-1 text-[11px] text-white mono outline-none focus:border-emerald-400">
+                        <option value="0">Photorealistic Satellite → Beach → Treeline</option>
+                        <option value="1">Hybrid Sentinel-2 Multi-Spectral + LiDAR</option>
+                    </select>
                 </div>
             </div>
 
@@ -425,6 +453,11 @@
             cruiseSpeed: 1.0,
             zoomDirection: 1,     // 1 = Dive In (0 -> 300), -1 = Pull Out (300 -> 0)
             pauseOnManual: false, // False = manual scroll nudges Z seamlessly while auto-zoom continues; True = manual scroll pauses auto-zoom
+            // Stage II & III Mode States
+            hatIfsMode: 0,        // 0 = Recursive Hat-IFS + H7/H8 Supertiles, 1 = Pure Substitution, 2 = Deep Contractive IFS Web
+            showChaosAttractor: true,
+            aerialMode: 0,        // 0 = True-Color Satellite -> Beach -> Treeline, 1 = Hybrid Sentinel Multi-Spectral + LiDAR
+            shorelineAnchor: { x: 0.0, y: 0.0 }, // Locked coastal beach/treeline coordinate
             // Interactive 2D camera
             camX: 0.0,
             camY: 0.0,
@@ -457,9 +490,15 @@
         };
 
         /**************************************************************************
-         * 2. AUTHENTIC EINSTEIN "HAT" MONOTILE + HIERARCHICAL INFLATION ENGINE
+         * 2. AUTHENTIC EINSTEIN "HAT" MONOTILE + GRAPH-DIRECTED IFS ENGINE
+         * Implements both the exact [3.4.6.4] polykite tessellation AND the
+         * Smith-Myers-Kaplan-Goodman-Strauss H7/H8 & {H,T,P,F} Substitution IFS
+         * with inflation factor φ² = (3+√5)/2 ≈ 2.618034 and angle arctan(√3/5).
          **************************************************************************/
         const SQRT3 = Math.sqrt(3);
+        const PHI2 = (3.0 + Math.sqrt(5.0)) * 0.5; // 2.61803398875
+        const INV_PHI2 = 1.0 / PHI2;               // 0.38196601125
+        const SUBST_ANGLE = Math.atan2(SQRT3, 5.0); // ~19.1066 degrees (irrational rotation)
 
         function getCanonicalHatOutline() {
             const hexToCart = (u, v) => ({
@@ -519,10 +558,44 @@
         }
 
         let einsteinTiles = [];
+        let supertileClusters = [];
+        let hatChaosPoints = [];
+        let hatChildIFSMaps = [];
+
+        // Build contractive IFS affine maps that pack child Hat shapes inside a parent Hat/H8 domain
+        function buildContractiveHatIFSMaps() {
+            hatChildIFSMaps = [];
+            // Center of canonical hat is roughly (-1.5, 0.15)
+            const cx = -1.5, cy = 0.15;
+            const offsets = [
+                { dx: 0.0,   dy: 0.0,   rot: SUBST_ANGLE,                  scale: INV_PHI2, refl: true },
+                { dx: -1.05, dy: 0.58,  rot: SUBST_ANGLE + Math.PI / 3.0,  scale: INV_PHI2, refl: false },
+                { dx: -1.05, dy: -0.58, rot: SUBST_ANGLE - Math.PI / 3.0,  scale: INV_PHI2, refl: false },
+                { dx: 0.92,  dy: 0.48,  rot: SUBST_ANGLE + Math.PI * 2/3,  scale: INV_PHI2, refl: false },
+                { dx: 0.92,  dy: -0.48, rot: SUBST_ANGLE - Math.PI * 2/3,  scale: INV_PHI2, refl: false },
+                { dx: -0.15, dy: 1.02,  rot: SUBST_ANGLE + Math.PI,        scale: INV_PHI2 * 0.92, refl: false },
+                { dx: 0.25,  dy: -0.95, rot: SUBST_ANGLE,                  scale: INV_PHI2 * 0.92, refl: false }
+            ];
+            for (const o of offsets) {
+                const c = Math.cos(o.rot) * o.scale;
+                const s = Math.sin(o.rot) * o.scale;
+                const sy = o.refl ? -1 : 1;
+                // Translate canonical hat center to origin, scale+rotate, translate to child slot inside parent hat
+                const M = [
+                    c, -s * sy, cx + o.dx - (c * cx - s * sy * cy),
+                    s,  c * sy, cy + o.dy - (s * cx + c * sy * cy)
+                ];
+                hatChildIFSMaps.push({ M, refl: o.refl });
+            }
+        }
+
+        buildContractiveHatIFSMaps();
 
         function buildEinsteinTiling(seedInt) {
             const rng = new PRNG(seedInt);
             einsteinTiles = [];
+            supertileClusters = [];
+            hatChaosPoints = [];
 
             const hexToCart = (u, v) => ({
                 x: (u + 0.5 * v) * 0.5,
@@ -579,13 +652,23 @@
                 cx /= verts.length;
                 cy /= verts.length;
 
-                // Assign a hierarchical metatile archetype (H, T, P, F) based on seed & local topology
                 const metaTypes = ["H-Metatile", "T-Metatile", "P-Metatile", "F-Metatile"];
-                const metaType = isReflected ? "H*-Reflected Core" : metaTypes[generation % 4];
+                const metaType = isReflected ? "H*-Reflected Core (H₈ Seed)" : metaTypes[generation % 4];
+
+                // Precompute 2 levels of recursive inward child Hat-IFS polygons for this tile
+                const childHatsGen1 = hatChildIFSMaps.map(cmap => {
+                    const cM = matMul(M, cmap.M);
+                    return {
+                        M: cM,
+                        refl: cmap.refl,
+                        verts: CANONICAL_HAT_VERTS.map(v => matTransformPt(cM, v))
+                    };
+                });
 
                 const tile = {
                     M, verts, kitePts, cx, cy, keys,
                     generation, isReflected, clusterId, metaType,
+                    childHatsGen1,
                     phase: rng.range(0, Math.PI * 2),
                     elevationBias: rng.range(0.2, 1.0)
                 };
@@ -593,8 +676,8 @@
                 return tile;
             }
 
-            const rootReflected = rng.next() > 0.35;
-            const rootM = rootReflected ? [1, 0, 0, 0, -1, 0] : [1, 0, 0, 0, 1, 0];
+            const rootReflected = true; // Center on an H8 reflected core for clear supertile inspection
+            const rootM = [1, 0, 0, 0, -1, 0];
             commitTile(rootM, 0, rootReflected, 0);
 
             const relativeTransforms = [];
@@ -658,6 +741,45 @@
                     }
                 }
             }
+
+            // Group every tile into its nearest reflected-hat H7/H8 Substitution Supertile Cluster
+            const reflectedCores = einsteinTiles.filter(t => t.isReflected);
+            if (reflectedCores.length > 0) {
+                const clusterMap = new Map();
+                reflectedCores.forEach((core, idx) => {
+                    clusterMap.set(idx, { core, members: [], id: idx });
+                });
+                einsteinTiles.forEach(tile => {
+                    let bestIdx = 0;
+                    let bestDist = 1e9;
+                    reflectedCores.forEach((core, idx) => {
+                        const d = Math.hypot(tile.cx - core.cx, tile.cy - core.cy);
+                        if (d < bestDist) {
+                            bestDist = d;
+                            bestIdx = idx;
+                        }
+                    });
+                    tile.supertileId = bestIdx;
+                    clusterMap.get(bestIdx).members.push(tile);
+                });
+                supertileClusters = Array.from(clusterMap.values());
+            }
+
+            // Generate Chaos-Game IFS Point Cloud along the H7/H8 fractal substitution attractor
+            let pt = { x: -1.5, y: 0.1 };
+            for (let i = 0; i < 1600; i++) {
+                const randCore = einsteinTiles[rng.int(0, Math.min(95, einsteinTiles.length - 1))];
+                const randSub = hatChildIFSMaps[rng.int(0, hatChildIFSMaps.length - 1)];
+                const combinedM = matMul(randCore.M, randSub.M);
+                pt = matTransformPt(combinedM, pt);
+                if (i > 30) {
+                    hatChaosPoints.push({
+                        x: pt.x,
+                        y: pt.y,
+                        isRefl: randCore.isReflected || randSub.refl
+                    });
+                }
+            }
         }
 
         /**************************************************************************
@@ -698,6 +820,8 @@
             uniform float u_symmetry;        // 3, 4, 5, or 6 fold IFS symmetry
             uniform float u_sierpinskiSpin;  // Rotational fold twist
             uniform float u_hurst;           // Coastline Hurst roughness exponent
+            uniform float u_aerialMode;      // 0 = True-Color Satellite, 1 = Multi-Spectral + LiDAR
+            uniform vec2 u_shoreAnchor;      // Shoreline-locked coordinate so zoom stays on the beach/treeline interface
 
             // --- 6 Procedural Cosine Palettes + Seed Phase Shift ---
             vec3 getPalette(float t, float palId) {
@@ -902,74 +1026,164 @@
                 return mix(colSierp, colMandel, smoothstep(0.32, 0.62, morph));
             }
 
-            // --- STAGE 3 RENDERER: Natural Statistical Fractals (Z = 200 .. 300) ---
+            // --- STAGE 3 RENDERER: Cohesive Satellite Coastline -> Sandy Beach Cove -> Coastal Forest Treeline (Z = 200 .. 300) ---
+            // Locks onto u_shoreAnchor so zooming from 200->300 dives continuously into the exact shoreline interface
+            // where turquoise surf, golden sandy beach berm, and lush coastal pine/oak treeline meet!
+            float getCoastElevation(vec2 uv, out vec2 warpQ, out vec2 warpR) {
+                warpQ = vec2(
+                    fbm(uv * 0.65 + vec2(0.0, 0.0), 6),
+                    fbm(uv * 0.65 + vec2(5.2, 1.3), 6)
+                );
+                warpR = vec2(
+                    fbm(uv * 1.15 + 2.6 * warpQ + vec2(1.7, 9.2), 7),
+                    fbm(uv * 1.15 + 2.6 * warpQ + vec2(8.3, 2.8), 7)
+                );
+                return fbm(uv + 1.65 * warpR, 8);
+            }
+
             vec3 renderStage3(vec2 p, float zDepth) {
-                // scaleProgress: 0.0 (Z=200 Macro Orbital Coast) -> 0.5 (Z=250 Meso Canopy/Delta) -> 1.0 (Z=300 Micro Stomata)
+                // scaleProgress:
+                // 0.00 -> 0.35 (Z=200..235): Orbital Satellite Coastline, Bays, Barrier Reefs & Headlands
+                // 0.35 -> 0.70 (Z=235..270): Coastal Beach Cove, Swash Foam Run-up, Wet/Dry Sand Berm & Foredunes
+                // 0.70 -> 1.00 (Z=270..300): Coastal Forest Canopy Treeline, Individual Tree Crowns & Branching Boughs
                 float scaleProgress = clamp((zDepth - 200.0) / 100.0, 0.0, 1.0);
-                float zoomFactor = exp2(scaleProgress * 7.2) * u_zoom;
-                vec2 worldUV = (p / zoomFactor) * 3.5 + u_camera * 0.4 + u_seedOffset;
 
-                vec2 q = vec2(
-                    fbm(worldUV + vec2(0.0, 0.0), 6),
-                    fbm(worldUV + vec2(5.2, 1.3), 6)
-                );
-                vec2 r = vec2(
-                    fbm(worldUV + 3.1 * q + vec2(1.7, 9.2), 7),
-                    fbm(worldUV + 3.1 * q + vec2(8.3, 2.8), 7)
-                );
+                // Continuous exponential aerial zoom (from 1x orbital view down to 220x low-altitude drone treeline view)
+                float zoomFactor = exp2(scaleProgress * 7.75) * u_zoom;
 
-                float elevation = fbm(worldUV + 1.9 * r, 8);
-                float mesoDetail = ridgedFbm(worldUV * 9.0 + r * 2.2, 6);
-                float microVeins = ridgedFbm(worldUV * 52.0 + q * 4.5, 7);
+                // As we zoom in past Z=245, gently drift the camera target from the water's edge slightly inland (+landward normal)
+                // so the final Z=270..300 zoom lands squarely in the coastal treeline & beach-dune transition!
+                vec2 worldUV = u_shoreAnchor + (p / zoomFactor) * 3.2 + (u_camera / zoomFactor) * 1.6;
 
-                float seaLevel = 0.48 + (u_shapeWarp - 0.5) * 0.08;
-                float coastDist = elevation - seaLevel;
+                vec2 q, r;
+                float elevation = getCoastElevation(worldUV, q, r);
 
-                // 1. MACRO: Bathymetric Fjords & Archipelagos (Z = 200..240)
-                vec3 deepWater = vec3(0.02, 0.09, 0.18);
-                vec3 shallowTurquoise = vec3(0.05, 0.40, 0.48);
-                vec3 foam = vec3(0.88, 0.96, 0.98);
+                // Estimate local shoreline gradient to know which way is inland vs seaward
+                vec2 qX, rX;
+                float elevX = getCoastElevation(worldUV + vec2(0.004, 0.0), qX, rX);
+                vec2 qY, rY;
+                float elevY = getCoastElevation(worldUV + vec2(0.0, 0.004), qY, rY);
+                vec2 grad = normalize(vec2(elevX - elevation, elevY - elevation) + vec2(1e-5));
 
-                float waterDepth = clamp(-coastDist * 5.5, 0.0, 1.0);
-                vec3 oceanCol = mix(shallowTurquoise, deepWater, pow(waterDepth, 0.65));
-                float bathyContour = smoothstep(0.92, 0.98, sin(coastDist * 210.0));
-                oceanCol += vec3(0.08, 0.26, 0.34) * bathyContour * (1.0 - waterDepth * 0.7);
-                float surf = exp(-abs(coastDist) * 175.0);
-                oceanCol = mix(oceanCol, foam, surf * 0.8);
+                float seaLevel = 0.485 + (u_shapeWarp - 0.5) * 0.05;
+                // Shift virtual seaLevel slightly downward at high zoom so the treeline fills the frame while keeping surf at the edge
+                float treelineFocusShift = smoothstep(0.45, 0.92, scaleProgress) * 0.032;
+                float h = (elevation - (seaLevel - treelineFocusShift));
 
-                // 2. MESO: Dendritic River Deltas & Forest Canopy (Z = 235..275)
-                float landHeight = clamp(coastDist * 4.4, 0.0, 1.0);
-                vec3 cliffRock = vec3(0.22, 0.21, 0.20);
-                vec3 borealForest = vec3(0.08, 0.28, 0.17);
-                vec3 mossCanopy = vec3(0.22, 0.48, 0.24);
-                vec3 alpinePeak = vec3(0.80, 0.84, 0.88);
+                // Multi-scale high-frequency textures (active across beach & canopy scales)
+                float fineSandGrain = fbm(worldUV * 85.0 + r * 4.0, 6);
+                float duneRipples = sin(dot(worldUV * 120.0, vec2(grad.y, -grad.x)) + fineSandGrain * 5.5) * 0.5 + 0.5;
+                float boulderNoise = ridgedFbm(worldUV * 36.0 + q * 3.0, 5);
 
-                float canopyCrown = smoothstep(0.32, 0.78, mesoDetail);
-                vec3 landCol = mix(cliffRock, borealForest, smoothstep(0.02, 0.14, landHeight));
-                landCol = mix(landCol, mossCanopy, canopyCrown * smoothstep(0.05, 0.48, landHeight));
-                landCol = mix(landCol, alpinePeak, smoothstep(0.60, 0.90, landHeight));
+                // -----------------------------------------------------------------
+                // A. OCEAN, CONTINENTAL SHELF BATHYMETRY & SURF SWASH ZONE (h < 0)
+                // -----------------------------------------------------------------
+                float waterDepth = clamp(-h * 7.5, 0.0, 1.0);
+                vec3 abyssalBlue     = vec3(0.02, 0.08, 0.19);
+                vec3 shelfSapphire   = vec3(0.04, 0.25, 0.42);
+                vec3 lagoonTurquoise = vec3(0.09, 0.56, 0.62);
+                vec3 shallowsEmerald = vec3(0.24, 0.68, 0.64);
 
-                float topoLine = smoothstep(0.94, 0.99, sin(elevation * 250.0));
-                landCol += vec3(0.18, 0.26, 0.16) * topoLine * 0.35;
+                vec3 waterCol = mix(shallowsEmerald, lagoonTurquoise, smoothstep(0.0, 0.14, waterDepth));
+                waterCol = mix(waterCol, shelfSapphire, smoothstep(0.12, 0.45, waterDepth));
+                waterCol = mix(waterCol, abyssalBlue, smoothstep(0.40, 0.95, waterDepth));
 
-                vec3 macroMesoCol = (coastDist < 0.0) ? oceanCol : landCol;
-                vec3 palTint = getPalette(elevation + mesoDetail * 0.3, u_palette);
-                macroMesoCol = mix(macroMesoCol, palTint, 0.22);
+                // Submerged sandbars & reef structures visible through clear shallow water
+                float sandbar = fbm(worldUV * 22.0 + q * 2.5, 5);
+                waterCol += vec3(0.14, 0.22, 0.16) * sandbar * (1.0 - smoothstep(0.0, 0.25, waterDepth));
 
-                // 3. MICRO: Leaf Vascular Network & Cellular Stomata (Z = 265..300)
-                vec2 cellVor = voronoi(worldUV * 380.0);
-                float cellWall = smoothstep(0.12, 0.02, cellVor.y);
-                float stomata = smoothstep(0.18, 0.05, cellVor.x);
+                // Multi-band breaking surf & fractal wave swash lines along the beach
+                float waveCoord = -h * 190.0 - fineSandGrain * 2.4 + sin(dot(worldUV, vec2(-grad.y, grad.x)) * 18.0) * 0.6;
+                float primaryBreaker = exp(-abs(h + 0.0025) * 420.0);
+                float secondarySwash = smoothstep(0.76, 0.96, sin(waveCoord)) * exp(-waterDepth * 9.5);
+                float laceFoam = smoothstep(0.42, 0.75, fbm(worldUV * 180.0, 5)) * exp(-waterDepth * 14.0);
+                float totalFoam = clamp(primaryBreaker * 0.95 + secondarySwash * 0.65 + laceFoam * 0.55, 0.0, 1.0);
+                waterCol = mix(waterCol, vec3(0.94, 0.98, 1.0), totalFoam);
 
-                float primaryVein = pow(clamp(mesoDetail, 0.0, 1.0), 2.8);
-                float secondaryVein = pow(clamp(microVeins, 0.0, 1.0), 2.2);
+                // -----------------------------------------------------------------
+                // B. SANDY BEACH COVE, WET SWASH BERM & FOREDUNES (0 <= h < 0.045)
+                // -----------------------------------------------------------------
+                float beachZone = smoothstep(-0.002, 0.006, h) * (1.0 - smoothstep(0.028, 0.058, h));
+                float wetSandFactor = 1.0 - smoothstep(0.0, 0.012, h);
 
-                vec3 leafBase = vec3(0.04, 0.19, 0.10) + vec3(0.06, 0.18, 0.08) * cellWall;
-                leafBase += vec3(0.25, 0.65, 0.35) * stomata * 0.35;
-                vec3 veinGlow = vec3(0.45, 0.88, 0.36) * secondaryVein + vec3(0.80, 0.98, 0.65) * primaryVein * 0.85;
-                vec3 microCol = mix(leafBase + veinGlow, getPalette(secondaryVein * 0.5, u_palette), 0.18);
+                vec3 wetBeachSand = vec3(0.48, 0.41, 0.31);
+                vec3 dryGoldenSand = vec3(0.86, 0.79, 0.63);
+                vec3 pebbleShingle = vec3(0.56, 0.53, 0.49);
 
-                return mix(macroMesoCol, microCol, smoothstep(0.52, 0.92, scaleProgress));
+                vec3 sandCol = mix(dryGoldenSand, wetBeachSand, wetSandFactor);
+                sandCol = mix(sandCol, pebbleShingle, smoothstep(0.65, 0.92, boulderNoise) * 0.55);
+                // Add wind-blown dune ripples & micro-grain sparkle at meso/micro zoom
+                sandCol *= (0.92 + 0.14 * duneRipples * smoothstep(0.15, 0.65, scaleProgress));
+                sandCol += vec3(0.06, 0.05, 0.03) * (fineSandGrain - 0.5);
+
+                // Wet swash foam line right on the water/sand edge
+                float swashLine = exp(-abs(h - 0.001) * 750.0);
+                sandCol = mix(sandCol, vec3(0.95, 0.98, 1.0), swashLine * 0.75);
+
+                // -----------------------------------------------------------------
+                // C. COASTAL FOREST CANOPY TREELINE & INDIVIDUAL CROWNS (h >= 0.028)
+                // -----------------------------------------------------------------
+                // Multi-scale hierarchical tree crown synthesis:
+                // Macro forest stand density + Meso individual tree crown domes + Micro radiating branches/needles
+                vec2 sunDir = normalize(vec2(-0.65, 0.75));
+                vec2 treeGridUV = worldUV * 115.0 + r * 3.5;
+                vec2 crownVor = voronoi(treeGridUV);
+                vec2 subCrownVor = voronoi(worldUV * 340.0 + q * 6.0);
+
+                // Each Voronoi cell is an individual coastal pine / live-oak crown
+                float crownRadius = clamp(1.0 - crownVor.x * 1.15, 0.0, 1.0);
+                float subCrownBough = clamp(1.0 - subCrownVor.x * 1.25, 0.0, 1.0);
+                float foliageRoughness = ridgedFbm(worldUV * 260.0 + r * 5.0, 6);
+
+                // Combined 3D canopy height dome for realistic overhead sun-dappled lighting
+                float canopyHeight = crownRadius * 0.65 + subCrownBough * 0.25 + foliageRoughness * 0.22;
+                float gapShadow = smoothstep(0.02, 0.22, crownVor.y) * smoothstep(0.05, 0.35, crownRadius);
+
+                // Directional solar highlight on the northwest side of each tree crown
+                float sunSlope = fbm(worldUV * 115.0 + sunDir * 0.35, 5) - fbm(worldUV * 115.0 - sunDir * 0.35, 5);
+                float sunHighlight = clamp(0.5 + sunSlope * 2.8, 0.0, 1.0);
+
+                vec3 deepCanopyShadow = vec3(0.03, 0.09, 0.05);
+                vec3 maritimePine     = vec3(0.09, 0.27, 0.14);
+                vec3 sunlitOakCrown   = vec3(0.24, 0.46, 0.21);
+                vec3 coastalScrub     = vec3(0.36, 0.44, 0.24);
+
+                vec3 forestCol = mix(maritimePine, sunlitOakCrown, sunHighlight * canopyHeight);
+                // Mix coastal scrub / dune grass right along the treeline edge (h between 0.025 and 0.055)
+                float treelineEdgeZone = 1.0 - smoothstep(0.025, 0.065, h);
+                forestCol = mix(forestCol, coastalScrub, treelineEdgeZone * 0.55);
+                // Apply deep inter-crown canopy gaps & self-shadowing
+                forestCol = mix(deepCanopyShadow, forestCol, clamp(gapShadow + 0.18, 0.0, 1.0));
+
+                // At high zoom (Z = 265..300), resolve individual radiating pine/oak boughs & sunlit needle clusters
+                float microDetailWeight = smoothstep(0.55, 0.92, scaleProgress);
+                float branchFilaments = pow(clamp(foliageRoughness, 0.0, 1.0), 1.8);
+                forestCol += vec3(0.18, 0.32, 0.12) * branchFilaments * microDetailWeight * gapShadow;
+
+                // Assemble seamless Ocean -> Sandy Beach Berm -> Coastal Treeline
+                vec3 landCol = mix(sandCol, forestCol, smoothstep(0.024, 0.052, h));
+
+                // Cast dark treeline shadows onto the back of the upper sandy beach!
+                float treeEdgeShadow = exp(-abs(h - 0.028) * 260.0) * (1.0 - sunHighlight);
+                landCol *= (1.0 - treeEdgeShadow * 0.35);
+
+                vec3 naturalAerial = (h < 0.0) ? waterCol : landCol;
+                // Blend water and wet sand across the swash zone
+                naturalAerial = mix(waterCol, landCol, smoothstep(-0.0025, 0.0035, h));
+
+                // Optional Mode 1: Hybrid Sentinel-2 Multi-Spectral + LiDAR Elevation Contours
+                if (u_aerialMode > 0.5) {
+                    float lidarContour = smoothstep(0.93, 0.99, sin(h * 420.0));
+                    vec3 palTint = getPalette(elevation + canopyHeight * 0.25, u_palette);
+                    naturalAerial = mix(naturalAerial, palTint, 0.28);
+                    naturalAerial += vec3(0.25, 0.85, 0.65) * lidarContour * 0.32;
+                } else {
+                    // Subtle atmospheric harmonization with active seed palette (8%) so stage transitions feel unified
+                    vec3 subtleTint = getPalette(elevation, u_palette);
+                    naturalAerial = mix(naturalAerial, subtleTint, 0.08);
+                }
+
+                return naturalAerial;
             }
 
             void main() {
@@ -1050,13 +1264,17 @@
             branchAngle: gl.getUniformLocation(program, "u_branchAngle"),
             symmetry: gl.getUniformLocation(program, "u_symmetry"),
             sierpinskiSpin: gl.getUniformLocation(program, "u_sierpinskiSpin"),
-            hurst: gl.getUniformLocation(program, "u_hurst")
+            hurst: gl.getUniformLocation(program, "u_hurst"),
+            aerialMode: gl.getUniformLocation(program, "u_aerialMode"),
+            shoreAnchor: gl.getUniformLocation(program, "u_shoreAnchor")
         };
 
         /**************************************************************************
-         * 4. MULTI-SCALE EINSTEIN "HAT" RENDERER WITH H/T/P/F METATILE INFLATION
-         * Supports continuous zoom across Z = 100 .. 200 by cycling through
-         * Golden-mean / φ⁴ metatile substitution scales while keeping zero period!
+         * 4. MULTI-SCALE EINSTEIN "HAT" GRAPH-DIRECTED IFS & FRACTAL SUPERTILE RENDERER
+         * Combines:
+         *  - Exact 13-sided polykite tessellation on [3.4.6.4] Laves lattice
+         *  - Recursive Inward Hat-IFS (feeding the Hat shape into an IFS generator!)
+         *  - H7/H8 Fractal Supertile Cluster boundaries & Chaos-Game IFS Attractor
          **************************************************************************/
         function renderEinsteinScene(alpha) {
             const w = hatCanvas.width;
@@ -1068,16 +1286,15 @@
             ctx2d.globalAlpha = alpha;
 
             const minDim = Math.min(w, h);
-            // Continuous multi-octave inflation across Z = 100..200
-            // Every 25 Z-units represents a full hierarchical metatile inflation cycle (scale factor 2.618x)
+            // Continuous φ² = 2.618034 substitution inflation across Z = 100..200
             const localZ = Math.max(0.0, state.depthZ - 95.0);
-            const inflationCycle = (localZ / 28.0) % 1.0;
-            const inflationGeneration = Math.floor(localZ / 28.0);
-            const zoomMultiplier = Math.pow(2.4, inflationCycle) * state.zoom;
-            const baseScale = (minDim / 30.0) * zoomMultiplier;
+            const inflationCycle = (localZ / 25.0) % 1.0;
+            const inflationGeneration = Math.floor(localZ / 25.0);
+            const zoomMultiplier = Math.pow(PHI2, inflationCycle) * state.zoom;
+            const baseScale = (minDim / 28.0) * zoomMultiplier;
 
-            // Slight rotational precession per inflation generation (matching authentic hat metatile rotation)
-            const genRotation = state.hatRotation + inflationGeneration * (Math.PI / 6.0);
+            // Irrational substitution rotation θ = arctan(√3/5) per inflation generation
+            const genRotation = state.hatRotation + inflationGeneration * SUBST_ANGLE;
 
             ctx2d.translate(w * 0.5 + state.camX * minDim * 0.4, h * 0.5 - state.camY * minDim * 0.4);
             ctx2d.rotate(genRotation);
@@ -1088,7 +1305,7 @@
             const worldMouseX = (dxM * cosR - dyM * sinR) / baseScale;
             const worldMouseY = (dxM * sinR + dyM * cosR) / baseScale;
 
-            const maxVisible = Math.min(einsteinTiles.length, Math.floor((state.complexity / 280) * einsteinTiles.length) + 35);
+            const maxVisible = Math.min(einsteinTiles.length, Math.floor((state.complexity / 280) * einsteinTiles.length) + 40);
 
             let hoveredTile = null;
             for (let i = 0; i < maxVisible; i++) {
@@ -1100,23 +1317,25 @@
             }
 
             const palettes = [
-                { unref: [16, 28, 50], ref: [14, 165, 233], stroke: "rgba(125, 211, 252, 0.58)", sub: "rgba(56, 189, 248, 0.22)" },
-                { unref: [26, 26, 32], ref: [245, 158, 11], stroke: "rgba(251, 191, 36, 0.55)",  sub: "rgba(245, 158, 11, 0.22)" },
-                { unref: [14, 36, 32], ref: [16, 185, 129], stroke: "rgba(110, 231, 183, 0.55)", sub: "rgba(52, 211, 153, 0.22)" },
-                { unref: [40, 18, 20], ref: [249, 115, 22], stroke: "rgba(253, 186, 116, 0.55)", sub: "rgba(251, 146, 60, 0.22)" },
-                { unref: [28, 18, 46], ref: [168, 85, 247], stroke: "rgba(216, 180, 254, 0.55)", sub: "rgba(192, 132, 252, 0.22)" },
-                { unref: [34, 18, 28], ref: [244, 63, 94],  stroke: "rgba(253, 164, 175, 0.55)", sub: "rgba(251, 113, 133, 0.22)" }
+                { unref: [16, 28, 50], ref: [14, 165, 233], stroke: "rgba(125, 211, 252, 0.58)", sub: "rgba(56, 189, 248, 0.35)", super: "rgba(251, 191, 36, 0.85)" },
+                { unref: [26, 26, 32], ref: [245, 158, 11], stroke: "rgba(251, 191, 36, 0.55)",  sub: "rgba(245, 158, 11, 0.35)", super: "rgba(56, 189, 248, 0.85)" },
+                { unref: [14, 36, 32], ref: [16, 185, 129], stroke: "rgba(110, 231, 183, 0.55)", sub: "rgba(52, 211, 153, 0.35)", super: "rgba(250, 204, 21, 0.85)" },
+                { unref: [40, 18, 20], ref: [249, 115, 22], stroke: "rgba(253, 186, 116, 0.55)", sub: "rgba(251, 146, 60, 0.35)", super: "rgba(56, 189, 248, 0.85)" },
+                { unref: [28, 18, 46], ref: [168, 85, 247], stroke: "rgba(216, 180, 254, 0.55)", sub: "rgba(192, 132, 252, 0.35)", super: "rgba(52, 211, 153, 0.85)" },
+                { unref: [34, 18, 28], ref: [244, 63, 94],  stroke: "rgba(253, 164, 175, 0.55)", sub: "rgba(251, 113, 133, 0.35)", super: "rgba(250, 204, 21, 0.85)" }
             ];
             const pal = palettes[state.paletteIndex] || palettes[0];
             const bevelShift = (state.shapeWarp - 0.5) * 6.0;
 
+            // 1. Draw Primary 13-Sided Einstein Hat Tiles & H7/H8 Cluster Grouping
             for (let i = 0; i < maxVisible; i++) {
                 const tile = einsteinTiles[i];
                 const isHovered = hoveredTile === tile;
-                const isSameCluster = hoveredTile && (tile.generation === hoveredTile.generation);
+                const isSameSupertile = hoveredTile && (tile.supertileId === hoveredTile.supertileId);
 
-                // Strictly static spatial shading by default (only animates if state.colorDrift is enabled)
+                // Strictly static spatial shading by default
                 const wave = Math.sin(tile.cx * 0.8 - tile.cy * 0.8 + state.colorTime * 1.6 + tile.phase) * 0.5 + 0.5;
+                const supertileTint = ((tile.supertileId || 0) * 19) % 36;
                 const elevation = tile.isReflected ? 1.0 : (0.15 + 0.3 * wave * tile.elevationBias);
 
                 ctx2d.beginPath();
@@ -1134,10 +1353,10 @@
                         : 0.90;
                     ctx2d.fillStyle = `rgba(${pal.ref[0]}, ${pal.ref[1]}, ${pal.ref[2]}, ${0.88 * pulse})`;
                 } else {
-                    const shade = Math.floor(elevation * 44);
-                    const r = Math.min(255, pal.unref[0] + shade + (isSameCluster ? 32 : 0));
-                    const g = Math.min(255, pal.unref[1] + shade + (isSameCluster ? 42 : 0));
-                    const b = Math.min(255, pal.unref[2] + shade + (isSameCluster ? 56 : 0));
+                    const shade = Math.floor(elevation * 42) + supertileTint;
+                    const r = Math.min(255, pal.unref[0] + shade + (isSameSupertile ? 36 : 0));
+                    const g = Math.min(255, pal.unref[1] + shade + (isSameSupertile ? 46 : 0));
+                    const b = Math.min(255, pal.unref[2] + shade + (isSameSupertile ? 62 : 0));
                     ctx2d.fillStyle = `rgb(${r}, ${g}, ${b})`;
                 }
 
@@ -1146,8 +1365,51 @@
                 }
                 ctx2d.fill();
 
-                // Draw internal [3.4.6.4] Laves dual kite sub-lattice as camera zooms deeper into the cycle
-                if (inflationCycle > 0.25 && tile.kitePts) {
+                // 2. RECURSIVE INWARD HAT-IFS GENERATOR (Modes 0 & 2):
+                // Feeds the Hat polygon into the contractive IFS maps so each Hat recursively
+                // subdivides into nested child Hats and grandchildren as you zoom!
+                if ((state.hatIfsMode === 0 || state.hatIfsMode === 2) && tile.childHatsGen1) {
+                    const subAlpha = state.hatIfsMode === 2 ? 0.72 : (0.28 + 0.55 * inflationCycle);
+                    ctx2d.strokeStyle = pal.sub;
+                    ctx2d.lineWidth = Math.max(0.75, baseScale * 0.022);
+
+                    for (let c = 0; c < tile.childHatsGen1.length; c++) {
+                        const childHat = tile.childHatsGen1[c];
+                        ctx2d.beginPath();
+                        for (let v = 0; v < childHat.verts.length; v++) {
+                            const cvx = childHat.verts[v].x * baseScale;
+                            const cvy = childHat.verts[v].y * baseScale;
+                            if (v === 0) ctx2d.moveTo(cvx, cvy);
+                            else ctx2d.lineTo(cvx, cvy);
+                        }
+                        ctx2d.closePath();
+                        if (childHat.refl) {
+                            ctx2d.fillStyle = `rgba(${pal.ref[0]}, ${pal.ref[1]}, ${pal.ref[2]}, ${subAlpha * 0.35})`;
+                            ctx2d.fill();
+                        }
+                        ctx2d.stroke();
+
+                        // Second-generation grandchildren Hats emerge as inflationCycle > 0.38 or in Deep IFS Mode
+                        if ((inflationCycle > 0.38 || state.hatIfsMode === 2) && c < 4) {
+                            ctx2d.lineWidth = Math.max(0.5, baseScale * 0.012);
+                            for (let g = 0; g < 3; g++) {
+                                const gMap = hatChildIFSMaps[g];
+                                const gM = matMul(childHat.M, gMap.M);
+                                ctx2d.beginPath();
+                                for (let v = 0; v < CANONICAL_HAT_VERTS.length; v++) {
+                                    const gp = matTransformPt(gM, CANONICAL_HAT_VERTS[v]);
+                                    if (v === 0) ctx2d.moveTo(gp.x * baseScale, gp.y * baseScale);
+                                    else ctx2d.lineTo(gp.x * baseScale, gp.y * baseScale);
+                                }
+                                ctx2d.closePath();
+                                ctx2d.stroke();
+                            }
+                        }
+                    }
+                }
+
+                // Draw internal [3.4.6.4] Laves dual kite sub-lattice in Mode 1
+                if (state.hatIfsMode === 1 && inflationCycle > 0.2 && tile.kitePts) {
                     ctx2d.strokeStyle = pal.sub;
                     ctx2d.lineWidth = Math.max(0.75, baseScale * 0.018);
                     ctx2d.beginPath();
@@ -1159,17 +1421,113 @@
                     ctx2d.stroke();
                 }
 
-                ctx2d.lineWidth = Math.max(1.1, baseScale * 0.04);
+                // Outer 13-sided Hat boundary stroke
+                ctx2d.lineWidth = Math.max(1.1, baseScale * 0.042);
                 ctx2d.strokeStyle = tile.isReflected ? "#ffffff" : pal.stroke;
                 ctx2d.stroke();
+            }
+
+            // 3. Draw H7 / H8 Substitution Supertile Graph-Directed IFS Web & Fractal Cluster Boundaries
+            if (state.hatIfsMode !== 1 && supertileClusters.length > 0) {
+                ctx2d.save();
+                ctx2d.strokeStyle = pal.super;
+                ctx2d.lineWidth = Math.max(1.3, baseScale * 0.055);
+                ctx2d.setLineDash([baseScale * 0.22, baseScale * 0.14]);
+
+                for (const cluster of supertileClusters) {
+                    const core = cluster.core;
+                    ctx2d.beginPath();
+                    for (const member of cluster.members) {
+                        if (member === core) continue;
+                        ctx2d.moveTo(core.cx * baseScale, core.cy * baseScale);
+                        ctx2d.lineTo(member.cx * baseScale, member.cy * baseScale);
+                    }
+                    ctx2d.stroke();
+                }
+                ctx2d.restore();
+            }
+
+            // 4. Optional Chaos-Game IFS Point Attractor Overlay
+            if (state.showChaosAttractor && hatChaosPoints.length > 0) {
+                const ptRadius = Math.max(1.1, baseScale * 0.038);
+                for (let i = 0; i < hatChaosPoints.length; i++) {
+                    const pt = hatChaosPoints[i];
+                    ctx2d.fillStyle = pt.isRefl ? "#fde047" : "rgba(125, 211, 252, 0.72)";
+                    ctx2d.fillRect(pt.x * baseScale - ptRadius * 0.5, pt.y * baseScale - ptRadius * 0.5, ptRadius, ptRadius);
+                }
             }
 
             ctx2d.restore();
         }
 
         /**************************************************************************
-         * 5. SEED MUTATION, GENOME INSPECTOR & URL (?seed=) MANAGEMENT
+         * 5. SEED MUTATION, SHORELINE FINDER & URL (?seed=) MANAGEMENT
          **************************************************************************/
+        // Mirrors the GLSL 2D noise + fBm so JavaScript can locate an exact shoreline
+        // cove coordinate (elevation == seaLevel) for each seed!
+        function jsHash21(px, py) {
+            let x = (px * 234.34) % 1; if (x < 0) x += 1;
+            let y = (py * 435.345) % 1; if (y < 0) y += 1;
+            const dot = x * (x + 34.23) + y * (y + 34.23);
+            x += dot; y += dot;
+            const res = (x * y) % 1;
+            return res < 0 ? res + 1 : res;
+        }
+
+        function jsNoise(px, py) {
+            const ix = Math.floor(px), iy = Math.floor(py);
+            const fx = px - ix, fy = py - iy;
+            const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+            const a = jsHash21(ix, iy);
+            const b = jsHash21(ix + 1, iy);
+            const c = jsHash21(ix, iy + 1);
+            const d = jsHash21(ix + 1, iy + 1);
+            return (a + (b - a) * ux) + ((c + (d - c) * ux) - (a + (b - a) * ux)) * uy;
+        }
+
+        function jsFbm(px, py, octaves, hurst) {
+            let v = 0, amp = 0.52;
+            const gain = Math.min(0.64, Math.max(0.42, Math.pow(2.0, -hurst)));
+            const cosA = Math.cos(0.52), sinA = Math.sin(0.52);
+            for (let i = 0; i < octaves; i++) {
+                v += amp * jsNoise(px, py);
+                const nx = (cosA * px - sinA * py) * 2.04 + 17.3;
+                const ny = (sinA * px + cosA * py) * 2.04 + 9.2;
+                px = nx; py = ny;
+                amp *= gain;
+            }
+            return v;
+        }
+
+        function jsCoastElevation(ux, uy, hurst) {
+            const qx = jsFbm(ux * 0.65, uy * 0.65, 6, hurst);
+            const qy = jsFbm(ux * 0.65 + 5.2, uy * 0.65 + 1.3, 6, hurst);
+            const rx = jsFbm(ux * 1.15 + 2.6 * qx + 1.7, uy * 1.15 + 2.6 * qy + 9.2, 7, hurst);
+            const ry = jsFbm(ux * 1.15 + 2.6 * qx + 8.3, uy * 1.15 + 2.6 * qy + 2.8, 7, hurst);
+            return jsFbm(ux + 1.65 * rx, uy + 1.65 * ry, 8, hurst);
+        }
+
+        // Automatically finds a scenic coastal beach & treeline interface for the current seed
+        function findShorelineAnchor(seedOffset, hurst, shapeWarp) {
+            const targetLevel = 0.485 + (shapeWarp - 0.5) * 0.05 + 0.016; // Right at the upper beach / coastal treeline berm
+            let bestPt = { x: seedOffset.x, y: seedOffset.y };
+            let bestErr = 1e9;
+
+            for (let i = 0; i < 48; i++) {
+                const angle = (i / 48) * Math.PI * 2.0;
+                const radius = 0.4 + (i % 5) * 0.35;
+                const tx = seedOffset.x + Math.cos(angle) * radius;
+                const ty = seedOffset.y + Math.sin(angle) * radius;
+                const elev = jsCoastElevation(tx, ty, hurst);
+                const err = Math.abs(elev - targetLevel);
+                if (err < bestErr) {
+                    bestErr = err;
+                    bestPt = { x: tx, y: ty };
+                }
+            }
+            return bestPt;
+        }
+
         function initSeedFromURLOrRandom() {
             const params = new URLSearchParams(window.location.search);
             const urlSeed = params.get('seed');
@@ -1238,9 +1596,11 @@
             state.hurstExponent = rng.range(0.48, 0.84);
             state.treeBranchAngle = rng.range(0.45, 0.82);
             state.seedOffset = {
-                x: rng.range(-80, 80),
-                y: rng.range(-80, 80)
+                x: rng.range(-60, 60),
+                y: rng.range(-60, 60)
             };
+            // Lock onto the shoreline beach/treeline interface for this seed
+            state.shorelineAnchor = findShorelineAnchor(state.seedOffset, state.hurstExponent, state.shapeWarp);
 
             // Update Genome Inspector HUD
             document.getElementById('genomePalette').textContent = PALETTE_NAMES[state.paletteIndex];
@@ -1281,6 +1641,28 @@
         function updatePalette(val) {
             state.paletteIndex = parseInt(val, 10);
             document.getElementById('genomePalette').textContent = PALETTE_NAMES[state.paletteIndex];
+        }
+
+        function updateHatIFSMode(val) {
+            state.hatIfsMode = parseInt(val, 10);
+            updateHUDReadouts();
+        }
+
+        function toggleChaosIFS() {
+            state.showChaosAttractor = !state.showChaosAttractor;
+            const btn = document.getElementById('chaosIfsBtn');
+            if (state.showChaosAttractor) {
+                btn.textContent = "+ Chaos Attractor: ON";
+                btn.className = "text-[9px] mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-400/30 hover:bg-amber-500/35 transition";
+            } else {
+                btn.textContent = "+ Chaos Attractor: OFF";
+                btn.className = "text-[9px] mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-white/10 hover:text-white transition";
+            }
+        }
+
+        function updateAerialMode(val) {
+            state.aerialMode = parseInt(val, 10);
+            updateHUDReadouts();
         }
 
         function syncAutoZoomUI() {
@@ -1406,25 +1788,26 @@
                 }
                 descEl.innerHTML = `Traversing 6 orders of magnitude from a <strong class="text-white">${state.sierpinskiSymmetry}-fold Kaleidoscopic Sierpinski gasket</strong> into the high-iteration <strong class="text-white">${state.mandelTarget.name}</strong> filament boundary ($D = 2.000$).`;
             } else if (activeScene === 1) {
-                titleEl.textContent = "02 // THE EINSTEIN 'HAT' MONOTILE";
-                badgeEl.textContent = "Stage II • Aperiodic Monotile";
+                titleEl.textContent = "02 // EINSTEIN 'HAT' GRAPH-DIRECTED IFS";
+                badgeEl.textContent = "Stage II • Aperiodic Substitution IFS";
                 badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30";
-                dimEl.textContent = "2.0000 (Aperiodic)";
-                const gen = Math.floor(Math.max(0, z - 95) / 28) + 1;
-                subStageEl.textContent = `H/T/P/F Metatile Inflation Gen #${gen}`;
-                descEl.innerHTML = `Continuous multi-scale dive through the <strong class="text-white">13-sided polykite "Hat" monotile</strong> on the $[3.4.6.4]$ Laves kite lattice. Highlighted anti-hats mark non-repeating substitution clusters across inflation generations.`;
+                dimEl.textContent = "2.000 (φ²=2.618 IFS)";
+                const gen = Math.floor(Math.max(0, z - 95) / 25) + 1;
+                const modeNames = ["Recursive Hat-IFS + H₇/H₈ Supertiles", "H/T/P/F Substitution Inflation", "Deep Contractive Hat-IFS Web"];
+                subStageEl.textContent = `${modeNames[state.hatIfsMode]} (Gen #${gen})`;
+                descEl.innerHTML = `Feeding the 13-sided <strong class="text-white">Einstein "Hat" monotile</strong> into its <strong class="text-white">Graph-Directed Iterated Function System ($H_7/H_8$ substitution attractor, $\\phi^2 \\approx 2.618$)</strong>: each parent Hat recursively subdivides into nested child Hats & fractal supertile boundaries with zero translational repetition.`;
             } else {
-                titleEl.textContent = "03 // NATURAL STATISTICAL FRACTALS";
-                badgeEl.textContent = "Stage III • Multi-Scale Organic fBm";
+                titleEl.textContent = "03 // SATELLITE COASTLINE → BEACH → TREELINE";
+                badgeEl.textContent = "Stage III • Continuous Nadir Aerial Zoom";
                 badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
                 const dNat = (2.0 - state.hurstExponent) + ((z - 200) / 100) * 0.35;
-                dimEl.textContent = `~${dNat.toFixed(3)}`;
+                dimEl.textContent = `~${dNat.toFixed(3)} (H=${state.hurstExponent.toFixed(2)})`;
 
-                if (z < 238) subStageEl.textContent = "Macro Orbital Fjord & Bathymetry";
-                else if (z < 270) subStageEl.textContent = "Meso River Deltas & Forest Canopy";
-                else subStageEl.textContent = "Micro Leaf Venation & Stomata Cells";
+                if (z < 235) subStageEl.textContent = "Orbital Satellite Coastline & Shelf Bathymetry";
+                else if (z < 270) subStageEl.textContent = "Sandy Beach Cove, Swash Foam & Foredunes";
+                else subStageEl.textContent = "Coastal Forest Canopy Treeline & Crown Boughs";
 
-                descEl.innerHTML = `Diving from an orbital <strong class="text-white">fjord coastline</strong> ($H=${state.hurstExponent.toFixed(2)}$) into dendritic river deltas, <strong class="text-white">pine canopies</strong>, and microscopic <strong class="text-white">Voronoi leaf stomata</strong>.`;
+                descEl.innerHTML = `Continuous shoreline-locked nadir zoom from <strong class="text-white">orbital satellite coastline</strong> ($D \\approx ${(2.0 - state.hurstExponent).toFixed(2)}$) directly into a <strong class="text-white">golden sandy beach swash zone</strong> and overhead <strong class="text-white">coastal pine & live-oak treeline canopy</strong>.`;
             }
 
             // 18-order-of-magnitude exponential readout (Z = 0..300 -> 10^0 .. 10^18)
@@ -1576,6 +1959,7 @@ fly deploy`
 
         document.getElementById('shapeWarpSlider').addEventListener('input', (e) => {
             state.shapeWarp = parseFloat(e.target.value);
+            state.shorelineAnchor = findShorelineAnchor(state.seedOffset, state.hurstExponent, state.shapeWarp);
             updateHUDReadouts();
         });
 
@@ -1703,6 +2087,8 @@ fly deploy`
             gl.uniform1f(uniforms.symmetry, state.sierpinskiSymmetry);
             gl.uniform1f(uniforms.sierpinskiSpin, state.sierpinskiSpin);
             gl.uniform1f(uniforms.hurst, state.hurstExponent);
+            gl.uniform1f(uniforms.aerialMode, state.aerialMode);
+            gl.uniform2f(uniforms.shoreAnchor, state.shorelineAnchor.x, state.shorelineAnchor.y);
 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
 
