@@ -1,0 +1,22 @@
+# fly.toml app configuration file generated for morphogenesis-fractal-engine on 2026-11-15T01:45:40+05:30
+#
+# See https://docs.fly.io/reference/configuration for information about how to use this file.
+#
+
+app = 'morphogenesis-fractal-engine'
+primary_region = 'iad'
+
+[build]
+  dockerfile = 'Dockerfile'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  memory = '256mb'
+  cpus = 1
+  memory_mb = 256

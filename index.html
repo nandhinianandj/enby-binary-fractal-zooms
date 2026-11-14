@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MORPHOGENESIS // 10¹⁸x Deep-Zoom Fractal & Aperiodic Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #04060a;
+            font-family: 'Inter', sans-serif;
+            color: #f1f5f9;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .glass-panel {
+            background: rgba(8, 12, 21, 0.78);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .glass-pill {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-pill:hover {
+            border-color: rgba(56, 189, 248, 0.45);
+            background: rgba(30, 41, 59, 0.85);
+        }
+        .glass-pill.active {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.3), rgba(99, 102, 241, 0.3));
+            border-color: rgba(56, 189, 248, 0.85);
+            box-shadow: 0 0 22px rgba(56, 189, 248, 0.28);
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.13);
+            border-radius: 999px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            border: 2px solid #0f172a;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.85);
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.22);
+            background: #7dd3fc;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+        #hatCanvas {
+            pointer-events: none;
+        }
+        pre::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        pre::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body class="relative select-none">
+
+    <!-- Primary WebGL Deep-Zoom Shader Canvas -->
+    <canvas id="glCanvas"></canvas>
+
+    <!-- Multi-Scale Hierarchical Einstein Hat Monotile Canvas (Z = 88 .. 212) -->
+    <canvas id="hatCanvas"></canvas>
+
+    <!-- Subtle Atmospheric Vignette -->
+    <div class="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_center,transparent_58%,rgba(2,6,23,0.78)_100%)] z-10"></div>
+
+    <!-- Top Navigation & Telemetry Bar -->
+    <header class="fixed top-3 left-3 right-3 md:top-4 md:left-5 md:right-5 z-20 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-2.5 pointer-events-none">
+        
+        <!-- Brand & Live 18-Magnitude Telemetry -->
+        <div class="glass-panel rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between xl:justify-start gap-4 pointer-events-auto">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full bg-sky-400 animate-pulse shadow-[0_0_12px_#38bdf8]"></div>
+                <div>
+                    <div class="text-[10px] mono tracking-widest uppercase text-sky-400 font-semibold flex items-center gap-2">
+                        <span>Morphogenesis v2.4</span>
+                        <span class="px-1.5 py-0.2 bg-sky-500/20 text-sky-300 rounded text-[9px] border border-sky-400/30">10¹⁸× DEEP ZOOM</span>
+                    </div>
+                    <h1 id="sceneTitle" class="text-xs sm:text-sm md:text-base font-bold tracking-tight text-white">01 // EXACT SELF-SIMILARITY</h1>
+                </div>
+            </div>
+
+            <div class="h-7 w-[1px] bg-white/10 hidden sm:block"></div>
+
+            <!-- Live Mathematical Telemetry -->
+            <div class="flex items-center gap-4 text-xs mono">
+                <div>
+                    <span class="text-slate-400 block text-[9px]">HAUSDORFF DIM (D)</span>
+                    <span id="dimReadout" class="text-sky-300 font-semibold text-xs sm:text-sm">1.5850</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[9px]">MAGNIFICATION</span>
+                    <span id="zoomReadout" class="text-emerald-300 font-semibold text-xs sm:text-sm">10⁰·⁰⁰×</span>
+                </div>
+                <div class="hidden md:block">
+                    <span class="text-slate-400 block text-[9px]">DEPTH Z</span>
+                    <span id="depthZReadout" class="text-amber-300 font-semibold text-xs sm:text-sm">018.4 / 300</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stage Switcher Tabs + Fly.io Deployment Button -->
+        <div class="flex items-center gap-2 pointer-events-auto overflow-x-auto">
+            <nav class="glass-panel rounded-2xl p-1.5 flex items-center gap-1.5 flex-1 xl:flex-initial">
+                <button onclick="jumpToScene(0)" id="tab-0" class="glass-pill active px-3 py-1.5 rounded-xl text-left transition-all flex items-center gap-2 whitespace-nowrap">
+                    <span class="mono text-xs px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30">I</span>
+                    <div>
+                        <div class="text-xs font-semibold text-white">Mathematical Fractals</div>
+                        <div class="text-[10px] text-slate-400 hidden sm:block">Z: 0→100 • IFS → Multibrot</div>
+                    </div>
+                </button>
+
+                <button onclick="jumpToScene(1)" id="tab-1" class="glass-pill px-3 py-1.5 rounded-xl text-left transition-all flex items-center gap-2 whitespace-nowrap">
+                    <span class="mono text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">II</span>
+                    <div>
+                        <div class="text-xs font-semibold text-white">Einstein "Hat" Monotile</div>
+                        <div class="text-[10px] text-slate-400 hidden sm:block">Z: 100→200 • H/T/P/F Inflation</div>
+                    </div>
+                </button>
+
+                <button onclick="jumpToScene(2)" id="tab-2" class="glass-pill px-3 py-1.5 rounded-xl text-left transition-all flex items-center gap-2 whitespace-nowrap">
+                    <span class="mono text-xs px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">III</span>
+                    <div>
+                        <div class="text-xs font-semibold text-white">Natural Fractals</div>
+                        <div class="text-[10px] text-slate-400 hidden sm:block">Z: 200→300 • Fjord → Stomata</div>
+                    </div>
+                </button>
+            </nav>
+
+            <!-- Deploy to Fly.io Kit Trigger -->
+            <button onclick="openFlyModal()" class="glass-panel hover:border-purple-400/70 px-3.5 py-2.5 rounded-2xl text-xs mono font-semibold text-purple-200 hover:text-white transition flex items-center gap-2 whitespace-nowrap shadow-lg bg-gradient-to-r from-purple-950/60 to-indigo-950/60">
+                <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"></path></svg>
+                <span>Deploy to Fly.io</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Bottom-Left Contextual Concept & Seed Genome Inspector Card -->
+    <aside id="infoCard" class="fixed bottom-3 left-3 right-3 md:left-5 md:right-auto md:bottom-5 md:w-[415px] z-20 glass-panel rounded-2xl p-4 pointer-events-auto transition-all duration-300">
+        <div class="flex items-center justify-between mb-1.5">
+            <span id="regimeBadge" class="text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">Stage I • Exact Recursion</span>
+            <span id="subStageLabel" class="text-[11px] mono text-amber-300 font-medium">N-Fold Kaleidoscopic Sierpinski</span>
+        </div>
+        <p id="sceneDescription" class="text-xs text-slate-300 leading-relaxed">
+            Diving across 6 orders of magnitude through a procedurally mutated <strong class="text-white">Kaleidoscopic Sierpinski gasket</strong> before warping through a logarithmic spiral portal into the <strong class="text-white">Multibrot / Julia filament boundary</strong>.
+        </p>
+
+        <!-- Procedural Genome Inspector Badges (Changes Every Reload / Seed) -->
+        <div class="mt-3 pt-2.5 border-t border-white/10">
+            <div class="flex items-center justify-between text-[10px] mono text-slate-400 mb-1.5">
+                <span>ACTIVE SEED GENOME PHENOTYPE</span>
+                <button onclick="copyShareLink()" id="shareSeedBtn" class="text-sky-400 hover:text-sky-300 underline">Copy ?seed URL</button>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 text-[10px] mono">
+                <div class="bg-slate-900/80 border border-white/10 rounded-lg px-2 py-1.5">
+                    <span class="text-slate-500 block text-[9px]">PALETTE GENE</span>
+                    <span id="genomePalette" class="text-sky-300 font-semibold truncate block">Bioluminescent</span>
+                </div>
+                <div class="bg-slate-900/80 border border-white/10 rounded-lg px-2 py-1.5">
+                    <span class="text-slate-500 block text-[9px]">SHAPE SYMMETRY</span>
+                    <span id="genomeShape" class="text-amber-300 font-semibold truncate block">3-Fold / z²·⁰</span>
+                </div>
+                <div class="bg-slate-900/80 border border-white/10 rounded-lg px-2 py-1.5">
+                    <span class="text-slate-500 block text-[9px]">HURST / CHIRAL</span>
+                    <span id="genomeHurst" class="text-emerald-300 font-semibold truncate block">H=0.68 • 14% Ref</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 300-Unit Master Journey Progress Bar -->
+        <div class="mt-3 pt-2 border-t border-white/10">
+            <div class="flex items-center justify-between text-[9px] mono text-slate-400 mb-1">
+                <span>0: IFS Gasket</span>
+                <span>55: Multibrot</span>
+                <span>150: Einstein Hat</span>
+                <span>240: Fjord</span>
+                <span>300: Leaf Veins</span>
+            </div>
+            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-white/10">
+                <div id="journeyProgressBar" class="h-full bg-gradient-to-r from-sky-400 via-amber-400 to-emerald-400 rounded-full transition-all duration-75" style="width: 6%;"></div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Collapsible Right Laboratory Control Dock -->
+    <section class="fixed bottom-3 right-3 md:bottom-5 md:right-5 z-30 flex flex-col items-end pointer-events-none">
+        
+        <button id="toggleControlsBtn" onclick="toggleControlPanel()" class="pointer-events-auto mb-2 glass-panel px-3.5 py-2 rounded-xl text-xs mono font-medium text-sky-300 hover:text-white flex items-center gap-2 shadow-lg">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+            <span id="toggleControlsText">Hide Lab Controls</span>
+        </button>
+
+        <div id="controlPanel" class="glass-panel rounded-2xl p-4 w-[calc(100vw-1.5rem)] sm:w-88 pointer-events-auto space-y-3 transition-all duration-300">
+            
+            <!-- Procedural Seed Generator & Mutator -->
+            <div class="bg-slate-900/80 rounded-xl p-2.5 border border-white/10 flex items-center justify-between">
+                <div>
+                    <div class="text-[9px] mono uppercase text-slate-400">Procedural Seed Genome</div>
+                    <div id="seedDisplay" class="text-xs mono font-bold text-amber-300 tracking-wider">#A7F9-29C1</div>
+                </div>
+                <button onclick="randomizeSeed()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white font-semibold text-xs mono shadow-md active:scale-95 transition flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Mutate Seed
+                </button>
+            </div>
+
+            <!-- Master 300-Unit Exponential Depth Scrubber -->
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-slate-300 font-medium">Deep-Zoom Depth (Z: 0→300)</span>
+                    <span id="journeyValueLabel" class="mono text-sky-400 text-xs">18.0 / 300</span>
+                </div>
+                <input id="journeySlider" type="range" min="0" max="300" step="0.1" value="18.0">
+                <div class="flex justify-between text-[9px] mono text-slate-500 mt-0.5">
+                    <span>10⁰× (Sierpinski)</span>
+                    <span>10⁹× (Einstein Hat)</span>
+                    <span>10¹⁸× (Leaf Cell)</span>
+                </div>
+            </div>
+
+            <!-- Shape / Geometry Warp Override Slider -->
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span id="subMorphTitle" class="text-slate-300 font-medium">Geometry / Symmetry Warp</span>
+                    <span id="subMorphValue" class="mono text-emerald-400 text-xs">50%</span>
+                </div>
+                <input id="shapeWarpSlider" type="range" min="0" max="1" step="0.005" value="0.5">
+            </div>
+
+            <!-- Complexity / Iteration Budget Slider -->
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-slate-300 font-medium">Complexity & Tile Density</span>
+                    <span id="complexityValue" class="mono text-amber-300 text-xs">160</span>
+                </div>
+                <input id="complexitySlider" type="range" min="48" max="280" step="1" value="160">
+            </div>
+
+            <!-- Palette Archetype & Auto-Pilot Speed Controls -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <div>
+                    <label class="block text-[9px] mono uppercase text-slate-400 mb-1">Color Archetype</label>
+                    <select id="paletteSelect" onchange="updatePalette(this.value)" class="w-full bg-slate-900/90 border border-white/15 rounded-lg px-2 py-1.5 text-xs text-white mono outline-none focus:border-sky-400">
+                        <option value="0">01 / Bioluminescent Abyss</option>
+                        <option value="1">02 / Brutalist Obsidian</option>
+                        <option value="2">03 / Boreal Fjord & Moss</option>
+                        <option value="3">04 / Solar Flare Magma</option>
+                        <option value="4">05 / Ultraviolet Quartz</option>
+                        <option value="5">06 / Infrared Basalt</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[9px] mono uppercase text-slate-400 mb-1">Auto-Dive Cruise (<span id="speedLabel">1.0x</span>)</label>
+                    <div class="flex items-center gap-1.5">
+                        <button id="autoZoomBtn" onclick="toggleAutoJourney()" class="flex-1 py-1.5 px-2 rounded-lg border border-sky-400/40 bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 text-xs mono font-medium transition flex items-center justify-center gap-1.5">
+                            <span id="autoDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+                            <span id="autoZoomText">Cruise</span>
+                        </button>
+                        <input id="speedSlider" type="range" min="0.2" max="4.0" step="0.1" value="1.2" class="w-16" title="Auto-Dive Speed">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Controls -->
+            <div class="pt-1 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+                <span>Scroll: Deep Zoom • Drag: Pan</span>
+                <button onclick="resetCamera()" class="text-sky-400 hover:underline mono">Reset Camera</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEPLOY TO FLY.IO MODAL (Zero-Friction Production Bundle) -->
+    <div id="flyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
+        <div class="glass-panel rounded-2xl max-w-3xl w-full max-h-[88vh] flex flex-col border border-purple-400/30 shadow-2xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-slate-900/60">
+                <div class="flex items-center gap-3">
+                    <div class="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-[0_0_10px_#c084fc]"></div>
+                    <div>
+                        <h2 class="text-sm md:text-base font-bold text-white mono">Deploy to Fly.io // Production Node.js + Docker Bundle</h2>
+                        <p class="text-[11px] text-slate-400">Ready-to-deploy configuration for hosting this procedural WebGL app globally on Fly.io Machines.</p>
+                    </div>
+                </div>
+                <button onclick="closeFlyModal()" class="text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 mono text-xs">ESC / Close</button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-4 text-xs">
+                <!-- File Tabs -->
+                <div class="flex flex-wrap gap-1.5 border-b border-white/10 pb-3">
+                    <button onclick="switchFlyTab('server')" id="flytab-server" class="glass-pill active px-3 py-1.5 rounded-lg mono text-xs text-white">1. server.js</button>
+                    <button onclick="switchFlyTab('pkg')" id="flytab-pkg" class="glass-pill px-3 py-1.5 rounded-lg mono text-xs text-white">2. package.json</button>
+                    <button onclick="switchFlyTab('docker')" id="flytab-docker" class="glass-pill px-3 py-1.5 rounded-lg mono text-xs text-white">3. Dockerfile</button>
+                    <button onclick="switchFlyTab('toml')" id="flytab-toml" class="glass-pill px-3 py-1.5 rounded-lg mono text-xs text-white">4. fly.toml</button>
+                    <button onclick="switchFlyTab('cli')" id="flytab-cli" class="glass-pill px-3 py-1.5 rounded-lg mono text-xs text-emerald-300">5. Quickstart CLI</button>
+                </div>
+
+                <!-- Code Viewer -->
+                <div class="relative">
+                    <button onclick="copyFlySnippet()" id="copyFlyBtn" class="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-purple-500/30 hover:bg-purple-500/50 border border-purple-400/40 text-purple-200 mono text-xs transition">
+                        Copy File Content
+                    </button>
+                    <pre id="flyCodeBlock" class="bg-slate-950/95 border border-white/10 rounded-xl p-4 mono text-xs text-sky-200 overflow-x-auto leading-relaxed"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**************************************************************************
+         * 1. PRNG SEED ENGINE, GENOME GENERATOR & URL (?seed=) SYNC
+         **************************************************************************/
+        class PRNG {
+            constructor(seed) {
+                this.seed = seed >>> 0;
+            }
+            next() {
+                let t = (this.seed += 0x6D2B79F5);
+                t = Math.imul(t ^ (t >>> 15), t | 1);
+                t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            }
+            range(min, max) {
+                return min + this.next() * (max - min);
+            }
+            int(min, max) {
+                return Math.floor(this.range(min, max + 1));
+            }
+        }
+
+        const MANDELBROT_LANDMARKS = [
+            { x: -0.7436438870371587, y: 0.1318259042053119, name: "Seahorse Valley Vortex" },
+            { x: -0.10109636384562,   y: 0.95628651080914,   name: "Lightning Filament Fork" },
+            { x: -1.25066,            y: 0.02012,            name: "Elephant Valley Spiral" },
+            { x: -0.749,              y: 0.1,                name: "Double Scepter Nebula" },
+            { x: 0.281717921930775,   y: 0.5771052841488505, name: "Quad-Spiral Attractor" },
+            { x: -0.77568377,         y: 0.13646737,         name: "Misiurewicz Point Twist" }
+        ];
+
+        const PALETTE_NAMES = [
+            "Bioluminescent Abyss",
+            "Brutalist Obsidian",
+            "Boreal Fjord & Moss",
+            "Solar Flare Magma",
+            "Ultraviolet Quartz",
+            "Infrared Basalt"
+        ];
+
+        const state = {
+            seedInt: 0,
+            seedHex: "",
+            // Master Depth Z: 0.0 -> 100.0 (Stage 1), 100.0 -> 200.0 (Stage 2), 200.0 -> 300.0 (Stage 3)
+            depthZ: 18.0,
+            targetDepthZ: 18.0,
+            shapeWarp: 0.5,       // Real-time user shape mutation override
+            complexity: 160,      // Shader iterations & tile density
+            paletteIndex: 0,
+            colorShift: 0.0,
+            autoDive: false,
+            cruiseSpeed: 1.2,
+            // Interactive 2D camera
+            camX: 0.0,
+            camY: 0.0,
+            targetCamX: 0.0,
+            targetCamY: 0.0,
+            zoom: 1.0,
+            targetZoom: 1.0,
+            // Pointer state
+            mouseX: -9999,
+            mouseY: -9999,
+            isDragging: false,
+            lastDragX: 0,
+            lastDragY: 0,
+            // Procedural Genome Parameters (Randomized every reload)
+            sierpinskiSymmetry: 3,    // 3-fold, 4-fold, 5-fold, or 6-fold IFS gasket
+            sierpinskiSpin: 0.0,      // Rotational twist per IFS fold
+            multibrotPower: 2.0,      // Exponent variations
+            mandelTarget: MANDELBROT_LANDMARKS[0],
+            juliaC: { x: -0.7269, y: 0.1889 },
+            juliaMix: 0.0,
+            seedOffset: { x: 0, y: 0 },
+            hatRotation: 0,
+            hatChiralBias: 0.14,
+            hatBevelDepth: 0.5,
+            hurstExponent: 0.68,      // Controls coastline fractal roughness
+            treeBranchAngle: 0.65,
+            time: 0
+        };
+
+        /**************************************************************************
+         * 2. AUTHENTIC EINSTEIN "HAT" MONOTILE + HIERARCHICAL INFLATION ENGINE
+         **************************************************************************/
+        const SQRT3 = Math.sqrt(3);
+
+        function getCanonicalHatOutline() {
+            const hexToCart = (u, v) => ({
+                x: u + 0.5 * v,
+                y: (SQRT3 / 2) * v
+            });
+            const ptsHex2 = [
+                [0, 0], [0, 2], [-1, 3], [-3, 3], [-3, 2], [-6, 2],
+                [-7, 1], [-6, -1], [-4, -2], [-3, -1], [-1, -2], [0, -2], [1, -1]
+            ];
+            return ptsHex2.map(([u, v]) => hexToCart(u * 0.5, v * 0.5));
+        }
+
+        const CANONICAL_HAT_VERTS = getCanonicalHatOutline();
+
+        function matMul(A, B) {
+            return [
+                A[0] * B[0] + A[1] * B[3],
+                A[0] * B[1] + A[1] * B[4],
+                A[0] * B[2] + A[1] * B[5] + A[2],
+                A[3] * B[0] + A[4] * B[3],
+                A[3] * B[1] + A[4] * B[4],
+                A[3] * B[2] + A[4] * B[5] + A[5]
+            ];
+        }
+
+        function matTransformPt(M, p) {
+            return {
+                x: M[0] * p.x + M[1] * p.y + M[2],
+                y: M[3] * p.x + M[4] * p.y + M[5]
+            };
+        }
+
+        function matchSegTransform(p1, p2, q1, q2, reflect = false) {
+            const dxP = p2.x - p1.x, dyP = p2.y - p1.y;
+            const dxQ = q2.x - q1.x, dyQ = q2.y - q1.y;
+            const lenP2 = dxP * dxP + dyP * dyP;
+            const scale = Math.sqrt((dxQ * dxQ + dyQ * dyQ) / lenP2);
+            const angP = Math.atan2(dyP, dxP);
+            const angQ = Math.atan2(dyQ, dxQ);
+
+            const cosP = Math.cos(-angP), sinP = Math.sin(-angP);
+            const cosQ = Math.cos(angQ), sinQ = Math.sin(angQ);
+
+            let M = [
+                cosP, -sinP, -p1.x * cosP + p1.y * sinP,
+                sinP,  cosP, -p1.x * sinP - p1.y * cosP
+            ];
+            if (reflect) {
+                M = matMul([1, 0, 0, 0, -1, 0], M);
+            }
+            const R = [
+                scale * cosQ, -scale * sinQ, q1.x,
+                scale * sinQ,  scale * cosQ, q1.y
+            ];
+            return matMul(R, M);
+        }
+
+        let einsteinTiles = [];
+
+        function buildEinsteinTiling(seedInt) {
+            const rng = new PRNG(seedInt);
+            einsteinTiles = [];
+
+            const hexToCart = (u, v) => ({
+                x: (u + 0.5 * v) * 0.5,
+                y: ((SQRT3 / 2) * v) * 0.5
+            });
+
+            const KITE_CENTERS = [
+                hexToCart(-1, 1), hexToCart(-2, 2), hexToCart(-4, 2), hexToCart(-5, 1),
+                hexToCart(-5, 0), hexToCart(-4, -1), hexToCart(-2, -1), hexToCart(-1, -1)
+            ];
+
+            const occupiedKites = new Set();
+            const kiteKey = (p) => `${Math.round(p.x * 8)},${Math.round(p.y * 8)}`;
+
+            const N = CANONICAL_HAT_VERTS.length;
+            const edgeLengths = [];
+            for (let i = 0; i < N; i++) {
+                const a = CANONICAL_HAT_VERTS[i];
+                const b = CANONICAL_HAT_VERTS[(i + 1) % N];
+                edgeLengths.push(Math.hypot(b.x - a.x, b.y - a.y));
+            }
+
+            function isLatticeAligned(M) {
+                const det = M[0] * M[4] - M[1] * M[3];
+                const angle = Math.atan2(M[3], M[0]);
+                const deg = ((angle * 180) / Math.PI + 360) % 60;
+                const alignedAngle = deg < 0.5 || deg > 59.5;
+                const validScale = Math.abs(Math.abs(det) - 1.0) < 0.02;
+                return alignedAngle && validScale;
+            }
+
+            function canPlaceTile(M) {
+                if (!isLatticeAligned(M)) return false;
+                for (let k = 0; k < KITE_CENTERS.length; k++) {
+                    const p = matTransformPt(M, KITE_CENTERS[k]);
+                    if (occupiedKites.has(kiteKey(p))) return false;
+                }
+                return true;
+            }
+
+            function commitTile(M, generation, isReflected, clusterId) {
+                const keys = [];
+                const kitePts = [];
+                for (let k = 0; k < KITE_CENTERS.length; k++) {
+                    const p = matTransformPt(M, KITE_CENTERS[k]);
+                    const key = kiteKey(p);
+                    keys.push(key);
+                    kitePts.push(p);
+                    occupiedKites.add(key);
+                }
+                const verts = CANONICAL_HAT_VERTS.map(v => matTransformPt(M, v));
+                let cx = 0, cy = 0;
+                verts.forEach(v => { cx += v.x; cy += v.y; });
+                cx /= verts.length;
+                cy /= verts.length;
+
+                // Assign a hierarchical metatile archetype (H, T, P, F) based on seed & local topology
+                const metaTypes = ["H-Metatile", "T-Metatile", "P-Metatile", "F-Metatile"];
+                const metaType = isReflected ? "H*-Reflected Core" : metaTypes[generation % 4];
+
+                const tile = {
+                    M, verts, kitePts, cx, cy, keys,
+                    generation, isReflected, clusterId, metaType,
+                    phase: rng.range(0, Math.PI * 2),
+                    elevationBias: rng.range(0.2, 1.0)
+                };
+                einsteinTiles.push(tile);
+                return tile;
+            }
+
+            const rootReflected = rng.next() > 0.35;
+            const rootM = rootReflected ? [1, 0, 0, 0, -1, 0] : [1, 0, 0, 0, 1, 0];
+            commitTile(rootM, 0, rootReflected, 0);
+
+            const relativeTransforms = [];
+            for (let i = 0; i < N; i++) {
+                const a1 = CANONICAL_HAT_VERTS[i];
+                const a2 = CANONICAL_HAT_VERTS[(i + 1) % N];
+                const lenA = edgeLengths[i];
+
+                for (let j = 0; j < N; j++) {
+                    const lenB = edgeLengths[j];
+                    if (Math.abs(lenA - lenB) > 0.01) continue;
+                    const b1 = CANONICAL_HAT_VERTS[j];
+                    const b2 = CANONICAL_HAT_VERTS[(j + 1) % N];
+
+                    for (const refl of [false, true]) {
+                        const T = matchSegTransform(b2, b1, a1, a2, refl);
+                        if (isLatticeAligned(T)) {
+                            let selfOverlap = false;
+                            const parentSet = new Set(KITE_CENTERS.map(kiteKey));
+                            for (const kc of KITE_CENTERS) {
+                                if (parentSet.has(kiteKey(matTransformPt(T, kc)))) {
+                                    selfOverlap = true;
+                                    break;
+                                }
+                            }
+                            if (!selfOverlap) {
+                                relativeTransforms.push({ T, refl });
+                            }
+                        }
+                    }
+                }
+            }
+
+            const TARGET_TILES = 270;
+            let frontierIdx = 0;
+            let clusterCounter = 1;
+            const reflPenalty = 1.35 + (0.22 - state.hatChiralBias) * 4.0;
+
+            while (einsteinTiles.length < TARGET_TILES && frontierIdx < einsteinTiles.length) {
+                const parent = einsteinTiles[frontierIdx++];
+                const candidates = relativeTransforms.slice().sort((a, b) => {
+                    const scoreA = (a.refl ? reflPenalty : 0.0) + rng.next() * 0.75;
+                    const scoreB = (b.refl ? reflPenalty : 0.0) + rng.next() * 0.75;
+                    return scoreA - scoreB;
+                });
+
+                for (const cand of candidates) {
+                    if (einsteinTiles.length >= TARGET_TILES) break;
+                    const childM = matMul(parent.M, cand.T);
+                    const childDet = childM[0] * childM[4] - childM[1] * childM[3];
+                    const childReflected = childDet < 0;
+
+                    if (parent.isReflected && childReflected) continue;
+
+                    const testCenter = matTransformPt(childM, { x: -1.5, y: 0 });
+                    if (Math.hypot(testCenter.x, testCenter.y) > 29) continue;
+
+                    if (canPlaceTile(childM)) {
+                        const cid = childReflected ? (clusterCounter++) : parent.clusterId;
+                        commitTile(childM, parent.generation + 1, childReflected, cid);
+                    }
+                }
+            }
+        }
+
+        /**************************************************************************
+         * 3. WEBGL SHADER ENGINE (18-MAGNITUDE DEEP ZOOM ACROSS STAGES I, II, III)
+         **************************************************************************/
+        const glCanvas = document.getElementById('glCanvas');
+        const gl = glCanvas.getContext('webgl', { antialias: false, depth: false });
+        const hatCanvas = document.getElementById('hatCanvas');
+        const ctx2d = hatCanvas.getContext('2d');
+
+        const vertexShaderSource = `
+            attribute vec2 a_position;
+            varying vec2 v_uv;
+            void main() {
+                v_uv = a_position * 0.5 + 0.5;
+                gl_Position = vec4(a_position, 0.0, 1.0);
+            }
+        `;
+
+        const fragmentShaderSource = `
+            precision highp float;
+            varying vec2 v_uv;
+
+            uniform vec2 u_resolution;
+            uniform float u_time;
+            uniform float u_depthZ;          // 0..300 continuous deep zoom coordinate
+            uniform float u_shapeWarp;       // 0..1 user/seed shape mutation parameter
+            uniform float u_complexity;      // Iteration budget
+            uniform vec2 u_camera;           // Interactive pan
+            uniform float u_zoom;            // Additional interactive zoom
+            uniform vec2 u_mandelTarget;     // Seeded spiral landmark
+            uniform vec2 u_juliaC;           // Seeded Julia constant
+            uniform float u_juliaMix;        // Mandelbrot <-> Julia blend
+            uniform vec2 u_seedOffset;       // Terrain seed offset
+            uniform float u_palette;         // 0..5 palette index
+            uniform float u_colorShift;      // Seeded phase shift
+            uniform float u_branchAngle;     // Seeded botanical branching angle
+            uniform float u_symmetry;        // 3, 4, 5, or 6 fold IFS symmetry
+            uniform float u_sierpinskiSpin;  // Rotational fold twist
+            uniform float u_hurst;           // Coastline Hurst roughness exponent
+
+            // --- 6 Procedural Cosine Palettes + Seed Phase Shift ---
+            vec3 getPalette(float t, float palId) {
+                t += u_colorShift;
+                vec3 a, b, c, d;
+                if (palId < 0.5) {
+                    // 0: Bioluminescent Abyss
+                    a = vec3(0.05, 0.10, 0.20); b = vec3(0.45, 0.45, 0.55);
+                    c = vec3(1.0, 1.0, 1.0);    d = vec3(0.00, 0.33, 0.67);
+                } else if (palId < 1.5) {
+                    // 1: Brutalist Obsidian & Gold
+                    a = vec3(0.11, 0.11, 0.13); b = vec3(0.50, 0.40, 0.25);
+                    c = vec3(1.0, 0.85, 0.65);  d = vec3(0.05, 0.15, 0.25);
+                } else if (palId < 2.5) {
+                    // 2: Boreal Fjord & Emerald Moss
+                    a = vec3(0.05, 0.17, 0.18); b = vec3(0.36, 0.46, 0.36);
+                    c = vec3(0.8, 1.0, 0.75);   d = vec3(0.12, 0.35, 0.52);
+                } else if (palId < 3.5) {
+                    // 3: Solar Flare Magma
+                    a = vec3(0.20, 0.07, 0.08); b = vec3(0.55, 0.38, 0.25);
+                    c = vec3(1.0, 0.85, 0.60);  d = vec3(0.00, 0.15, 0.35);
+                } else if (palId < 4.5) {
+                    // 4: Ultraviolet Quartz
+                    a = vec3(0.14, 0.08, 0.24); b = vec3(0.48, 0.35, 0.55);
+                    c = vec3(0.95, 0.85, 1.0);  d = vec3(0.22, 0.45, 0.78);
+                } else {
+                    // 5: Infrared Basalt
+                    a = vec3(0.12, 0.08, 0.11); b = vec3(0.52, 0.32, 0.38);
+                    c = vec3(1.0, 0.75, 0.82);  d = vec3(0.85, 0.12, 0.30);
+                }
+                return a + b * cos(6.28318 * (c * t + d));
+            }
+
+            mat2 rot2D(float a) {
+                float c = cos(a), s = sin(a);
+                return mat2(c, -s, s, c);
+            }
+
+            float hash21(vec2 p) {
+                p = fract(p * vec2(234.34, 435.345));
+                p += dot(p, p + 34.23);
+                return fract(p.x * p.y);
+            }
+
+            float noise(vec2 p) {
+                vec2 i = floor(p);
+                vec2 f = fract(p);
+                vec2 u = f * f * (3.0 - 2.0 * f);
+                float a = hash21(i);
+                float b = hash21(i + vec2(1.0, 0.0));
+                float c = hash21(i + vec2(0.0, 1.0));
+                float d = hash21(i + vec2(1.0, 1.0));
+                return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+            }
+
+            // Variable-Hurst Fractional Brownian Motion
+            float fbm(vec2 p, int octaves) {
+                float v = 0.0;
+                float amp = 0.52;
+                float gain = clamp(pow(2.0, -u_hurst), 0.42, 0.64);
+                mat2 rot = rot2D(0.52);
+                for (int i = 0; i < 9; i++) {
+                    if (i >= octaves) break;
+                    v += amp * noise(p);
+                    p = rot * p * 2.04 + vec2(17.3, 9.2);
+                    amp *= gain;
+                }
+                return v;
+            }
+
+            float ridgedFbm(vec2 p, int octaves) {
+                float v = 0.0;
+                float amp = 0.55;
+                float weight = 1.0;
+                mat2 rot = rot2D(u_branchAngle);
+                for (int i = 0; i < 8; i++) {
+                    if (i >= octaves) break;
+                    float n = 1.0 - abs(noise(p) * 2.0 - 1.0);
+                    n = n * n * weight;
+                    weight = clamp(n * 1.85, 0.0, 1.0);
+                    v += n * amp;
+                    p = rot * p * 2.12 + vec2(11.7, 23.1);
+                    amp *= 0.5;
+                }
+                return v;
+            }
+
+            // Cellular Voronoi for Microscopic Leaf Venation & Stomata (Z = 265..300)
+            vec2 voronoi(vec2 x) {
+                vec2 n = floor(x);
+                vec2 f = fract(x);
+                float md = 8.0;
+                float md2 = 8.0;
+                for (int j = -1; j <= 1; j++) {
+                    for (int i = -1; i <= 1; i++) {
+                        vec2 g = vec2(float(i), float(j));
+                        vec2 o = vec2(hash21(n + g), hash21(n + g + 13.7));
+                        o = 0.5 + 0.42 * sin(u_time * 0.4 + 6.2831 * o);
+                        vec2 r = g + o - f;
+                        float d = dot(r, r);
+                        if (d < md) {
+                            md2 = md;
+                            md = d;
+                        } else if (d < md2) {
+                            md2 = d;
+                        }
+                    }
+                }
+                return vec2(sqrt(md), sqrt(md2) - sqrt(md));
+            }
+
+            // --- STAGE 1A: Mutated N-Fold Kaleidoscopic Sierpinski IFS (Z = 0 .. 55) ---
+            float kaleidoscopicSierpinskiDE(vec2 z, int maxIter, out float trap) {
+                float scale = 1.0;
+                trap = 1e10;
+                float sym = floor(u_symmetry + 0.5);
+                float sectorAngle = 6.2831853 / sym;
+                float twist = (u_shapeWarp - 0.5) * 0.22 + u_sierpinskiSpin;
+                mat2 stepRot = rot2D(twist);
+
+                for (int i = 0; i < 18; i++) {
+                    if (i >= maxIter) break;
+                    // Kaleidoscopic angular fold for N-fold symmetry (3=Triangle, 4=Tetra, 5=Penta, 6=Hexaflake)
+                    float r = length(z);
+                    float a = atan(z.y, z.x);
+                    a = mod(a + 0.5 * sectorAngle, sectorAngle) - 0.5 * sectorAngle;
+                    z = vec2(cos(a), abs(sin(a))) * r;
+
+                    // Scale & translate toward outer vertex
+                    z = stepRot * z;
+                    z = z * 2.0 - vec2(0.92, 0.0);
+                    scale *= 2.0;
+                    trap = min(trap, length(z));
+                }
+                return (length(z) - 0.95) / scale;
+            }
+
+            // --- STAGE 1 RENDERER (Z = 0 .. 100) ---
+            vec3 renderStage1(vec2 p, float zDepth) {
+                // Normalized stage progress 0.0 -> 1.0 across 100 Z-units
+                float morph = clamp(zDepth / 100.0, 0.0, 1.0);
+
+                // 1. Multi-order periodic log-zoom into Kaleidoscopic Sierpinski (Z = 0..55)
+                float sLogCycle = mod(zDepth * 0.35 + log2(max(u_zoom, 0.0001)), 1.0);
+                float sScale = exp2(sLogCycle);
+                vec2 sPos = (p / sScale) + u_camera * 0.25;
+                // Add spiral portal warp as Z approaches 35..55
+                float portalSwirl = smoothstep(0.28, 0.58, morph);
+                sPos = rot2D(portalSwirl * length(p) * 2.4) * sPos;
+
+                float trap;
+                int sIter = int(clamp(u_complexity / 11.0, 5.0, 16.0));
+                float dSierp = kaleidoscopicSierpinskiDE(sPos * 1.15, sIter, trap);
+                float glowSierp = exp(-abs(dSierp) * 145.0);
+                float fillSierp = smoothstep(0.012, -0.004, dSierp);
+                vec3 colSierp = getPalette(trap * 0.42 + zDepth * 0.015 - u_time * 0.03, u_palette) * (fillSierp * 0.85 + glowSierp * 1.35);
+
+                // Precision coordinate grid in voids
+                float grid = smoothstep(0.97, 1.0, max(cos(sPos.x * 36.0), cos(sPos.y * 36.0))) * 0.14;
+                colSierp += getPalette(0.5, u_palette) * grid * (1.0 - fillSierp);
+
+                // 2. Extended Exponential Dive into Mandelbrot / Julia Filaments (Z = 35..100)
+                // Spans from 1x up to ~10^6x zoom smoothly
+                float mProgress = clamp((zDepth - 30.0) / 68.0, 0.0, 1.0);
+                float expZoom = pow(18000.0, mProgress * mProgress) * u_zoom;
+                vec2 zCoord = (p / expZoom) + u_mandelTarget + (u_camera / expZoom);
+
+                float juliaBlend = u_juliaMix + (u_shapeWarp - 0.5) * 0.12;
+                vec2 c = mix(zCoord, u_juliaC, clamp(juliaBlend, 0.0, 0.85));
+                vec2 z = zCoord;
+                float iter = 0.0;
+                float maxIt = u_complexity;
+                float orbitMin = 1e10;
+                float foldInf = (1.0 - smoothstep(0.30, 0.65, morph)) * 0.22;
+
+                for (int i = 0; i < 280; i++) {
+                    if (float(i) >= maxIt) break;
+                    vec2 zSq = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
+                    // Hybrid algebraic bridge between IFS folding and complex quadratic polynomial
+                    z = mix(zSq, abs(zSq) - foldInf, foldInf) + c;
+                    orbitMin = min(orbitMin, abs(z.x * z.y));
+                    if (dot(z, z) > 256.0) break;
+                    iter += 1.0;
+                }
+
+                vec3 colMandel = vec3(0.02, 0.03, 0.06);
+                if (iter < maxIt) {
+                    float log_zn = log(dot(z, z)) * 0.5;
+                    float nu = log(log_zn / log(2.0)) / log(2.0);
+                    float smoothIter = iter + 1.0 - nu;
+                    float cycle = sqrt(max(smoothIter, 0.0)) * 0.20 - u_time * 0.035 + zDepth * 0.008;
+                    colMandel = getPalette(cycle + orbitMin * 0.28, u_palette);
+                    colMandel += vec3(0.95, 0.98, 1.0) * pow(clamp(1.0 - orbitMin * 2.6, 0.0, 1.0), 5.0) * 0.38;
+                } else {
+                    float interior = sin(orbitMin * 45.0 - u_time * 1.2) * 0.5 + 0.5;
+                    colMandel = getPalette(interior * 0.25, u_palette) * 0.22;
+                }
+
+                return mix(colSierp, colMandel, smoothstep(0.32, 0.62, morph));
+            }
+
+            // --- STAGE 3 RENDERER: Natural Statistical Fractals (Z = 200 .. 300) ---
+            vec3 renderStage3(vec2 p, float zDepth) {
+                // scaleProgress: 0.0 (Z=200 Macro Orbital Coast) -> 0.5 (Z=250 Meso Canopy/Delta) -> 1.0 (Z=300 Micro Stomata)
+                float scaleProgress = clamp((zDepth - 200.0) / 100.0, 0.0, 1.0);
+                float zoomFactor = exp2(scaleProgress * 7.2) * u_zoom;
+                vec2 worldUV = (p / zoomFactor) * 3.5 + u_camera * 0.4 + u_seedOffset;
+
+                vec2 q = vec2(
+                    fbm(worldUV + vec2(0.0, 0.0), 6),
+                    fbm(worldUV + vec2(5.2, 1.3), 6)
+                );
+                vec2 r = vec2(
+                    fbm(worldUV + 3.1 * q + vec2(1.7, 9.2), 7),
+                    fbm(worldUV + 3.1 * q + vec2(8.3, 2.8), 7)
+                );
+
+                float elevation = fbm(worldUV + 1.9 * r, 8);
+                float mesoDetail = ridgedFbm(worldUV * 9.0 + r * 2.2, 6);
+                float microVeins = ridgedFbm(worldUV * 52.0 + q * 4.5, 7);
+
+                float seaLevel = 0.48 + (u_shapeWarp - 0.5) * 0.08;
+                float coastDist = elevation - seaLevel;
+
+                // 1. MACRO: Bathymetric Fjords & Archipelagos (Z = 200..240)
+                vec3 deepWater = vec3(0.02, 0.09, 0.18);
+                vec3 shallowTurquoise = vec3(0.05, 0.40, 0.48);
+                vec3 foam = vec3(0.88, 0.96, 0.98);
+
+                float waterDepth = clamp(-coastDist * 5.5, 0.0, 1.0);
+                vec3 oceanCol = mix(shallowTurquoise, deepWater, pow(waterDepth, 0.65));
+                float bathyContour = smoothstep(0.92, 0.98, sin(coastDist * 210.0));
+                oceanCol += vec3(0.08, 0.26, 0.34) * bathyContour * (1.0 - waterDepth * 0.7);
+                float surf = exp(-abs(coastDist) * 175.0);
+                oceanCol = mix(oceanCol, foam, surf * 0.8);
+
+                // 2. MESO: Dendritic River Deltas & Forest Canopy (Z = 235..275)
+                float landHeight = clamp(coastDist * 4.4, 0.0, 1.0);
+                vec3 cliffRock = vec3(0.22, 0.21, 0.20);
+                vec3 borealForest = vec3(0.08, 0.28, 0.17);
+                vec3 mossCanopy = vec3(0.22, 0.48, 0.24);
+                vec3 alpinePeak = vec3(0.80, 0.84, 0.88);
+
+                float canopyCrown = smoothstep(0.32, 0.78, mesoDetail);
+                vec3 landCol = mix(cliffRock, borealForest, smoothstep(0.02, 0.14, landHeight));
+                landCol = mix(landCol, mossCanopy, canopyCrown * smoothstep(0.05, 0.48, landHeight));
+                landCol = mix(landCol, alpinePeak, smoothstep(0.60, 0.90, landHeight));
+
+                float topoLine = smoothstep(0.94, 0.99, sin(elevation * 250.0));
+                landCol += vec3(0.18, 0.26, 0.16) * topoLine * 0.35;
+
+                vec3 macroMesoCol = (coastDist < 0.0) ? oceanCol : landCol;
+                vec3 palTint = getPalette(elevation + mesoDetail * 0.3, u_palette);
+                macroMesoCol = mix(macroMesoCol, palTint, 0.22);
+
+                // 3. MICRO: Leaf Vascular Network & Cellular Stomata (Z = 265..300)
+                vec2 cellVor = voronoi(worldUV * 380.0);
+                float cellWall = smoothstep(0.12, 0.02, cellVor.y);
+                float stomata = smoothstep(0.18, 0.05, cellVor.x);
+
+                float primaryVein = pow(clamp(mesoDetail, 0.0, 1.0), 2.8);
+                float secondaryVein = pow(clamp(microVeins, 0.0, 1.0), 2.2);
+
+                vec3 leafBase = vec3(0.04, 0.19, 0.10) + vec3(0.06, 0.18, 0.08) * cellWall;
+                leafBase += vec3(0.25, 0.65, 0.35) * stomata * 0.35;
+                vec3 veinGlow = vec3(0.45, 0.88, 0.36) * secondaryVein + vec3(0.80, 0.98, 0.65) * primaryVein * 0.85;
+                vec3 microCol = mix(leafBase + veinGlow, getPalette(secondaryVein * 0.5, u_palette), 0.18);
+
+                return mix(macroMesoCol, microCol, smoothstep(0.52, 0.92, scaleProgress));
+            }
+
+            void main() {
+                vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+                vec3 finalColor = vec3(0.03, 0.04, 0.07);
+
+                if (u_depthZ < 100.0) {
+                    finalColor = renderStage1(p, u_depthZ);
+                } else if (u_depthZ < 200.0) {
+                    // Stage 2 backdrop beneath the multi-scale Einstein Hat Canvas
+                    float radial = length(p);
+                    float wave = sin(radial * 10.0 - u_time * 0.8 + u_depthZ * 0.1) * 0.5 + 0.5;
+                    finalColor = mix(vec3(0.02, 0.03, 0.06), getPalette(wave * 0.3, u_palette) * 0.24, 0.6);
+                } else {
+                    finalColor = renderStage3(p, u_depthZ);
+                }
+
+                // Extended cross-stage portal transitions around Z=100 and Z=200
+                if (u_depthZ >= 88.0 && u_depthZ < 115.0) {
+                    float w1 = 1.0 - smoothstep(88.0, 112.0, u_depthZ);
+                    vec3 s1 = renderStage1(p, min(u_depthZ, 99.5));
+                    finalColor = mix(finalColor, s1, w1);
+                }
+                if (u_depthZ >= 185.0 && u_depthZ < 215.0) {
+                    float w3 = smoothstep(188.0, 212.0, u_depthZ);
+                    vec3 s3 = renderStage3(p, max(u_depthZ, 200.1));
+                    finalColor = mix(finalColor, s3, w3);
+                }
+
+                finalColor = pow(clamp(finalColor, 0.0, 1.0), vec3(0.92));
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        function compileShader(type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error(gl.getShaderInfoLog(shader));
+            }
+            return shader;
+        }
+
+        const vs = compileShader(gl.VERTEX_SHADER, vertexShaderSource);
+        const fs = compileShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+        const program = gl.createProgram();
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        const quadBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1, -1,  1, -1, -1,  1,
+            -1,  1,  1, -1,  1,  1
+        ]), gl.STATIC_DRAW);
+
+        const posLoc = gl.getAttribLocation(program, "a_position");
+        gl.enableVertexAttribArray(posLoc);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+        const uniforms = {
+            res: gl.getUniformLocation(program, "u_resolution"),
+            time: gl.getUniformLocation(program, "u_time"),
+            depthZ: gl.getUniformLocation(program, "u_depthZ"),
+            shapeWarp: gl.getUniformLocation(program, "u_shapeWarp"),
+            complexity: gl.getUniformLocation(program, "u_complexity"),
+            camera: gl.getUniformLocation(program, "u_camera"),
+            zoom: gl.getUniformLocation(program, "u_zoom"),
+            mandelTarget: gl.getUniformLocation(program, "u_mandelTarget"),
+            juliaC: gl.getUniformLocation(program, "u_juliaC"),
+            juliaMix: gl.getUniformLocation(program, "u_juliaMix"),
+            seedOffset: gl.getUniformLocation(program, "u_seedOffset"),
+            palette: gl.getUniformLocation(program, "u_palette"),
+            colorShift: gl.getUniformLocation(program, "u_colorShift"),
+            branchAngle: gl.getUniformLocation(program, "u_branchAngle"),
+            symmetry: gl.getUniformLocation(program, "u_symmetry"),
+            sierpinskiSpin: gl.getUniformLocation(program, "u_sierpinskiSpin"),
+            hurst: gl.getUniformLocation(program, "u_hurst")
+        };
+
+        /**************************************************************************
+         * 4. MULTI-SCALE EINSTEIN "HAT" RENDERER WITH H/T/P/F METATILE INFLATION
+         * Supports continuous zoom across Z = 100 .. 200 by cycling through
+         * Golden-mean / φ⁴ metatile substitution scales while keeping zero period!
+         **************************************************************************/
+        function renderEinsteinScene(alpha) {
+            const w = hatCanvas.width;
+            const h = hatCanvas.height;
+            ctx2d.clearRect(0, 0, w, h);
+            if (alpha <= 0.01) return;
+
+            ctx2d.save();
+            ctx2d.globalAlpha = alpha;
+
+            const minDim = Math.min(w, h);
+            // Continuous multi-octave inflation across Z = 100..200
+            // Every 25 Z-units represents a full hierarchical metatile inflation cycle (scale factor 2.618x)
+            const localZ = Math.max(0.0, state.depthZ - 95.0);
+            const inflationCycle = (localZ / 28.0) % 1.0;
+            const inflationGeneration = Math.floor(localZ / 28.0);
+            const zoomMultiplier = Math.pow(2.4, inflationCycle) * state.zoom;
+            const baseScale = (minDim / 30.0) * zoomMultiplier;
+
+            // Slight rotational precession per inflation generation (matching authentic hat metatile rotation)
+            const genRotation = state.hatRotation + inflationGeneration * (Math.PI / 6.0);
+
+            ctx2d.translate(w * 0.5 + state.camX * minDim * 0.4, h * 0.5 - state.camY * minDim * 0.4);
+            ctx2d.rotate(genRotation);
+
+            const dxM = (state.mouseX * window.devicePixelRatio - (w * 0.5 + state.camX * minDim * 0.4));
+            const dyM = (state.mouseY * window.devicePixelRatio - (h * 0.5 - state.camY * minDim * 0.4));
+            const cosR = Math.cos(-genRotation), sinR = Math.sin(-genRotation);
+            const worldMouseX = (dxM * cosR - dyM * sinR) / baseScale;
+            const worldMouseY = (dxM * sinR + dyM * cosR) / baseScale;
+
+            const maxVisible = Math.min(einsteinTiles.length, Math.floor((state.complexity / 280) * einsteinTiles.length) + 35);
+
+            let hoveredTile = null;
+            for (let i = 0; i < maxVisible; i++) {
+                const t = einsteinTiles[i];
+                if (Math.hypot(t.cx - worldMouseX, t.cy - worldMouseY) < 1.35) {
+                    hoveredTile = t;
+                    break;
+                }
+            }
+
+            const palettes = [
+                { unref: [16, 28, 50], ref: [14, 165, 233], stroke: "rgba(125, 211, 252, 0.58)", sub: "rgba(56, 189, 248, 0.22)" },
+                { unref: [26, 26, 32], ref: [245, 158, 11], stroke: "rgba(251, 191, 36, 0.55)",  sub: "rgba(245, 158, 11, 0.22)" },
+                { unref: [14, 36, 32], ref: [16, 185, 129], stroke: "rgba(110, 231, 183, 0.55)", sub: "rgba(52, 211, 153, 0.22)" },
+                { unref: [40, 18, 20], ref: [249, 115, 22], stroke: "rgba(253, 186, 116, 0.55)", sub: "rgba(251, 146, 60, 0.22)" },
+                { unref: [28, 18, 46], ref: [168, 85, 247], stroke: "rgba(216, 180, 254, 0.55)", sub: "rgba(192, 132, 252, 0.22)" },
+                { unref: [34, 18, 28], ref: [244, 63, 94],  stroke: "rgba(253, 164, 175, 0.55)", sub: "rgba(251, 113, 133, 0.22)" }
+            ];
+            const pal = palettes[state.paletteIndex] || palettes[0];
+            const bevelShift = (state.shapeWarp - 0.5) * 6.0;
+
+            for (let i = 0; i < maxVisible; i++) {
+                const tile = einsteinTiles[i];
+                const isHovered = hoveredTile === tile;
+                const isSameCluster = hoveredTile && (tile.generation === hoveredTile.generation);
+
+                const wave = Math.sin(tile.cx * 0.8 - tile.cy * 0.8 + state.time * 1.6 + tile.phase) * 0.5 + 0.5;
+                const elevation = tile.isReflected ? 1.0 : (0.15 + 0.3 * wave * tile.elevationBias);
+
+                ctx2d.beginPath();
+                for (let v = 0; v < tile.verts.length; v++) {
+                    const vx = tile.verts[v].x * baseScale + (tile.isReflected ? bevelShift : 0);
+                    const vy = tile.verts[v].y * baseScale + (tile.isReflected ? bevelShift : 0);
+                    if (v === 0) ctx2d.moveTo(vx, vy);
+                    else ctx2d.lineTo(vx, vy);
+                }
+                ctx2d.closePath();
+
+                if (tile.isReflected) {
+                    const pulse = 0.80 + 0.20 * Math.sin(state.time * 2.6 + tile.phase);
+                    ctx2d.fillStyle = `rgba(${pal.ref[0]}, ${pal.ref[1]}, ${pal.ref[2]}, ${0.86 * pulse})`;
+                } else {
+                    const shade = Math.floor(elevation * 44);
+                    const r = Math.min(255, pal.unref[0] + shade + (isSameCluster ? 32 : 0));
+                    const g = Math.min(255, pal.unref[1] + shade + (isSameCluster ? 42 : 0));
+                    const b = Math.min(255, pal.unref[2] + shade + (isSameCluster ? 56 : 0));
+                    ctx2d.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                }
+
+                if (isHovered) {
+                    ctx2d.fillStyle = "rgba(255, 255, 255, 0.92)";
+                }
+                ctx2d.fill();
+
+                // Draw internal [3.4.6.4] Laves dual kite sub-lattice as camera zooms deeper into the cycle
+                if (inflationCycle > 0.25 && tile.kitePts) {
+                    ctx2d.strokeStyle = pal.sub;
+                    ctx2d.lineWidth = Math.max(0.75, baseScale * 0.018);
+                    ctx2d.beginPath();
+                    for (let k = 0; k < tile.kitePts.length; k++) {
+                        const kp = tile.kitePts[k];
+                        ctx2d.moveTo(tile.cx * baseScale, tile.cy * baseScale);
+                        ctx2d.lineTo(kp.x * baseScale, kp.y * baseScale);
+                    }
+                    ctx2d.stroke();
+                }
+
+                ctx2d.lineWidth = Math.max(1.1, baseScale * 0.04);
+                ctx2d.strokeStyle = tile.isReflected ? "#ffffff" : pal.stroke;
+                ctx2d.stroke();
+            }
+
+            ctx2d.restore();
+        }
+
+        /**************************************************************************
+         * 5. SEED MUTATION, GENOME INSPECTOR & URL (?seed=) MANAGEMENT
+         **************************************************************************/
+        function initSeedFromURLOrRandom() {
+            const params = new URLSearchParams(window.location.search);
+            const urlSeed = params.get('seed');
+            if (urlSeed && /^[0-9a-fA-F]{1,8}$/.test(urlSeed)) {
+                applySeed(parseInt(urlSeed, 16) >>> 0, false);
+            } else {
+                randomizeSeed();
+            }
+        }
+
+        function randomizeSeed() {
+            const random32 = (Math.random() * 0xFFFFFFFF) >>> 0;
+            applySeed(random32, true);
+        }
+
+        function applySeed(seedInt, updateUrl = true) {
+            state.seedInt = seedInt >>> 0;
+            const hex = state.seedInt.toString(16).toUpperCase().padStart(8, '0');
+            state.seedHex = `#${hex.slice(0, 4)}-${hex.slice(4, 8)}`;
+            document.getElementById('seedDisplay').textContent = state.seedHex;
+
+            if (updateUrl && window.history && window.history.replaceState) {
+                const newUrl = `${window.location.pathname}?seed=${hex}`;
+                window.history.replaceState({}, '', newUrl);
+            }
+
+            const rng = new PRNG(state.seedInt);
+
+            // 1. Mutate Color Archetype & Phase Shift
+            state.paletteIndex = rng.int(0, 5);
+            state.colorShift = rng.range(0.0, 1.0);
+            document.getElementById('paletteSelect').value = String(state.paletteIndex);
+
+            // 2. Mutate Stage 1 Fractal Symmetry (3-fold, 4-fold, 5-fold, or 6-fold) & Spin
+            const symChoices = [3, 3, 4, 5, 6];
+            state.sierpinskiSymmetry = symChoices[rng.int(0, symChoices.length - 1)];
+            state.sierpinskiSpin = rng.range(-0.18, 0.18);
+            state.shapeWarp = rng.range(0.25, 0.78);
+            document.getElementById('shapeWarpSlider').value = state.shapeWarp;
+
+            // 3. Mutate Mandelbrot Landmark & Julia Perturbation
+            const landmarkIdx = rng.int(0, MANDELBROT_LANDMARKS.length - 1);
+            const baseMark = MANDELBROT_LANDMARKS[landmarkIdx];
+            state.mandelTarget = {
+                x: baseMark.x + rng.range(-0.00025, 0.00025),
+                y: baseMark.y + rng.range(-0.00025, 0.00025),
+                name: baseMark.name
+            };
+            state.juliaC = {
+                x: -0.745 + rng.range(-0.045, 0.045),
+                y: 0.148 + rng.range(-0.045, 0.045)
+            };
+            state.juliaMix = rng.next() > 0.65 ? rng.range(0.05, 0.18) : 0.0;
+
+            // 4. Mutate Complexity / Iteration Budget
+            state.complexity = rng.int(120, 230);
+            document.getElementById('complexitySlider').value = state.complexity;
+            document.getElementById('complexityValue').textContent = state.complexity;
+
+            // 5. Mutate Stage 2 Einstein Hat Chiral Ratio & Rebuild Lattice
+            state.hatRotation = rng.range(0, Math.PI * 2);
+            state.hatChiralBias = rng.range(0.11, 0.19);
+            buildEinsteinTiling(state.seedInt);
+
+            // 6. Mutate Stage 3 Natural Fractal Hurst Exponent & Botanical Angle
+            state.hurstExponent = rng.range(0.48, 0.84);
+            state.treeBranchAngle = rng.range(0.45, 0.82);
+            state.seedOffset = {
+                x: rng.range(-80, 80),
+                y: rng.range(-80, 80)
+            };
+
+            // Update Genome Inspector HUD
+            document.getElementById('genomePalette').textContent = PALETTE_NAMES[state.paletteIndex];
+            document.getElementById('genomeShape').textContent = `${state.sierpinskiSymmetry}-Fold • ${baseMark.name.split(' ')[0]}`;
+            document.getElementById('genomeHurst').textContent = `H=${state.hurstExponent.toFixed(2)} • ${Math.round(state.hatChiralBias * 100)}% Ref`;
+
+            updateHUDReadouts();
+        }
+
+        function copyShareLink() {
+            const hex = state.seedInt.toString(16).toUpperCase().padStart(8, '0');
+            const shareUrl = `${window.location.origin}${window.location.pathname}?seed=${hex}`;
+            const temp = document.createElement('textarea');
+            temp.value = shareUrl;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+
+            const btn = document.getElementById('shareSeedBtn');
+            btn.textContent = "Copied URL!";
+            setTimeout(() => { btn.textContent = "Copy ?seed URL"; }, 1800);
+        }
+
+        function jumpToScene(sceneIdx) {
+            if (sceneIdx === 0) state.targetDepthZ = 18.0;
+            else if (sceneIdx === 1) state.targetDepthZ = 142.0;
+            else state.targetDepthZ = 235.0;
+            resetCamera();
+        }
+
+        function resetCamera() {
+            state.targetCamX = 0.0;
+            state.targetCamY = 0.0;
+            state.targetZoom = 1.0;
+        }
+
+        function updatePalette(val) {
+            state.paletteIndex = parseInt(val, 10);
+            document.getElementById('genomePalette').textContent = PALETTE_NAMES[state.paletteIndex];
+        }
+
+        function toggleAutoJourney() {
+            state.autoDive = !state.autoDive;
+            const btnText = document.getElementById('autoZoomText');
+            const dot = document.getElementById('autoDot');
+            if (state.autoDive) {
+                btnText.textContent = "Active";
+                dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+            } else {
+                btnText.textContent = "Cruise";
+                dot.className = "w-2 h-2 rounded-full bg-slate-400";
+            }
+        }
+
+        let controlsVisible = true;
+        function toggleControlPanel() {
+            controlsVisible = !controlsVisible;
+            const panel = document.getElementById('controlPanel');
+            const label = document.getElementById('toggleControlsText');
+            if (controlsVisible) {
+                panel.classList.remove('hidden');
+                label.textContent = "Hide Lab Controls";
+            } else {
+                panel.classList.add('hidden');
+                label.textContent = "Show Lab Controls";
+            }
+        }
+
+        function updateHUDReadouts() {
+            const z = state.depthZ;
+            const activeScene = z < 100.0 ? 0 : (z < 200.0 ? 1 : 2);
+
+            for (let i = 0; i < 3; i++) {
+                const tab = document.getElementById(`tab-${i}`);
+                if (i === activeScene) tab.classList.add('active');
+                else tab.classList.remove('active');
+            }
+
+            const titleEl = document.getElementById('sceneTitle');
+            const descEl = document.getElementById('sceneDescription');
+            const badgeEl = document.getElementById('regimeBadge');
+            const subStageEl = document.getElementById('subStageLabel');
+            const dimEl = document.getElementById('dimReadout');
+
+            if (activeScene === 0) {
+                titleEl.textContent = "01 // EXACT MATHEMATICAL FRACTALS";
+                badgeEl.textContent = "Stage I • Exact & Quasi Recursion";
+                badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30";
+                const m = z / 100.0;
+                const baseD = state.sierpinskiSymmetry === 3 ? 1.58496 : (state.sierpinskiSymmetry === 4 ? 1.722 : 1.861);
+                dimEl.textContent = (baseD + (2.0 - baseD) * m).toFixed(4);
+
+                if (z < 38) {
+                    subStageEl.textContent = `${state.sierpinskiSymmetry}-Fold Kaleidoscopic IFS Gasket`;
+                } else if (z < 60) {
+                    subStageEl.textContent = "Logarithmic Spiral Morph Portal";
+                } else {
+                    subStageEl.textContent = `${state.mandelTarget.name} Boundary`;
+                }
+                descEl.innerHTML = `Traversing 6 orders of magnitude from a <strong class="text-white">${state.sierpinskiSymmetry}-fold Kaleidoscopic Sierpinski gasket</strong> into the high-iteration <strong class="text-white">${state.mandelTarget.name}</strong> filament boundary ($D = 2.000$).`;
+            } else if (activeScene === 1) {
+                titleEl.textContent = "02 // THE EINSTEIN 'HAT' MONOTILE";
+                badgeEl.textContent = "Stage II • Aperiodic Monotile";
+                badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                dimEl.textContent = "2.0000 (Aperiodic)";
+                const gen = Math.floor(Math.max(0, z - 95) / 28) + 1;
+                subStageEl.textContent = `H/T/P/F Metatile Inflation Gen #${gen}`;
+                descEl.innerHTML = `Continuous multi-scale dive through the <strong class="text-white">13-sided polykite "Hat" monotile</strong> on the $[3.4.6.4]$ Laves kite lattice. Highlighted anti-hats mark non-repeating substitution clusters across inflation generations.`;
+            } else {
+                titleEl.textContent = "03 // NATURAL STATISTICAL FRACTALS";
+                badgeEl.textContent = "Stage III • Multi-Scale Organic fBm";
+                badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                const dNat = (2.0 - state.hurstExponent) + ((z - 200) / 100) * 0.35;
+                dimEl.textContent = `~${dNat.toFixed(3)}`;
+
+                if (z < 238) subStageEl.textContent = "Macro Orbital Fjord & Bathymetry";
+                else if (z < 270) subStageEl.textContent = "Meso River Deltas & Forest Canopy";
+                else subStageEl.textContent = "Micro Leaf Venation & Stomata Cells";
+
+                descEl.innerHTML = `Diving from an orbital <strong class="text-white">fjord coastline</strong> ($H=${state.hurstExponent.toFixed(2)}$) into dendritic river deltas, <strong class="text-white">pine canopies</strong>, and microscopic <strong class="text-white">Voronoi leaf stomata</strong>.`;
+            }
+
+            // 18-order-of-magnitude exponential readout (Z = 0..300 -> 10^0 .. 10^18)
+            const magExp = (z / 300.0) * 18.0 + Math.log10(Math.max(state.zoom, 0.001));
+            document.getElementById('zoomReadout').textContent = `10^${magExp.toFixed(2)}×`;
+            document.getElementById('depthZReadout').textContent = `${z.toFixed(1)} / 300`;
+            document.getElementById('journeyValueLabel').textContent = `${z.toFixed(1)} / 300`;
+            document.getElementById('journeySlider').value = z;
+            document.getElementById('subMorphValue').textContent = `${Math.round(state.shapeWarp * 100)}%`;
+            document.getElementById('journeyProgressBar').style.width = `${Math.min(100, Math.max(2, (z / 300.0) * 100))}%`;
+        }
+
+        /**************************************************************************
+         * 6. FLY.IO DEPLOYMENT KIT MODAL & SNIPPETS
+         **************************************************************************/
+        const FLY_SNIPPETS = {
+            server: `// server.js - Zero-dependency Node.js production server for Fly.io
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const zlib = require('zlib');
+
+const PORT = process.env.PORT || 8080;
+const INDEX_PATH = path.join(__dirname, 'index.html');
+
+const server = http.createServer((req, res) => {
+  if (req.url === '/healthz') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ status: 'ok', engine: 'morphogenesis-webgl' }));
+  }
+
+  fs.readFile(INDEX_PATH, (err, data) => {
+    if (err) {
+      res.writeHead(500);
+      return res.end('Error loading index.html');
+    }
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+      'Content-Encoding': 'gzip'
+    });
+    zlib.gzip(data, (_, compressed) => res.end(compressed));
+  });
+});
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(\`Morphogenesis WebGL Engine listening on http://0.0.0.0:\${PORT}\`);
+});`,
+            pkg: `{
+  "name": "morphogenesis-fractal-engine",
+  "version": "2.4.0",
+  "description": "18-Order-of-Magnitude Procedural Fractal, Einstein Hat & Natural fBm WebGL App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}`,
+            docker: `# Dockerfile - Lightweight Alpine Node.js image for Fly.io
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json server.js index.html ./
+EXPOSE 8080
+ENV NODE_ENV=production
+ENV PORT=8080
+CMD ["node", "server.js"]`,
+            toml: `# fly.toml - Fly.io Machine Configuration
+app = "morphogenesis-fractal-engine"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1`,
+            cli: `# Deploy to Fly.io in 4 commands:
+# 1. Save this HTML file as index.html alongside server.js, package.json, Dockerfile, and fly.toml
+# 2. Authenticate with Fly CLI:
+fly auth login
+
+# 3. Initialize & launch the app (accept the existing fly.toml):
+fly launch --copy-config --no-deploy
+
+# 4. Deploy globally:
+fly deploy`
+        };
+
+        let currentFlyTab = 'server';
+
+        function openFlyModal() {
+            const modal = document.getElementById('flyModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            switchFlyTab('server');
+        }
+
+        function closeFlyModal() {
+            const modal = document.getElementById('flyModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function switchFlyTab(tabKey) {
+            currentFlyTab = tabKey;
+            ['server', 'pkg', 'docker', 'toml', 'cli'].forEach(k => {
+                const btn = document.getElementById(`flytab-${k}`);
+                if (k === tabKey) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            document.getElementById('flyCodeBlock').textContent = FLY_SNIPPETS[tabKey];
+        }
+
+        function copyFlySnippet() {
+            const temp = document.createElement('textarea');
+            temp.value = FLY_SNIPPETS[currentFlyTab];
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+
+            const btn = document.getElementById('copyFlyBtn');
+            btn.textContent = "Copied to Clipboard!";
+            setTimeout(() => { btn.textContent = "Copy File Content"; }, 1600);
+        }
+
+        /**************************************************************************
+         * 7. INTERACTIVE EVENT LISTENERS & MAIN ANIMATION LOOP
+         **************************************************************************/
+        document.getElementById('journeySlider').addEventListener('input', (e) => {
+            state.targetDepthZ = parseFloat(e.target.value);
+            state.depthZ = state.targetDepthZ;
+            updateHUDReadouts();
+        });
+
+        document.getElementById('shapeWarpSlider').addEventListener('input', (e) => {
+            state.shapeWarp = parseFloat(e.target.value);
+            updateHUDReadouts();
+        });
+
+        document.getElementById('complexitySlider').addEventListener('input', (e) => {
+            state.complexity = parseFloat(e.target.value);
+            document.getElementById('complexityValue').textContent = Math.round(state.complexity);
+        });
+
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            state.cruiseSpeed = parseFloat(e.target.value);
+            document.getElementById('speedLabel').textContent = `${state.cruiseSpeed.toFixed(1)}x`;
+        });
+
+        // Smooth wheel zoom across all 300 Z-units
+        window.addEventListener('wheel', (e) => {
+            if (e.target.closest('#controlPanel') || e.target.closest('header') || e.target.closest('#flyModal')) return;
+            e.preventDefault();
+            const step = Math.min(Math.max(Math.abs(e.deltaY) * 0.032, 0.6), 4.5);
+            const delta = Math.sign(e.deltaY) * step;
+            state.targetDepthZ = Math.max(0.0, Math.min(300.0, state.targetDepthZ + delta));
+        }, { passive: false });
+
+        window.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('#controlPanel') || e.target.closest('header') || e.target.closest('#infoCard') || e.target.closest('#toggleControlsBtn') || e.target.closest('#flyModal')) return;
+            state.isDragging = true;
+            state.lastDragX = e.clientX;
+            state.lastDragY = e.clientY;
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            state.mouseX = e.clientX;
+            state.mouseY = e.clientY;
+            if (!state.isDragging) return;
+            const dx = (e.clientX - state.lastDragX) / window.innerWidth;
+            const dy = (e.clientY - state.lastDragY) / window.innerHeight;
+            state.lastDragX = e.clientX;
+            state.lastDragY = e.clientY;
+
+            state.targetCamX -= dx * 2.2;
+            state.targetCamY += dy * 2.2;
+        });
+
+        window.addEventListener('pointerup', () => {
+            state.isDragging = false;
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeFlyModal();
+        });
+
+        function handleResize() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            glCanvas.width = window.innerWidth * dpr;
+            glCanvas.height = window.innerHeight * dpr;
+            gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+
+            hatCanvas.width = window.innerWidth * dpr;
+            hatCanvas.height = window.innerHeight * dpr;
+        }
+        window.addEventListener('resize', handleResize);
+
+        let lastTime = performance.now();
+
+        function animate(now) {
+            const dt = Math.min(0.05, (now - lastTime) * 0.001);
+            lastTime = now;
+            state.time += dt;
+
+            if (state.autoDive) {
+                state.targetDepthZ = (state.targetDepthZ + dt * 7.5 * state.cruiseSpeed) % 300.0;
+            }
+
+            state.depthZ += (state.targetDepthZ - state.depthZ) * 0.11;
+            state.camX += (state.targetCamX - state.camX) * 0.14;
+            state.camY += (state.targetCamY - state.camY) * 0.14;
+            state.zoom += (state.targetZoom - state.zoom) * 0.14;
+
+            gl.useProgram(program);
+            gl.uniform2f(uniforms.res, glCanvas.width, glCanvas.height);
+            gl.uniform1f(uniforms.time, state.time);
+            gl.uniform1f(uniforms.depthZ, state.depthZ);
+            gl.uniform1f(uniforms.shapeWarp, state.shapeWarp);
+            gl.uniform1f(uniforms.complexity, state.complexity);
+            gl.uniform2f(uniforms.camera, state.camX, state.camY);
+            gl.uniform1f(uniforms.zoom, state.zoom);
+            gl.uniform2f(uniforms.mandelTarget, state.mandelTarget.x, state.mandelTarget.y);
+            gl.uniform2f(uniforms.juliaC, state.juliaC.x, state.juliaC.y);
+            gl.uniform1f(uniforms.juliaMix, state.juliaMix);
+            gl.uniform2f(uniforms.seedOffset, state.seedOffset.x, state.seedOffset.y);
+            gl.uniform1f(uniforms.palette, state.paletteIndex);
+            gl.uniform1f(uniforms.colorShift, state.colorShift);
+            gl.uniform1f(uniforms.branchAngle, state.treeBranchAngle);
+            gl.uniform1f(uniforms.symmetry, state.sierpinskiSymmetry);
+            gl.uniform1f(uniforms.sierpinskiSpin, state.sierpinskiSpin);
+            gl.uniform1f(uniforms.hurst, state.hurstExponent);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            // Compute smooth portal alpha for Stage 2 (Einstein Hat Canvas across Z = 88..212)
+            let hatAlpha = 0.0;
+            if (state.depthZ > 88.0 && state.depthZ < 212.0) {
+                if (state.depthZ < 108.0) {
+                    hatAlpha = (state.depthZ - 88.0) / 20.0;
+                } else if (state.depthZ > 192.0) {
+                    hatAlpha = 1.0 - (state.depthZ - 192.0) / 20.0;
+                } else {
+                    hatAlpha = 1.0;
+                }
+                hatAlpha = Math.max(0.0, Math.min(1.0, hatAlpha));
+            }
+            renderEinsteinScene(hatAlpha);
+
+            updateHUDReadouts();
+            requestAnimationFrame(animate);
+        }
+
+        window.onload = function () {
+            handleResize();
+            initSeedFromURLOrRandom();
+            requestAnimationFrame(animate);
+        };
+    </script>
+</body>
+</html>
