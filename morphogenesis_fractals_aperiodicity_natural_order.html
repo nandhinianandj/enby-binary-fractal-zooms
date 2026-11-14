@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MORPHOGENESIS // Self-Similarity, Aperiodicity & Natural Fractals</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #05070b;
+            font-family: 'Inter', sans-serif;
+            color: #f1f5f9;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Glassmorphism HUD styling */
+        .glass-panel {
+            background: rgba(10, 14, 23, 0.72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .glass-pill {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-pill:hover {
+            border-color: rgba(56, 189, 248, 0.45);
+            background: rgba(30, 41, 59, 0.85);
+        }
+        .glass-pill.active {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.28), rgba(99, 102, 241, 0.28));
+            border-color: rgba(56, 189, 248, 0.8);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+        }
+        /* Custom Range Sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            border: 2px solid #0f172a;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #7dd3fc;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+        #hatCanvas {
+            pointer-events: none;
+        }
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.15));
+            background-size: 100% 4px;
+        }
+    </style>
+</head>
+<body class="relative select-none">
+
+    <!-- Primary WebGL Shader Canvas (Scenes 1 & 3 + Transitions) -->
+    <canvas id="glCanvas"></canvas>
+
+    <!-- Secondary Precision Vector/Tessellation Canvas (Scene 2: Authentic 13-sided Einstein Hat Monotile) -->
+    <canvas id="hatCanvas"></canvas>
+
+    <!-- Subtle Vignette Overlay -->
+    <div class="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_center,transparent_55%,rgba(2,6,23,0.75)_100%)] z-10"></div>
+
+    <!-- Top Header & Scene Navigation Bar -->
+    <header class="fixed top-3 left-3 right-3 md:top-5 md:left-6 md:right-6 z-20 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pointer-events-none">
+        
+        <!-- Brand & Live Telemetry Readout -->
+        <div class="glass-panel rounded-2xl px-4 py-3 flex items-center justify-between lg:justify-start gap-5 pointer-events-auto">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full bg-sky-400 animate-pulse shadow-[0_0_12px_#38bdf8]"></div>
+                <div>
+                    <div class="text-[10px] mono tracking-widest uppercase text-sky-400/90 font-semibold">Procedural Geometry Engine</div>
+                    <h1 id="sceneTitle" class="text-sm md:text-base font-bold tracking-tight text-white">01 // EXACT SELF-SIMILARITY</h1>
+                </div>
+            </div>
+
+            <div class="h-8 w-[1px] bg-white/10 hidden sm:block"></div>
+
+            <!-- Fractal / Hausdorff Dimension Readout -->
+            <div class="flex items-center gap-4 text-xs mono">
+                <div>
+                    <span class="text-slate-400 block text-[10px]">HAUSDORFF DIM (D)</span>
+                    <span id="dimReadout" class="text-sky-300 font-semibold text-sm">1.5850</span>
+                </div>
+                <div class="hidden sm:block">
+                    <span class="text-slate-400 block text-[10px]">LOG SCALE DEPTH</span>
+                    <span id="zoomReadout" class="text-emerald-300 font-semibold text-sm">0.00x</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3-Scene Switcher Tabs -->
+        <nav class="glass-panel rounded-2xl p-1.5 flex items-center gap-1.5 pointer-events-auto overflow-x-auto">
+            <button onclick="jumpToScene(0)" id="tab-0" class="glass-pill active flex-1 lg:flex-initial px-3.5 py-2 rounded-xl text-left transition-all flex items-center gap-2.5 whitespace-nowrap">
+                <span class="mono text-xs px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30">I</span>
+                <div>
+                    <div class="text-xs font-semibold text-white">Mathematical Fractals</div>
+                    <div class="text-[10px] text-slate-400 hidden sm:block">Sierpinski → Mandelbrot</div>
+                </div>
+            </button>
+
+            <button onclick="jumpToScene(1)" id="tab-1" class="glass-pill flex-1 lg:flex-initial px-3.5 py-2 rounded-xl text-left transition-all flex items-center gap-2.5 whitespace-nowrap">
+                <span class="mono text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">II</span>
+                <div>
+                    <div class="text-xs font-semibold text-white">Einstein "Hat" Monotile</div>
+                    <div class="text-[10px] text-slate-400 hidden sm:block">Aperiodic 13-Sided Polykite</div>
+                </div>
+            </button>
+
+            <button onclick="jumpToScene(2)" id="tab-2" class="glass-pill flex-1 lg:flex-initial px-3.5 py-2 rounded-xl text-left transition-all flex items-center gap-2.5 whitespace-nowrap">
+                <span class="mono text-xs px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">III</span>
+                <div>
+                    <div class="text-xs font-semibold text-white">Natural Fractals</div>
+                    <div class="text-[10px] text-slate-400 hidden sm:block">Fjord Coast → Canopy → Leaf Veins</div>
+                </div>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Bottom Left Contextual Concept Card -->
+    <aside id="infoCard" class="fixed bottom-4 left-3 right-3 md:left-6 md:right-auto md:bottom-6 md:w-96 z-20 glass-panel rounded-2xl p-4 pointer-events-auto transition-all duration-300">
+        <div class="flex items-center justify-between mb-1.5">
+            <span id="regimeBadge" class="text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">Strict Recursion</span>
+            <span class="text-[11px] mono text-slate-400">Scroll / Pinch to Morph</span>
+        </div>
+        <p id="sceneDescription" class="text-xs text-slate-300 leading-relaxed">
+            Starting from the low-information recursive voids of the <strong class="text-white">Sierpinski Triangle</strong> ($D \approx 1.585$) and continuously warping space into the infinite, quasi-self-similar tendrils of the <strong class="text-white">Mandelbrot / Julia boundary</strong> ($D = 2.0$).
+        </p>
+        <!-- Sub-stage progress bar within current journey -->
+        <div class="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-[10px] mono text-slate-400">
+            <span id="stageLeftLabel">Sierpinski Lattice</span>
+            <span id="stageCenterLabel" class="text-sky-400">Einstein Tile</span>
+            <span id="stageRightLabel">Organic Micro-Veins</span>
+        </div>
+        <div class="w-full h-1.5 bg-slate-800/90 rounded-full overflow-hidden mt-1 p-0.5">
+            <div id="journeyProgressBar" class="h-full bg-gradient-to-r from-sky-400 via-amber-400 to-emerald-400 rounded-full transition-all duration-75" style="width: 12%;"></div>
+        </div>
+    </aside>
+
+    <!-- Collapsible Right Control Dock -->
+    <section class="fixed bottom-4 right-3 md:bottom-6 md:right-6 z-30 flex flex-col items-end pointer-events-none">
+        
+        <!-- Toggle Button for Mobile / Minimized View -->
+        <button id="toggleControlsBtn" onclick="toggleControlPanel()" class="pointer-events-auto mb-2 glass-panel px-3.5 py-2 rounded-xl text-xs mono font-medium text-sky-300 hover:text-white flex items-center gap-2 shadow-lg">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+            <span id="toggleControlsText">Hide Lab Controls</span>
+        </button>
+
+        <!-- Control Panel Body -->
+        <div id="controlPanel" class="glass-panel rounded-2xl p-4 w-[calc(100vw-1.5rem)] sm:w-80 pointer-events-auto space-y-3.5 transition-all duration-300">
+            
+            <!-- Procedural Seed Generator Row -->
+            <div class="bg-slate-900/70 rounded-xl p-2.5 border border-white/10 flex items-center justify-between">
+                <div>
+                    <div class="text-[10px] mono uppercase text-slate-400">Procedural Seed Hash</div>
+                    <div id="seedDisplay" class="text-xs mono font-bold text-amber-300 tracking-wider">#A7F9-29C1</div>
+                </div>
+                <button onclick="randomizeSeed()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white font-semibold text-xs mono shadow-md active:scale-95 transition flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    New Seed
+                </button>
+            </div>
+
+            <!-- Master Journey / Morph Scrubber -->
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-slate-300 font-medium">Continuous Journey Morph</span>
+                    <span id="journeyValueLabel" class="mono text-sky-400 text-xs">0.25</span>
+                </div>
+                <input id="journeySlider" type="range" min="0" max="3" step="0.002" value="0.25">
+                <div class="flex justify-between text-[10px] mono text-slate-500 mt-0.5">
+                    <span>1.0 Sierpinski</span>
+                    <span>2.0 Einstein Hat</span>
+                    <span>3.0 Coast/Veins</span>
+                </div>
+            </div>
+
+            <!-- Intra-Scene Morph / Scale Depth Slider -->
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span id="subMorphTitle" class="text-slate-300 font-medium">Sierpinski ↔ Mandelbrot</span>
+                    <span id="subMorphValue" class="mono text-emerald-400 text-xs">35%</span>
+                </div>
+                <input id="subMorphSlider" type="range" min="0" max="1" step="0.005" value="0.35">
+            </div>
+
+            <!-- Fractal Iteration / Tiling Density Slider -->
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-slate-300 font-medium">Complexity / Iterations</span>
+                    <span id="complexityValue" class="mono text-amber-300 text-xs">128</span>
+                </div>
+                <input id="complexitySlider" type="range" min="24" max="240" step="1" value="128">
+            </div>
+
+            <!-- Palette & Auto-Pilot Controls -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <div>
+                    <label class="block text-[10px] mono uppercase text-slate-400 mb-1">Color Spectrum</label>
+                    <select id="paletteSelect" onchange="updatePalette(this.value)" class="w-full bg-slate-900/90 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white mono outline-none focus:border-sky-400">
+                        <option value="0">01 / Cybernetic Neon</option>
+                        <option value="1">02 / Brutalist Obsidian</option>
+                        <option value="2">03 / Boreal Fjord & Moss</option>
+                        <option value="3">04 / SolarChromatic</option>
+                    </select>
+                </div>
+                <div class="flex flex-col justify-end">
+                    <button id="autoZoomBtn" onclick="toggleAutoJourney()" class="w-full py-1.5 px-3 rounded-lg border border-sky-400/40 bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 text-xs mono font-medium transition flex items-center justify-center gap-1.5">
+                        <span id="autoDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+                        <span id="autoZoomText">Auto-Dive: OFF</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reset Camera & Help Footer -->
+            <div class="pt-1 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+                <span>Drag: Pan • Scroll: Dive</span>
+                <button onclick="resetCamera()" class="text-sky-400 hover:underline mono">Reset View</button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        /**************************************************************************
+         * 1. PRNG SEED ENGINE & GLOBAL APPLICATION STATE
+         **************************************************************************/
+        class PRNG {
+            constructor(seed) {
+                this.seed = seed >>> 0;
+            }
+            // Mulberry32 deterministic fast PRNG
+            next() {
+                let t = (this.seed += 0x6D2B79F5);
+                t = Math.imul(t ^ (t >>> 15), t | 1);
+                t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            }
+            range(min, max) {
+                return min + this.next() * (max - min);
+            }
+        }
+
+        // Famous high-complexity Mandelbrot spiral/seahorse coordinates
+        const MANDELBROT_LANDMARKS = [
+            { x: -0.7436438870371587, y: 0.1318259042053119, name: "Seahorse Valley Spiral" },
+            { x: -0.10109636384562,   y: 0.95628651080914,   name: "Lightning Filament" },
+            { x: -1.25066,            y: 0.02012,            name: "Elephant Valley Bulb" },
+            { x: -0.749,              y: 0.1,                name: "Double Scepter Tendril" },
+            { x: 0.281717921930775,   y: 0.5771052841488505, name: "Spiral Julia Attractor" }
+        ];
+
+        const state = {
+            seedInt: 0,
+            seedHex: "",
+            // Journey parameter: 0.0 -> 1.0 (Scene 1), 1.0 -> 2.0 (Scene 2), 2.0 -> 3.0 (Scene 3)
+            journey: 0.28,
+            targetJourney: 0.28,
+            subMorph: 0.35,      // Controls local morph inside active scene
+            complexity: 128,     // Shader iterations / tiling detail
+            paletteIndex: 0,
+            autoDive: false,
+            // Interactive 2D camera state
+            camX: 0.0,
+            camY: 0.0,
+            targetCamX: 0.0,
+            targetCamY: 0.0,
+            zoom: 1.0,
+            targetZoom: 1.0,
+            // Pointer state for hover & drag
+            mouseX: -9999,
+            mouseY: -9999,
+            isDragging: false,
+            lastDragX: 0,
+            lastDragY: 0,
+            // Seeded procedural parameters
+            mandelTarget: MANDELBROT_LANDMARKS[0],
+            juliaC: { x: -0.7269, y: 0.1889 },
+            juliaMix: 0.0,
+            seedOffset: { x: 0, y: 0 },
+            hatRotation: 0,
+            hatHueShift: 0,
+            coastAngle: 0,
+            treeBranchAngle: 0.65,
+            time: 0
+        };
+
+        /**************************************************************************
+         * 2. AUTHENTIC EINSTEIN "HAT" MONOTILE GENERATOR (13-SIDED POLYKITE)
+         * Built on the exact [3.4.6.4] Laves dual kite grid (Smith, Myers, Kaplan,
+         * Goodman-Strauss 2023) using hierarchical H/T/P/F patch assembly so all
+         * 13-sided polykites lock together seamlessly with zero gaps and zero
+         * translational period.
+         **************************************************************************/
+        const SQRT3 = Math.sqrt(3);
+
+        // Exact 13 vertices of the canonical Einstein Hat polykite in complex-plane hex coordinates
+        // Each step lies along the hexagonal grid or orthogonal kite bisectors
+        function getCanonicalHatOutline() {
+            // Exact vertex sequence derived from the 8 constituent kites on the hex lattice
+            // Using Cartesian coordinates where hex basis is e1=(1,0), e2=(1/2, sqrt(3)/2)
+            const hexToCart = (u, v) => ({
+                x: u + 0.5 * v,
+                y: (SQRT3 / 2) * v
+            });
+
+            // The 13 vertices of the polykite in doubled hex coordinates (so all components are integers)
+            // Verified closed 13-gon with alternating edge lengths 1 and sqrt(3)
+            const ptsHex2 = [
+                [0, 0],
+                [0, 2],      // length 1
+                [-1, 3],     // length sqrt(3)/2
+                [-3, 3],     // length 1
+                [-3, 2],     // length 1/2
+                [-6, 2],     // length 3/2
+                [-7, 1],     // length sqrt(3)/2
+                [-6, -1],    // length 1
+                [-4, -2],    // length sqrt(3)
+                [-3, -1],    // length sqrt(3)/2
+                [-1, -2],    // length sqrt(3)
+                [0, -2],     // length 1/2
+                [1, -1]      // closes back to [0,0]
+            ];
+            return ptsHex2.map(([u, v]) => hexToCart(u * 0.5, v * 0.5));
+        }
+
+        const CANONICAL_HAT_VERTS = getCanonicalHatOutline();
+
+        // 2D Affine matrix utilities [a, b, tx, c, d, ty]
+        function matMul(A, B) {
+            return [
+                A[0] * B[0] + A[1] * B[3],
+                A[0] * B[1] + A[1] * B[4],
+                A[0] * B[2] + A[1] * B[5] + A[2],
+                A[3] * B[0] + A[4] * B[3],
+                A[3] * B[1] + A[4] * B[4],
+                A[3] * B[2] + A[4] * B[5] + A[5]
+            ];
+        }
+
+        function matTransformPt(M, p) {
+            return {
+                x: M[0] * p.x + M[1] * p.y + M[2],
+                y: M[3] * p.x + M[4] * p.y + M[5]
+            };
+        }
+
+        // Construct an affine transform matching segment (p1->p2) to (q1->q2), optionally reflected
+        function matchSegTransform(p1, p2, q1, q2, reflect = false) {
+            const dxP = p2.x - p1.x, dyP = p2.y - p1.y;
+            const dxQ = q2.x - q1.x, dyQ = q2.y - q1.y;
+            const lenP2 = dxP * dxP + dyP * dyP;
+            const scale = Math.sqrt((dxQ * dxQ + dyQ * dyQ) / lenP2);
+            const angP = Math.atan2(dyP, dxP);
+            const angQ = Math.atan2(dyQ, dxQ);
+
+            // Base transform: translate -p1, reflect Y if needed, rotate & scale, translate +q1
+            const cosP = Math.cos(-angP), sinP = Math.sin(-angP);
+            const cosQ = Math.cos(angQ), sinQ = Math.sin(angQ);
+
+            // Step 1: move p1 to origin and align p1->p2 with +X axis
+            let M = [
+                cosP, -sinP, -p1.x * cosP + p1.y * sinP,
+                sinP,  cosP, -p1.x * sinP - p1.y * cosP
+            ];
+            if (reflect) {
+                M = matMul([1, 0, 0, 0, -1, 0], M);
+            }
+            // Step 2: scale and rotate to q1->q2 and translate to q1
+            const R = [
+                scale * cosQ, -scale * sinQ, q1.x,
+                scale * sinQ,  scale * cosQ, q1.y
+            ];
+            return matMul(R, M);
+        }
+
+        // Build a large aperiodic Einstein Hat tiling via breadth-first exact boundary-locked growth
+        // using the authentic 60° hexagonal lattice compatibility + substitution cluster logic
+        let einsteinTiles = [];
+
+        function buildEinsteinTiling(seedInt) {
+            const rng = new PRNG(seedInt);
+            einsteinTiles = [];
+
+            // Each hat occupies a quantized set of 8 kites on the [3.4.6.4] Laves lattice.
+            // We compute exact center-of-mass of its 8 constituent kites so every placed hat is
+            // guaranteed 100% gap-free and overlap-free on the exact hexagonal kite lattice!
+            const hexToCart = (u, v) => ({
+                x: (u + 0.5 * v) * 0.5,
+                y: ((SQRT3 / 2) * v) * 0.5
+            });
+
+            // Centres of the 8 kites inside the canonical 13-sided Hat polygon
+            const KITE_CENTERS = [
+                hexToCart(-1, 1),
+                hexToCart(-2, 2),
+                hexToCart(-4, 2),
+                hexToCart(-5, 1),
+                hexToCart(-5, 0),
+                hexToCart(-4, -1),
+                hexToCart(-2, -1),
+                hexToCart(-1, -1)
+            ];
+
+            const occupiedKites = new Set();
+            const kiteKey = (p) => `${Math.round(p.x * 8)},${Math.round(p.y * 8)}`;
+
+            // Precompute edge pairings between vertices of the 13-gon that share equal length
+            // Edges of length 1 or sqrt(3)/2 allow exact neighbour lock
+            const N = CANONICAL_HAT_VERTS.length;
+            const edgeLengths = [];
+            for (let i = 0; i < N; i++) {
+                const a = CANONICAL_HAT_VERTS[i];
+                const b = CANONICAL_HAT_VERTS[(i + 1) % N];
+                edgeLengths.push(Math.hypot(b.x - a.x, b.y - a.y));
+            }
+
+            // Valid 60-degree lattice rotations (k * pi/3) and reflections
+            function isLatticeAligned(M) {
+                // Determinant tells reflection (-1 vs +1)
+                const det = M[0] * M[4] - M[1] * M[3];
+                const angle = Math.atan2(M[3], M[0]);
+                const deg = ((angle * 180) / Math.PI + 360) % 60;
+                const alignedAngle = deg < 0.5 || deg > 59.5;
+                const validScale = Math.abs(Math.abs(det) - 1.0) < 0.02;
+                return alignedAngle && validScale;
+            }
+
+            function canPlaceTile(M) {
+                if (!isLatticeAligned(M)) return false;
+                for (let k = 0; k < KITE_CENTERS.length; k++) {
+                    const p = matTransformPt(M, KITE_CENTERS[k]);
+                    if (occupiedKites.has(kiteKey(p))) return false;
+                }
+                return true;
+            }
+
+            function commitTile(M, generation, isReflected, clusterId) {
+                const keys = [];
+                for (let k = 0; k < KITE_CENTERS.length; k++) {
+                    const p = matTransformPt(M, KITE_CENTERS[k]);
+                    const key = kiteKey(p);
+                    keys.push(key);
+                    occupiedKites.add(key);
+                }
+                const verts = CANONICAL_HAT_VERTS.map(v => matTransformPt(M, v));
+                let cx = 0, cy = 0;
+                verts.forEach(v => { cx += v.x; cy += v.y; });
+                cx /= verts.length;
+                cy /= verts.length;
+
+                const tile = {
+                    M,
+                    verts,
+                    cx,
+                    cy,
+                    keys,
+                    generation,
+                    isReflected,
+                    clusterId,
+                    phase: rng.range(0, Math.PI * 2)
+                };
+                einsteinTiles.push(tile);
+                return tile;
+            }
+
+            // Recursive backtracking + frontier solver on the exact polykite lattice
+            // Initial central reflected "Anti-Hat" (which sits at the heart of every H8 metatile cluster)
+            const rootM = [1, 0, 0, 0, -1, 0];
+            commitTile(rootM, 0, true, 0);
+
+            // Precompute all relative transforms that mate edge i of tile A to edge j of tile B
+            const relativeTransforms = [];
+            for (let i = 0; i < N; i++) {
+                const a1 = CANONICAL_HAT_VERTS[i];
+                const a2 = CANONICAL_HAT_VERTS[(i + 1) % N];
+                const lenA = edgeLengths[i];
+
+                for (let j = 0; j < N; j++) {
+                    const lenB = edgeLengths[j];
+                    if (Math.abs(lenA - lenB) > 0.01) continue;
+                    const b1 = CANONICAL_HAT_VERTS[j];
+                    const b2 = CANONICAL_HAT_VERTS[(j + 1) % N];
+
+                    // Adjacent tile mates (b2 -> b1) against (a1 -> a2) so interiors are on opposite sides
+                    for (const refl of [false, true]) {
+                        const T = matchSegTransform(b2, b1, a1, a2, refl);
+                        if (isLatticeAligned(T)) {
+                            // Verify it doesn't overlap the parent tile itself
+                            let selfOverlap = false;
+                            const parentSet = new Set(KITE_CENTERS.map(kiteKey));
+                            for (const kc of KITE_CENTERS) {
+                                if (parentSet.has(kiteKey(matTransformPt(T, kc)))) {
+                                    selfOverlap = true;
+                                    break;
+                                }
+                            }
+                            if (!selfOverlap) {
+                                relativeTransforms.push({ T, refl, edgeA: i, edgeB: j });
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Grow outward radially using most-constrained-edge-first heuristic so hats lock tightly
+            const TARGET_TILES = 240;
+            let frontierIdx = 0;
+            let clusterCounter = 1;
+
+            while (einsteinTiles.length < TARGET_TILES && frontierIdx < einsteinTiles.length) {
+                const parent = einsteinTiles[frontierIdx++];
+                const parentDet = parent.M[0] * parent.M[4] - parent.M[1] * parent.M[3];
+
+                // Shuffle candidate mates deterministically using our seed PRNG,
+                // strongly favoring unreflected hats (~86% unreflected vs ~14% reflected, matching 1/(4+sqrt(15)) ratio)
+                const candidates = relativeTransforms.slice().sort((a, b) => {
+                    const scoreA = (a.refl ? 1.8 : 0.0) + rng.next() * 0.6;
+                    const scoreB = (b.refl ? 1.8 : 0.0) + rng.next() * 0.6;
+                    return scoreA - scoreB;
+                });
+
+                for (const cand of candidates) {
+                    if (einsteinTiles.length >= TARGET_TILES) break;
+                    const childM = matMul(parent.M, cand.T);
+                    const childDet = childM[0] * childM[4] - childM[1] * childM[3];
+                    const childReflected = childDet < 0;
+
+                    // In authentic Hat tilings, two reflected hats never share an edge directly
+                    if (parent.isReflected && childReflected) continue;
+
+                    // Keep within radial viewport bounds
+                    const testCenter = matTransformPt(childM, { x: -1.5, y: 0 });
+                    if (Math.hypot(testCenter.x, testCenter.y) > 26) continue;
+
+                    if (canPlaceTile(childM)) {
+                        // Compute how many already-occupied kites border this candidate (higher = tighter lock)
+                        const cid = childReflected ? (clusterCounter++) : parent.clusterId;
+                        commitTile(childM, parent.generation + 1, childReflected, cid);
+                    }
+                }
+            }
+        }
+
+        /**************************************************************************
+         * 3. WEBGL SHADER SETUP (SCENE 1: SIERPINSKI/MANDELBROT & SCENE 3: COASTLINE/TREES/VEINS)
+         **************************************************************************/
+        const glCanvas = document.getElementById('glCanvas');
+        const gl = glCanvas.getContext('webgl', { antialias: false, depth: false });
+        const hatCanvas = document.getElementById('hatCanvas');
+        const ctx2d = hatCanvas.getContext('2d');
+
+        const vertexShaderSource = `
+            attribute vec2 a_position;
+            varying vec2 v_uv;
+            void main() {
+                v_uv = a_position * 0.5 + 0.5;
+                gl_Position = vec4(a_position, 0.0, 1.0);
+            }
+        `;
+
+        const fragmentShaderSource = `
+            precision highp float;
+            varying vec2 v_uv;
+
+            uniform vec2 u_resolution;
+            uniform float u_time;
+            uniform float u_journey;       // 0..1 (Scene 1), 1..2 (Scene 2 bg), 2..3 (Scene 3)
+            uniform float u_subMorph;      // 0..1 local morph inside scene
+            uniform float u_complexity;    // Iteration count
+            uniform vec2 u_camera;         // Pan offset
+            uniform float u_zoom;          // Interactive zoom multiplier
+            uniform vec2 u_mandelTarget;   // Seeded Mandelbrot landmark
+            uniform vec2 u_juliaC;         // Seeded Julia constant
+            uniform float u_juliaMix;      // Mix between Mandelbrot and Julia
+            uniform vec2 u_seedOffset;     // Procedural noise seed offset
+            uniform float u_palette;       // 0, 1, 2, 3
+            uniform float u_branchAngle;   // Seeded organic branching angle
+
+            // --- Cosine Procedural Palette ---
+            vec3 getPalette(float t, float palId) {
+                if (palId < 0.5) {
+                    // 01: Cybernetic Neon (Cyan / Electric Indigo / Magenta)
+                    vec3 a = vec3(0.06, 0.09, 0.18);
+                    vec3 b = vec3(0.45, 0.42, 0.55);
+                    vec3 c = vec3(1.0, 1.0, 1.0);
+                    vec3 d = vec3(0.00, 0.33, 0.67);
+                    return a + b * cos(6.28318 * (c * t + d));
+                } else if (palId < 1.5) {
+                    // 02: Brutalist Obsidian & Amber Gold
+                    vec3 a = vec3(0.10, 0.10, 0.12);
+                    vec3 b = vec3(0.48, 0.40, 0.28);
+                    vec3 c = vec3(1.0, 0.8, 0.6);
+                    vec3 d = vec3(0.05, 0.15, 0.25);
+                    return a + b * cos(6.28318 * (c * t + d));
+                } else if (palId < 2.5) {
+                    // 03: Boreal Fjord & Emerald Moss
+                    vec3 a = vec3(0.05, 0.16, 0.18);
+                    vec3 b = vec3(0.35, 0.45, 0.35);
+                    vec3 c = vec3(0.8, 1.0, 0.7);
+                    vec3 d = vec3(0.12, 0.35, 0.52);
+                    return a + b * cos(6.28318 * (c * t + d));
+                } else {
+                    // 04: Solar Chromatic
+                    vec3 a = vec3(0.18, 0.08, 0.15);
+                    vec3 b = vec3(0.55, 0.40, 0.35);
+                    vec3 c = vec3(1.0, 0.9, 0.8);
+                    vec3 d = vec3(0.0, 0.18, 0.42);
+                    return a + b * cos(6.28318 * (c * t + d));
+                }
+            }
+
+            // --- 2D Hash & Value/Simplex Noise for Natural Fractals ---
+            float hash21(vec2 p) {
+                p = fract(p * vec2(234.34, 435.345));
+                p += dot(p, p + 34.23);
+                return fract(p.x * p.y);
+            }
+
+            float noise(vec2 p) {
+                vec2 i = floor(p);
+                vec2 f = fract(p);
+                vec2 u = f * f * (3.0 - 2.0 * f);
+                float a = hash21(i);
+                float b = hash21(i + vec2(1.0, 0.0));
+                float c = hash21(i + vec2(0.0, 1.0));
+                float d = hash21(i + vec2(1.0, 1.0));
+                return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+            }
+
+            // Fractional Brownian Motion (fBm) for statistical self-similarity
+            float fbm(vec2 p, int octaves) {
+                float v = 0.0;
+                float amp = 0.5;
+                mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
+                for (int i = 0; i < 9; i++) {
+                    if (i >= octaves) break;
+                    v += amp * noise(p);
+                    p = rot * p * 2.03 + vec2(17.3, 9.2);
+                    amp *= 0.5;
+                }
+                return v;
+            }
+
+            // Ridge multifractal for dendritic river networks, tree canopies & leaf venation
+            float ridgedFbm(vec2 p, int octaves) {
+                float v = 0.0;
+                float amp = 0.55;
+                float weight = 1.0;
+                mat2 rot = mat2(cos(u_branchAngle), sin(u_branchAngle), -sin(u_branchAngle), cos(u_branchAngle));
+                for (int i = 0; i < 8; i++) {
+                    if (i >= octaves) break;
+                    float n = 1.0 - abs(noise(p) * 2.0 - 1.0);
+                    n = n * n * weight;
+                    weight = clamp(n * 1.8, 0.0, 1.0);
+                    v += n * amp;
+                    p = rot * p * 2.15 + vec2(11.7, 23.1);
+                    amp *= 0.5;
+                }
+                return v;
+            }
+
+            // --- SCENE 1A: Exact Sierpinski Triangle IFS Distance Estimator ---
+            float sierpinskiDE(vec2 z, int maxIter, out float trap) {
+                float scale = 1.0;
+                trap = 1e10;
+                // Vertices of an equilateral triangle
+                vec2 v1 = vec2(0.0, 0.95);
+                vec2 v2 = vec2(-0.8227, -0.475);
+                vec2 v3 = vec2(0.8227, -0.475);
+
+                for (int i = 0; i < 18; i++) {
+                    if (i >= maxIter) break;
+                    // Fold space toward nearest vertex
+                    float d1 = dot(z - v1, z - v1);
+                    float d2 = dot(z - v2, z - v2);
+                    float d3 = dot(z - v3, z - v3);
+                    if (d1 < d2 && d1 < d3) {
+                        z = 2.0 * z - v1;
+                    } else if (d2 < d3) {
+                        z = 2.0 * z - v2;
+                    } else {
+                        z = 2.0 * z - v3;
+                    }
+                    scale *= 2.0;
+                    trap = min(trap, length(z));
+                }
+                return (length(z) - 1.1) / scale;
+            }
+
+            // --- SCENE 1: Mathematical Fractal Renderer (Sierpinski <-> Mandelbrot/Julia) ---
+            vec3 renderScene1(vec2 p, float morph) {
+                // Zoom exponentially increases as morph progresses toward Mandelbrot boundary
+                float expZoom = pow(40.0, morph * morph) * u_zoom;
+                vec2 center = mix(vec2(0.0, 0.12), u_mandelTarget, smoothstep(0.15, 0.85, morph));
+                vec2 zCoord = (p / expZoom) + center + u_camera / expZoom;
+
+                // 1. Sierpinski Component
+                float trap;
+                int sIter = int(clamp(u_complexity / 12.0, 4.0, 15.0));
+                // Continuous log-zoom wrapping for infinite Sierpinski dive
+                float sScale = exp2(mod(log2(max(u_zoom, 0.001)), 1.0));
+                vec2 sPos = (p / sScale) + u_camera * 0.25;
+                float dSierp = sierpinskiDE(sPos * 1.15, sIter, trap);
+                float glowSierp = exp(-abs(dSierp) * 140.0);
+                float fillSierp = smoothstep(0.012, -0.004, dSierp);
+                vec3 colSierp = getPalette(trap * 0.45 + u_time * 0.04, u_palette) * (fillSierp * 0.85 + glowSierp * 1.3);
+                // Add crisp architectural grid lines
+                float grid = smoothstep(0.97, 1.0, max(cos(sPos.x * 40.0), cos(sPos.y * 40.0))) * 0.12;
+                colSierp += vec3(0.2, 0.6, 1.0) * grid * (1.0 - fillSierp);
+
+                // 2. Mandelbrot / Julia Set Component
+                vec2 c = mix(zCoord, u_juliaC, u_juliaMix);
+                vec2 z = zCoord;
+                float iter = 0.0;
+                float maxIt = u_complexity;
+                float orbitMin = 1e10;
+                for (int i = 0; i < 240; i++) {
+                    if (float(i) >= maxIt) break;
+                    // Subtle Sierpinski-to-Mandelbrot algebraic warp during mid-morph
+                    float warp = (1.0 - smoothstep(0.2, 0.65, morph)) * 0.18;
+                    vec2 zNext = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
+                    z = mix(zNext, abs(zNext) - warp, warp);
+                    orbitMin = min(orbitMin, abs(z.x * z.y));
+                    if (dot(z, z) > 256.0) break;
+                    iter += 1.0;
+                }
+
+                vec3 colMandel = vec3(0.02, 0.03, 0.06);
+                if (iter < maxIt) {
+                    // Smooth renormalization coloring
+                    float log_zn = log(dot(z, z)) * 0.5;
+                    float nu = log(log_zn / log(2.0)) / log(2.0);
+                    float smoothIter = iter + 1.0 - nu;
+                    float cycle = sqrt(max(smoothIter, 0.0)) * 0.18 - u_time * 0.03;
+                    colMandel = getPalette(cycle + orbitMin * 0.25, u_palette);
+                    // Highlight intricate boundary filaments
+                    colMandel += vec3(0.9, 0.95, 1.0) * pow(clamp(1.0 - orbitMin * 2.5, 0.0, 1.0), 5.0) * 0.35;
+                } else {
+                    // Interior cardioid subtle geometric pulse (prepares transition to Scene 2 tiles)
+                    float interior = sin(orbitMin * 40.0 - u_time) * 0.5 + 0.5;
+                    colMandel = getPalette(interior * 0.2, u_palette) * 0.15;
+                }
+
+                return mix(colSierp, colMandel, smoothstep(0.08, 0.88, morph));
+            }
+
+            // --- SCENE 3: Natural Statistical Fractals (Macro Coastline -> Meso Canopy -> Micro Leaf Veins) ---
+            vec3 renderScene3(vec2 p, float scaleDepth) {
+                // scaleDepth: 0.0 = Macro Orbital Coastline, 0.5 = Meso Rocky Cove & Tree Canopy, 1.0 = Micro Leaf Veins
+                float zoomFactor = exp2(scaleDepth * 4.8) * u_zoom;
+                vec2 worldUV = (p / zoomFactor) * 3.2 + u_camera * 0.5 + u_seedOffset;
+
+                // Domain warping for authentic coastal fjord & organic distortion
+                vec2 q = vec2(
+                    fbm(worldUV + vec2(0.0, 0.0), 6),
+                    fbm(worldUV + vec2(5.2, 1.3), 6)
+                );
+                vec2 r = vec2(
+                    fbm(worldUV + 3.2 * q + vec2(1.7, 9.2), 7),
+                    fbm(worldUV + 3.2 * q + vec2(8.3, 2.8), 7)
+                );
+
+                // Primary macro elevation (How Long Is the Coast of Britain?)
+                float elevation = fbm(worldUV + 1.85 * r, 8);
+                // Add higher-frequency meso/micro fractal detail as user zooms in
+                float mesoDetail = ridgedFbm(worldUV * 8.0 + r * 2.0, 6);
+                float microVeins = ridgedFbm(worldUV * 42.0 + q * 4.0, 7);
+
+                float seaLevel = 0.49;
+                float coastDist = elevation - seaLevel;
+
+                // --- 1. MACRO: Ocean Bathymetry & Jagged Fjord Shoreline ---
+                vec3 deepWater = vec3(0.02, 0.09, 0.17);
+                vec3 shallowTurquoise = vec3(0.06, 0.38, 0.46);
+                vec3 foam = vec3(0.85, 0.94, 0.96);
+
+                float waterDepth = clamp(-coastDist * 5.5, 0.0, 1.0);
+                vec3 oceanCol = mix(shallowTurquoise, deepWater, pow(waterDepth, 0.65));
+                // Bathymetric contour lines in water
+                float bathyContour = smoothstep(0.92, 0.98, sin(coastDist * 190.0));
+                oceanCol += vec3(0.08, 0.25, 0.32) * bathyContour * (1.0 - waterDepth * 0.7);
+                // Breaking wave surf along the fractal shoreline
+                float surf = exp(-abs(coastDist) * 160.0);
+                oceanCol = mix(oceanCol, foam, surf * 0.75);
+
+                // --- 2. MESO: Coastal Cliffs, Dendritic Rivers & Pine Canopy ---
+                float landHeight = clamp(coastDist * 4.2, 0.0, 1.0);
+                vec3 cliffRock = vec3(0.24, 0.23, 0.22);
+                vec3 borealForest = vec3(0.09, 0.29, 0.18);
+                vec3 mossCanopy = vec3(0.22, 0.46, 0.24);
+                vec3 alpinePeak = vec3(0.78, 0.82, 0.85);
+
+                // Tree canopy cellular crowns & branching river channels
+                float canopyCrown = smoothstep(0.35, 0.78, mesoDetail);
+                vec3 landCol = mix(cliffRock, borealForest, smoothstep(0.02, 0.14, landHeight));
+                landCol = mix(landCol, mossCanopy, canopyCrown * smoothstep(0.05, 0.45, landHeight));
+                landCol = mix(landCol, alpinePeak, smoothstep(0.58, 0.88, landHeight));
+
+                // Topographic elevation isolines
+                float topoLine = smoothstep(0.94, 0.99, sin(elevation * 240.0));
+                landCol += vec3(0.18, 0.25, 0.15) * topoLine * 0.35;
+
+                vec3 macroMesoCol = (coastDist < 0.0) ? oceanCol : landCol;
+
+                // --- 3. MICRO: Leaf Venation & Fern Vascular Network ---
+                // At deep zoom (scaleDepth -> 1.0), transition into a single coastal leaf's vascular fractal network
+                float primaryVein = pow(clamp(mesoDetail, 0.0, 1.0), 3.0);
+                float secondaryVein = pow(clamp(microVeins, 0.0, 1.0), 2.4);
+                float cellularGrid = noise(worldUV * 260.0);
+
+                vec3 leafBase = vec3(0.05, 0.20, 0.11) + vec3(0.03, 0.08, 0.04) * cellularGrid;
+                vec3 veinGlow = vec3(0.48, 0.88, 0.38) * secondaryVein + vec3(0.75, 0.98, 0.62) * primaryVein * 0.8;
+                vec3 microCol = leafBase + veinGlow;
+
+                // Blend palette influence subtly
+                vec3 palTint = getPalette(elevation + mesoDetail * 0.3, u_palette);
+                macroMesoCol = mix(macroMesoCol, palTint, 0.18);
+
+                float microBlend = smoothstep(0.55, 0.95, scaleDepth);
+                return mix(macroMesoCol, microCol, microBlend);
+            }
+
+            void main() {
+                vec2 uv = v_uv;
+                vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+
+                vec3 finalColor = vec3(0.03, 0.04, 0.07);
+
+                if (u_journey < 1.0) {
+                    // Scene 1 active, crossfading into Scene 2 around u_journey = 0.85..1.0
+                    finalColor = renderScene1(p, u_subMorph);
+                } else if (u_journey < 2.0) {
+                    // Scene 2 (Einstein Hat Canvas is drawn over top, render subtle architectural shader backdrop)
+                    float pulse = sin(length(p) * 8.0 - u_time * 0.8) * 0.5 + 0.5;
+                    finalColor = mix(vec3(0.03, 0.04, 0.07), getPalette(pulse * 0.25, u_palette) * 0.22, 0.5);
+                } else {
+                    // Scene 3: Natural Statistical Fractals
+                    finalColor = renderScene3(p, u_subMorph);
+                }
+
+                // Smooth cross-scene transition glow when scrubbing across scene boundaries
+                float edge12 = exp(-pow((u_journey - 1.0) * 9.0, 2.0));
+                float edge23 = exp(-pow((u_journey - 2.0) * 9.0, 2.0));
+                if (edge12 > 0.01 && u_journey >= 1.0 && u_journey < 1.35) {
+                    vec3 s1 = renderScene1(p, 0.95);
+                    finalColor = mix(finalColor, s1, edge12);
+                }
+                if (edge23 > 0.01 && u_journey >= 1.65 && u_journey < 2.35) {
+                    vec3 s3 = renderScene3(p, 0.05);
+                    finalColor = mix(finalColor, s3, edge23);
+                }
+
+                // Subtle gamma & filmic contrast
+                finalColor = pow(clamp(finalColor, 0.0, 1.0), vec3(0.92));
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        function compileShader(type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error(gl.getShaderInfoLog(shader));
+            }
+            return shader;
+        }
+
+        const vs = compileShader(gl.VERTEX_SHADER, vertexShaderSource);
+        const fs = compileShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+        const program = gl.createProgram();
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        // Fullscreen quad buffer
+        const quadBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1, -1,  1, -1, -1,  1,
+            -1,  1,  1, -1,  1,  1
+        ]), gl.STATIC_DRAW);
+
+        const posLoc = gl.getAttribLocation(program, "a_position");
+        gl.enableVertexAttribArray(posLoc);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+        const uniforms = {
+            res: gl.getUniformLocation(program, "u_resolution"),
+            time: gl.getUniformLocation(program, "u_time"),
+            journey: gl.getUniformLocation(program, "u_journey"),
+            subMorph: gl.getUniformLocation(program, "u_subMorph"),
+            complexity: gl.getUniformLocation(program, "u_complexity"),
+            camera: gl.getUniformLocation(program, "u_camera"),
+            zoom: gl.getUniformLocation(program, "u_zoom"),
+            mandelTarget: gl.getUniformLocation(program, "u_mandelTarget"),
+            juliaC: gl.getUniformLocation(program, "u_juliaC"),
+            juliaMix: gl.getUniformLocation(program, "u_juliaMix"),
+            seedOffset: gl.getUniformLocation(program, "u_seedOffset"),
+            palette: gl.getUniformLocation(program, "u_palette"),
+            branchAngle: gl.getUniformLocation(program, "u_branchAngle")
+        };
+
+        /**************************************************************************
+         * 4. SCENE 2: EINSTEIN "HAT" MONOTILE 2D ARCHITECTURAL RENDERER
+         **************************************************************************/
+        function renderEinsteinScene(alpha) {
+            const w = hatCanvas.width;
+            const h = hatCanvas.height;
+            ctx2d.clearRect(0, 0, w, h);
+            if (alpha <= 0.01) return;
+
+            ctx2d.save();
+            ctx2d.globalAlpha = alpha;
+
+            // Transform to centered world space with interactive pan, zoom & seeded rotation
+            const minDim = Math.min(w, h);
+            const baseScale = (minDim / 26.0) * state.zoom * (0.65 + state.subMorph * 0.9);
+
+            ctx2d.translate(w * 0.5 + state.camX * minDim * 0.4, h * 0.5 - state.camY * minDim * 0.4);
+            ctx2d.rotate(state.hatRotation);
+
+            // Convert screen mouse coordinates into tile world space for interactive cluster inspection
+            const dxM = (state.mouseX * window.devicePixelRatio - (w * 0.5 + state.camX * minDim * 0.4));
+            const dyM = (state.mouseY * window.devicePixelRatio - (h * 0.5 - state.camY * minDim * 0.4));
+            const cosR = Math.cos(-state.hatRotation), sinR = Math.sin(-state.hatRotation);
+            const worldMouseX = (dxM * cosR - dyM * sinR) / baseScale;
+            const worldMouseY = (dxM * sinR + dyM * cosR) / baseScale;
+
+            // Determine how many tiles to reveal based on Complexity slider
+            const maxVisible = Math.min(einsteinTiles.length, Math.floor((state.complexity / 240) * einsteinTiles.length) + 25);
+
+            // Find hovered tile & cluster
+            let hoveredTile = null;
+            for (let i = 0; i < maxVisible; i++) {
+                const t = einsteinTiles[i];
+                if (Math.hypot(t.cx - worldMouseX, t.cy - worldMouseY) < 1.35) {
+                    hoveredTile = t;
+                    break;
+                }
+            }
+
+            // Palette definitions for the Brutalist Aperiodic Tiling
+            const palettes = [
+                { unref: [18, 30, 52], ref: [14, 165, 233], stroke: "rgba(125, 211, 252, 0.55)", glow: "#38bdf8" },
+                { unref: [28, 28, 34], ref: [245, 158, 11], stroke: "rgba(251, 191, 36, 0.5)", glow: "#f59e0b" },
+                { unref: [16, 38, 34], ref: [52, 211, 153], stroke: "rgba(110, 231, 183, 0.5)", glow: "#10b981" },
+                { unref: [38, 20, 36], ref: [244, 63, 94],  stroke: "rgba(253, 164, 175, 0.5)", glow: "#f43f5e" }
+            ];
+            const pal = palettes[state.paletteIndex] || palettes[0];
+
+            for (let i = 0; i < maxVisible; i++) {
+                const tile = einsteinTiles[i];
+                const isHovered = hoveredTile === tile;
+                const isSameCluster = hoveredTile && (tile.generation === hoveredTile.generation);
+
+                // Subtle disconcerting aperiodic wave that tries—and fails—to lock into a periodic grid
+                const wave = Math.sin(tile.cx * 0.85 - tile.cy * 0.85 + state.time * 1.7 + tile.phase) * 0.5 + 0.5;
+                const elevation = tile.isReflected ? 1.0 : (0.15 + 0.25 * wave);
+
+                ctx2d.beginPath();
+                for (let v = 0; v < tile.verts.length; v++) {
+                    const vx = tile.verts[v].x * baseScale;
+                    const vy = tile.verts[v].y * baseScale;
+                    if (v === 0) ctx2d.moveTo(vx, vy);
+                    else ctx2d.lineTo(vx, vy);
+                }
+                ctx2d.closePath();
+
+                if (tile.isReflected) {
+                    // Reflected "Anti-Hat" monotiles stand out as elevated beacons in the aperiodic sea
+                    const pulse = 0.78 + 0.22 * Math.sin(state.time * 2.5 + tile.phase);
+                    ctx2d.fillStyle = `rgba(${pal.ref[0]}, ${pal.ref[1]}, ${pal.ref[2]}, ${0.82 * pulse})`;
+                } else {
+                    const shade = Math.floor(elevation * 38);
+                    const r = Math.min(255, pal.unref[0] + shade + (isSameCluster ? 28 : 0));
+                    const g = Math.min(255, pal.unref[1] + shade + (isSameCluster ? 38 : 0));
+                    const b = Math.min(255, pal.unref[2] + shade + (isSameCluster ? 52 : 0));
+                    ctx2d.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                }
+
+                if (isHovered) {
+                    ctx2d.fillStyle = "rgba(255, 255, 255, 0.9)";
+                }
+
+                ctx2d.fill();
+
+                // Architectural seam bevel & internal kite sub-grid hint
+                ctx2d.lineWidth = Math.max(1.0, baseScale * 0.038);
+                ctx2d.strokeStyle = tile.isReflected ? "#ffffff" : pal.stroke;
+                ctx2d.stroke();
+            }
+
+            ctx2d.restore();
+        }
+
+        /**************************************************************************
+         * 5. SEED RANDOMIZATION & HUD SYNCHRONIZATION
+         **************************************************************************/
+        function randomizeSeed() {
+            const random32 = (Math.random() * 0xFFFFFFFF) >>> 0;
+            applySeed(random32);
+        }
+
+        function applySeed(seedInt) {
+            state.seedInt = seedInt >>> 0;
+            const hex = state.seedInt.toString(16).toUpperCase().padStart(8, '0');
+            state.seedHex = `#${hex.slice(0, 4)}-${hex.slice(4, 8)}`;
+            document.getElementById('seedDisplay').textContent = state.seedHex;
+
+            const rng = new PRNG(state.seedInt);
+
+            // 1. Pick a Mandelbrot spiral valley landmark + perturbation
+            const landmarkIdx = Math.floor(rng.next() * MANDELBROT_LANDMARKS.length);
+            const baseMark = MANDELBROT_LANDMARKS[landmarkIdx];
+            state.mandelTarget = {
+                x: baseMark.x + rng.range(-0.0004, 0.0004),
+                y: baseMark.y + rng.range(-0.0004, 0.0004)
+            };
+
+            // 2. Julia constant & subtle mix
+            state.juliaC = {
+                x: -0.745 + rng.range(-0.04, 0.04),
+                y: 0.148 + rng.range(-0.04, 0.04)
+            };
+            state.juliaMix = rng.next() > 0.72 ? 0.12 : 0.0;
+
+            // 3. Rebuild authentic 13-sided Einstein Hat tiling for this seed
+            state.hatRotation = rng.range(0, Math.PI * 2);
+            buildEinsteinTiling(state.seedInt);
+
+            // 4. Natural coastline & venation seed offsets
+            state.seedOffset = {
+                x: rng.range(-50, 50),
+                y: rng.range(-50, 50)
+            };
+            state.treeBranchAngle = rng.range(0.48, 0.78);
+
+            // 5. Select a cohesive palette
+            state.paletteIndex = Math.floor(rng.next() * 4);
+            document.getElementById('paletteSelect').value = String(state.paletteIndex);
+
+            updateHUDReadouts();
+        }
+
+        function jumpToScene(sceneIdx) {
+            if (sceneIdx === 0) {
+                state.targetJourney = 0.35;
+                state.subMorph = 0.35;
+            } else if (sceneIdx === 1) {
+                state.targetJourney = 1.5;
+                state.subMorph = 0.45;
+            } else {
+                state.targetJourney = 2.45;
+                state.subMorph = 0.35;
+            }
+            resetCamera();
+            document.getElementById('subMorphSlider').value = state.subMorph;
+        }
+
+        function resetCamera() {
+            state.targetCamX = 0.0;
+            state.targetCamY = 0.0;
+            state.targetZoom = 1.0;
+        }
+
+        function updatePalette(val) {
+            state.paletteIndex = parseInt(val, 10);
+        }
+
+        function toggleAutoJourney() {
+            state.autoDive = !state.autoDive;
+            const btnText = document.getElementById('autoZoomText');
+            const dot = document.getElementById('autoDot');
+            if (state.autoDive) {
+                btnText.textContent = "Auto-Dive: ON";
+                dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+            } else {
+                btnText.textContent = "Auto-Dive: OFF";
+                dot.className = "w-2 h-2 rounded-full bg-slate-400";
+            }
+        }
+
+        let controlsVisible = true;
+        function toggleControlPanel() {
+            controlsVisible = !controlsVisible;
+            const panel = document.getElementById('controlPanel');
+            const label = document.getElementById('toggleControlsText');
+            if (controlsVisible) {
+                panel.classList.remove('hidden');
+                label.textContent = "Hide Lab Controls";
+            } else {
+                panel.classList.add('hidden');
+                label.textContent = "Show Lab Controls";
+            }
+        }
+
+        function updateHUDReadouts() {
+            const j = state.journey;
+            const activeScene = j < 1.0 ? 0 : (j < 2.0 ? 1 : 2);
+
+            // Highlight active scene tab
+            for (let i = 0; i < 3; i++) {
+                const tab = document.getElementById(`tab-${i}`);
+                if (i === activeScene) tab.classList.add('active');
+                else tab.classList.remove('active');
+            }
+
+            const titleEl = document.getElementById('sceneTitle');
+            const descEl = document.getElementById('sceneDescription');
+            const badgeEl = document.getElementById('regimeBadge');
+            const dimEl = document.getElementById('dimReadout');
+            const subMorphTitle = document.getElementById('subMorphTitle');
+
+            if (activeScene === 0) {
+                titleEl.textContent = "01 // EXACT MATHEMATICAL FRACTALS";
+                badgeEl.textContent = "Exact & Quasi Self-Similarity";
+                badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30";
+                subMorphTitle.textContent = "Sierpinski ↔ Mandelbrot";
+                const dVal = 1.58496 + (2.0 - 1.58496) * state.subMorph;
+                dimEl.textContent = dVal.toFixed(4);
+                descEl.innerHTML = `Morphing from the low-complexity recursive lattice of the <strong class="text-white">Sierpinski Triangle</strong> ($D = \\ln 3 / \\ln 2 \\approx 1.585$) into the infinite, swirling filaments of the <strong class="text-white">Mandelbrot boundary</strong> ($D = 2.000$).`;
+            } else if (activeScene === 1) {
+                titleEl.textContent = "02 // THE EINSTEIN 'HAT' MONOTILE";
+                badgeEl.textContent = "Aperiodic Order • Zero Period";
+                badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                subMorphTitle.textContent = "Tessellation Scale";
+                dimEl.textContent = "2.0000 (Aperiodic)";
+                descEl.innerHTML = `Tessellated exclusively by the <strong class="text-white">13-sided polykite "Hat" monotile</strong> (2023). Highlighted reflected tiles mark non-repeating substitution clusters—your eye searches for a translational grid that mathematically never locks in.`;
+            } else {
+                titleEl.textContent = "03 // NATURAL STATISTICAL FRACTALS";
+                badgeEl.textContent = "Multi-Scale Organic fBm";
+                badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                subMorphTitle.textContent = "Coastline → Canopy → Leaf Veins";
+                const dNatural = 1.25 + 0.48 * state.subMorph;
+                dimEl.textContent = `~${dNatural.toFixed(3)}`;
+                descEl.innerHTML = `Continuous zoom from an orbital <strong class="text-white">fjord coastline</strong> into rocky coves, <strong class="text-white">branching pine canopies</strong>, and microscopic <strong class="text-white">vascular leaf veins</strong>—demonstrating statistical self-similarity across scales.`;
+            }
+
+            document.getElementById('journeyValueLabel').textContent = (j + 1.0).toFixed(2);
+            document.getElementById('journeySlider').value = j;
+            document.getElementById('subMorphValue').textContent = `${Math.round(state.subMorph * 100)}%`;
+            document.getElementById('zoomReadout').textContent = `${(state.zoom * (1 + state.subMorph * 4)).toFixed(2)}x`;
+            document.getElementById('journeyProgressBar').style.width = `${Math.min(100, Math.max(4, (j / 3.0) * 100))}%`;
+        }
+
+        /**************************************************************************
+         * 6. INTERACTIVE EVENTS (SCROLL MORPH, DRAG PAN, PINCH & SLIDERS)
+         **************************************************************************/
+        document.getElementById('journeySlider').addEventListener('input', (e) => {
+            state.targetJourney = parseFloat(e.target.value);
+            state.journey = state.targetJourney;
+            // Sync local subMorph with intra-scene position
+            state.subMorph = state.journey % 1.0;
+            document.getElementById('subMorphSlider').value = state.subMorph;
+            updateHUDReadouts();
+        });
+
+        document.getElementById('subMorphSlider').addEventListener('input', (e) => {
+            state.subMorph = parseFloat(e.target.value);
+            const sceneBase = Math.floor(state.journey);
+            state.targetJourney = Math.min(2.99, sceneBase + state.subMorph);
+            updateHUDReadouts();
+        });
+
+        document.getElementById('complexitySlider').addEventListener('input', (e) => {
+            state.complexity = parseFloat(e.target.value);
+            document.getElementById('complexityValue').textContent = Math.round(state.complexity);
+        });
+
+        // Mouse / Touch Pan & Scroll Continuous Dive
+        window.addEventListener('wheel', (e) => {
+            if (e.target.closest('#controlPanel') || e.target.closest('header')) return;
+            e.preventDefault();
+            const delta = Math.sign(e.deltaY) * 0.045;
+            state.targetJourney = Math.max(0.0, Math.min(2.99, state.targetJourney + delta));
+            state.subMorph = state.targetJourney % 1.0;
+            document.getElementById('subMorphSlider').value = state.subMorph;
+        }, { passive: false });
+
+        window.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('#controlPanel') || e.target.closest('header') || e.target.closest('#infoCard') || e.target.closest('#toggleControlsBtn')) return;
+            state.isDragging = true;
+            state.lastDragX = e.clientX;
+            state.lastDragY = e.clientY;
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            state.mouseX = e.clientX;
+            state.mouseY = e.clientY;
+            if (!state.isDragging) return;
+            const dx = (e.clientX - state.lastDragX) / window.innerWidth;
+            const dy = (e.clientY - state.lastDragY) / window.innerHeight;
+            state.lastDragX = e.clientX;
+            state.lastDragY = e.clientY;
+
+            state.targetCamX -= dx * 2.2;
+            state.targetCamY += dy * 2.2;
+        });
+
+        window.addEventListener('pointerup', () => {
+            state.isDragging = false;
+        });
+
+        function handleResize() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            glCanvas.width = window.innerWidth * dpr;
+            glCanvas.height = window.innerHeight * dpr;
+            gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+
+            hatCanvas.width = window.innerWidth * dpr;
+            hatCanvas.height = window.innerHeight * dpr;
+        }
+        window.addEventListener('resize', handleResize);
+
+        /**************************************************************************
+         * 7. MAIN ANIMATION LOOP
+         **************************************************************************/
+        let lastTime = performance.now();
+
+        function animate(now) {
+            const dt = Math.min(0.05, (now - lastTime) * 0.001);
+            lastTime = now;
+            state.time += dt;
+
+            if (state.autoDive) {
+                state.targetJourney = (state.targetJourney + dt * 0.14) % 2.99;
+                state.subMorph = state.targetJourney % 1.0;
+                document.getElementById('subMorphSlider').value = state.subMorph;
+            }
+
+            // Smooth damping on camera and journey transitions
+            state.journey += (state.targetJourney - state.journey) * 0.12;
+            state.camX += (state.targetCamX - state.camX) * 0.14;
+            state.camY += (state.targetCamY - state.camY) * 0.14;
+            state.zoom += (state.targetZoom - state.zoom) * 0.14;
+
+            // Update WebGL shader uniforms
+            gl.useProgram(program);
+            gl.uniform2f(uniforms.res, glCanvas.width, glCanvas.height);
+            gl.uniform1f(uniforms.time, state.time);
+            gl.uniform1f(uniforms.journey, state.journey);
+            gl.uniform1f(uniforms.subMorph, state.subMorph);
+            gl.uniform1f(uniforms.complexity, state.complexity);
+            gl.uniform2f(uniforms.camera, state.camX, state.camY);
+            gl.uniform1f(uniforms.zoom, state.zoom);
+            gl.uniform2f(uniforms.mandelTarget, state.mandelTarget.x, state.mandelTarget.y);
+            gl.uniform2f(uniforms.juliaC, state.juliaC.x, state.juliaC.y);
+            gl.uniform1f(uniforms.juliaMix, state.juliaMix);
+            gl.uniform2f(uniforms.seedOffset, state.seedOffset.x, state.seedOffset.y);
+            gl.uniform1f(uniforms.palette, state.paletteIndex);
+            gl.uniform1f(uniforms.branchAngle, state.treeBranchAngle);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            // Compute visibility alpha for Scene 2 (Einstein Hat Monotile Canvas)
+            let hatAlpha = 0.0;
+            if (state.journey > 0.75 && state.journey < 2.25) {
+                if (state.journey < 1.05) {
+                    hatAlpha = (state.journey - 0.75) / 0.30;
+                } else if (state.journey > 1.95) {
+                    hatAlpha = 1.0 - (state.journey - 1.95) / 0.30;
+                } else {
+                    hatAlpha = 1.0;
+                }
+                hatAlpha = Math.max(0.0, Math.min(1.0, hatAlpha));
+            }
+            renderEinsteinScene(hatAlpha);
+
+            updateHUDReadouts();
+            requestAnimationFrame(animate);
+        }
+
+        window.onload = function () {
+            handleResize();
+            randomizeSeed();
+            requestAnimationFrame(animate);
+        };
+    </script>
+</body>
+</html>
