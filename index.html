@@ -112,10 +112,10 @@
         <!-- Brand & Live 18-Magnitude Telemetry -->
         <div class="glass-panel rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between xl:justify-start gap-4 pointer-events-auto">
             <div class="flex items-center gap-3">
-                <div class="w-3 h-3 rounded-full bg-sky-400 animate-pulse shadow-[0_0_12px_#38bdf8]"></div>
+                <div id="brandStatusDot" class="w-3 h-3 rounded-full bg-sky-400 shadow-[0_0_12px_#38bdf8]"></div>
                 <div>
                     <div class="text-[10px] mono tracking-widest uppercase text-sky-400 font-semibold flex items-center gap-2">
-                        <span>Morphogenesis v2.4</span>
+                        <span>Morphogenesis v2.5</span>
                         <span class="px-1.5 py-0.2 bg-sky-500/20 text-sky-300 rounded text-[9px] border border-sky-400/30">10¹⁸× DEEP ZOOM</span>
                     </div>
                     <h1 id="sceneTitle" class="text-xs sm:text-sm md:text-base font-bold tracking-tight text-white">01 // EXACT SELF-SIMILARITY</h1>
@@ -136,13 +136,32 @@
                 </div>
                 <div class="hidden md:block">
                     <span class="text-slate-400 block text-[9px]">DEPTH Z</span>
-                    <span id="depthZReadout" class="text-amber-300 font-semibold text-xs sm:text-sm">018.4 / 300</span>
+                    <span id="depthZReadout" class="text-amber-300 font-semibold text-xs sm:text-sm">000.0 / 300</span>
                 </div>
             </div>
         </div>
 
-        <!-- Stage Switcher Tabs + Fly.io Deployment Button -->
-        <div class="flex items-center gap-2 pointer-events-auto overflow-x-auto">
+        <!-- Prominent Primary Auto-Zoom Transport & Stage Switcher Tabs -->
+        <div class="flex flex-wrap items-center gap-2 pointer-events-auto overflow-x-auto">
+            <!-- Primary Start / Pause Auto-Zoom Button + Speed Presets -->
+            <div class="glass-panel rounded-2xl p-1.5 flex items-center gap-1.5">
+                <button id="primaryAutoZoomBtn" onclick="toggleAutoJourney()" class="px-3.5 py-2 rounded-xl font-bold text-xs mono transition-all flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.35)] active:scale-95 whitespace-nowrap">
+                    <span id="primaryAutoZoomIcon">▶</span>
+                    <span id="primaryAutoZoomLabel">Start Auto-Zoom</span>
+                </button>
+
+                <div class="hidden sm:flex items-center gap-1 bg-slate-900/80 rounded-xl p-1 border border-white/10">
+                    <button onclick="setCruiseSpeed(0.5)" id="spd-0.5" class="px-2 py-1 rounded-lg text-[10px] mono text-slate-300 hover:text-white transition">0.5x</button>
+                    <button onclick="setCruiseSpeed(1.0)" id="spd-1" class="px-2 py-1 rounded-lg text-[10px] mono bg-sky-500/30 text-sky-200 border border-sky-400/40 transition">1x</button>
+                    <button onclick="setCruiseSpeed(2.0)" id="spd-2" class="px-2 py-1 rounded-lg text-[10px] mono text-slate-300 hover:text-white transition">2x</button>
+                    <button onclick="setCruiseSpeed(4.0)" id="spd-4" class="px-2 py-1 rounded-lg text-[10px] mono text-slate-300 hover:text-white transition">4x</button>
+                </div>
+
+                <button onclick="toggleZoomDirection()" id="dirToggleBtn" title="Toggle Zoom Direction (Dive In vs Pull Out)" class="px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-[10px] mono text-slate-300 hover:text-white transition whitespace-nowrap">
+                    ↓ Dive In
+                </button>
+            </div>
+
             <nav class="glass-panel rounded-2xl p-1.5 flex items-center gap-1.5 flex-1 xl:flex-initial">
                 <button onclick="jumpToScene(0)" id="tab-0" class="glass-pill active px-3 py-1.5 rounded-xl text-left transition-all flex items-center gap-2 whitespace-nowrap">
                     <span class="mono text-xs px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30">I</span>
@@ -250,9 +269,9 @@
             <div>
                 <div class="flex justify-between text-xs mb-1">
                     <span class="text-slate-300 font-medium">Deep-Zoom Depth (Z: 0→300)</span>
-                    <span id="journeyValueLabel" class="mono text-sky-400 text-xs">18.0 / 300</span>
+                    <span id="journeyValueLabel" class="mono text-sky-400 text-xs">0.0 / 300</span>
                 </div>
-                <input id="journeySlider" type="range" min="0" max="300" step="0.1" value="18.0">
+                <input id="journeySlider" type="range" min="0" max="300" step="0.1" value="0.0">
                 <div class="flex justify-between text-[9px] mono text-slate-500 mt-0.5">
                     <span>10⁰× (Sierpinski)</span>
                     <span>10⁹× (Einstein Hat)</span>
@@ -278,10 +297,10 @@
                 <input id="complexitySlider" type="range" min="48" max="280" step="1" value="160">
             </div>
 
-            <!-- Palette Archetype & Auto-Pilot Speed Controls -->
+            <!-- Palette Archetype & Static/Drift Color Mode + Manual Override Mode -->
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <div>
-                    <label class="block text-[9px] mono uppercase text-slate-400 mb-1">Color Archetype</label>
+                    <label class="block text-[9px] mono uppercase text-slate-400 mb-1">Static Color Archetype</label>
                     <select id="paletteSelect" onchange="updatePalette(this.value)" class="w-full bg-slate-900/90 border border-white/15 rounded-lg px-2 py-1.5 text-xs text-white mono outline-none focus:border-sky-400">
                         <option value="0">01 / Bioluminescent Abyss</option>
                         <option value="1">02 / Brutalist Obsidian</option>
@@ -292,20 +311,25 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[9px] mono uppercase text-slate-400 mb-1">Auto-Dive Cruise (<span id="speedLabel">1.0x</span>)</label>
-                    <div class="flex items-center gap-1.5">
-                        <button id="autoZoomBtn" onclick="toggleAutoJourney()" class="flex-1 py-1.5 px-2 rounded-lg border border-sky-400/40 bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 text-xs mono font-medium transition flex items-center justify-center gap-1.5">
-                            <span id="autoDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
-                            <span id="autoZoomText">Cruise</span>
-                        </button>
-                        <input id="speedSlider" type="range" min="0.2" max="4.0" step="0.1" value="1.2" class="w-16" title="Auto-Dive Speed">
-                    </div>
+                    <label class="block text-[9px] mono uppercase text-slate-400 mb-1">Color Stability Mode</label>
+                    <button id="colorDriftBtn" onclick="toggleColorDrift()" class="w-full py-1.5 px-2.5 rounded-lg border border-white/15 bg-slate-900/90 hover:border-sky-400/40 text-slate-300 text-xs mono font-medium transition flex items-center justify-between">
+                        <span id="colorDriftText">Static (Locked)</span>
+                        <span id="colorDriftDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                    </button>
                 </div>
+            </div>
+
+            <!-- Auto-Zoom Manual Override Behavior Toggle -->
+            <div class="bg-slate-900/60 rounded-xl p-2 border border-white/10 flex items-center justify-between text-[11px]">
+                <span class="text-slate-400 mono text-[10px]">Manual Scroll/Drag Action:</span>
+                <button id="manualBehaviorBtn" onclick="toggleManualPauseBehavior()" class="px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-sky-300 mono text-[10px] hover:bg-sky-500/25 transition">
+                    Nudge While Cruising
+                </button>
             </div>
 
             <!-- Footer Controls -->
             <div class="pt-1 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
-                <span>Scroll: Deep Zoom • Drag: Pan</span>
+                <span>Scroll/Pinch: Manual Zoom • Drag: Pan</span>
                 <button onclick="resetCamera()" class="text-sky-400 hover:underline mono">Reset Camera</button>
             </div>
         </div>
@@ -389,15 +413,18 @@
         const state = {
             seedInt: 0,
             seedHex: "",
-            // Master Depth Z: 0.0 -> 100.0 (Stage 1), 100.0 -> 200.0 (Stage 2), 200.0 -> 300.0 (Stage 3)
-            depthZ: 18.0,
-            targetDepthZ: 18.0,
+            // Master Depth Z: Starts at Z = 0.0 (stationary by default)
+            depthZ: 0.0,
+            targetDepthZ: 0.0,
             shapeWarp: 0.5,       // Real-time user shape mutation override
             complexity: 160,      // Shader iterations & tile density
             paletteIndex: 0,
             colorShift: 0.0,
-            autoDive: false,
-            cruiseSpeed: 1.2,
+            colorDrift: false,    // OFF by default: colors remain 100% static unless toggled
+            autoDive: false,      // OFF by default: stationary until user clicks Start Auto-Zoom
+            cruiseSpeed: 1.0,
+            zoomDirection: 1,     // 1 = Dive In (0 -> 300), -1 = Pull Out (300 -> 0)
+            pauseOnManual: false, // False = manual scroll nudges Z seamlessly while auto-zoom continues; True = manual scroll pauses auto-zoom
             // Interactive 2D camera
             camX: 0.0,
             camY: 0.0,
@@ -405,12 +432,13 @@
             targetCamY: 0.0,
             zoom: 1.0,
             targetZoom: 1.0,
-            // Pointer state
+            // Pointer & Touch Pinch state
             mouseX: -9999,
             mouseY: -9999,
             isDragging: false,
             lastDragX: 0,
             lastDragY: 0,
+            lastPinchDist: null,
             // Procedural Genome Parameters (Randomized every reload)
             sierpinskiSymmetry: 3,    // 3-fold, 4-fold, 5-fold, or 6-fold IFS gasket
             sierpinskiSpin: 0.0,      // Rotational twist per IFS fold
@@ -424,7 +452,8 @@
             hatBevelDepth: 0.5,
             hurstExponent: 0.68,      // Controls coastline fractal roughness
             treeBranchAngle: 0.65,
-            time: 0
+            time: 0,
+            colorTime: 0              // Only advances when state.colorDrift === true
         };
 
         /**************************************************************************
@@ -766,6 +795,7 @@
                     for (int i = -1; i <= 1; i++) {
                         vec2 g = vec2(float(i), float(j));
                         vec2 o = vec2(hash21(n + g), hash21(n + g + 13.7));
+                        // Static deterministic cellular geometry by default (only animates if u_time > 0)
                         o = 0.5 + 0.42 * sin(u_time * 0.4 + 6.2831 * o);
                         vec2 r = g + o - f;
                         float d = dot(r, r);
@@ -824,7 +854,8 @@
                 float dSierp = kaleidoscopicSierpinskiDE(sPos * 1.15, sIter, trap);
                 float glowSierp = exp(-abs(dSierp) * 145.0);
                 float fillSierp = smoothstep(0.012, -0.004, dSierp);
-                vec3 colSierp = getPalette(trap * 0.42 + zDepth * 0.015 - u_time * 0.03, u_palette) * (fillSierp * 0.85 + glowSierp * 1.35);
+                // Strictly static spatial color mapping (u_time is 0.0 unless Color Drift is enabled)
+                vec3 colSierp = getPalette(trap * 0.42 - u_time * 0.03, u_palette) * (fillSierp * 0.85 + glowSierp * 1.35);
 
                 // Precision coordinate grid in voids
                 float grid = smoothstep(0.97, 1.0, max(cos(sPos.x * 36.0), cos(sPos.y * 36.0))) * 0.14;
@@ -859,7 +890,8 @@
                     float log_zn = log(dot(z, z)) * 0.5;
                     float nu = log(log_zn / log(2.0)) / log(2.0);
                     float smoothIter = iter + 1.0 - nu;
-                    float cycle = sqrt(max(smoothIter, 0.0)) * 0.20 - u_time * 0.035 + zDepth * 0.008;
+                    // Static iteration coloring by default (does not shift during zoom unless Color Drift is on)
+                    float cycle = sqrt(max(smoothIter, 0.0)) * 0.20 - u_time * 0.035;
                     colMandel = getPalette(cycle + orbitMin * 0.28, u_palette);
                     colMandel += vec3(0.95, 0.98, 1.0) * pow(clamp(1.0 - orbitMin * 2.6, 0.0, 1.0), 5.0) * 0.38;
                 } else {
@@ -947,9 +979,9 @@
                 if (u_depthZ < 100.0) {
                     finalColor = renderStage1(p, u_depthZ);
                 } else if (u_depthZ < 200.0) {
-                    // Stage 2 backdrop beneath the multi-scale Einstein Hat Canvas
+                    // Stage 2 backdrop beneath the multi-scale Einstein Hat Canvas (Static by default)
                     float radial = length(p);
-                    float wave = sin(radial * 10.0 - u_time * 0.8 + u_depthZ * 0.1) * 0.5 + 0.5;
+                    float wave = sin(radial * 10.0 - u_time * 0.8) * 0.5 + 0.5;
                     finalColor = mix(vec3(0.02, 0.03, 0.06), getPalette(wave * 0.3, u_palette) * 0.24, 0.6);
                 } else {
                     finalColor = renderStage3(p, u_depthZ);
@@ -1083,7 +1115,8 @@
                 const isHovered = hoveredTile === tile;
                 const isSameCluster = hoveredTile && (tile.generation === hoveredTile.generation);
 
-                const wave = Math.sin(tile.cx * 0.8 - tile.cy * 0.8 + state.time * 1.6 + tile.phase) * 0.5 + 0.5;
+                // Strictly static spatial shading by default (only animates if state.colorDrift is enabled)
+                const wave = Math.sin(tile.cx * 0.8 - tile.cy * 0.8 + state.colorTime * 1.6 + tile.phase) * 0.5 + 0.5;
                 const elevation = tile.isReflected ? 1.0 : (0.15 + 0.3 * wave * tile.elevationBias);
 
                 ctx2d.beginPath();
@@ -1096,8 +1129,10 @@
                 ctx2d.closePath();
 
                 if (tile.isReflected) {
-                    const pulse = 0.80 + 0.20 * Math.sin(state.time * 2.6 + tile.phase);
-                    ctx2d.fillStyle = `rgba(${pal.ref[0]}, ${pal.ref[1]}, ${pal.ref[2]}, ${0.86 * pulse})`;
+                    const pulse = state.colorDrift
+                        ? (0.80 + 0.20 * Math.sin(state.colorTime * 2.6 + tile.phase))
+                        : 0.90;
+                    ctx2d.fillStyle = `rgba(${pal.ref[0]}, ${pal.ref[1]}, ${pal.ref[2]}, ${0.88 * pulse})`;
                 } else {
                     const shade = Math.floor(elevation * 44);
                     const r = Math.min(255, pal.unref[0] + shade + (isSameCluster ? 32 : 0));
@@ -1231,7 +1266,7 @@
         }
 
         function jumpToScene(sceneIdx) {
-            if (sceneIdx === 0) state.targetDepthZ = 18.0;
+            if (sceneIdx === 0) state.targetDepthZ = 0.0;
             else if (sceneIdx === 1) state.targetDepthZ = 142.0;
             else state.targetDepthZ = 235.0;
             resetCamera();
@@ -1248,17 +1283,80 @@
             document.getElementById('genomePalette').textContent = PALETTE_NAMES[state.paletteIndex];
         }
 
+        function syncAutoZoomUI() {
+            const btn = document.getElementById('primaryAutoZoomBtn');
+            const icon = document.getElementById('primaryAutoZoomIcon');
+            const label = document.getElementById('primaryAutoZoomLabel');
+            const brandDot = document.getElementById('brandStatusDot');
+
+            if (state.autoDive) {
+                icon.textContent = "⏸";
+                label.textContent = "Pause Auto-Zoom";
+                btn.className = "px-3.5 py-2 rounded-xl font-bold text-xs mono transition-all flex items-center gap-2 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 shadow-[0_0_22px_rgba(245,158,11,0.45)] active:scale-95 whitespace-nowrap";
+                brandDot.className = "w-3 h-3 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_12px_#34d399]";
+            } else {
+                icon.textContent = "▶";
+                label.textContent = "Start Auto-Zoom";
+                btn.className = "px-3.5 py-2 rounded-xl font-bold text-xs mono transition-all flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.35)] active:scale-95 whitespace-nowrap";
+                brandDot.className = "w-3 h-3 rounded-full bg-sky-400 shadow-[0_0_12px_#38bdf8]";
+            }
+        }
+
         function toggleAutoJourney() {
             state.autoDive = !state.autoDive;
-            const btnText = document.getElementById('autoZoomText');
-            const dot = document.getElementById('autoDot');
-            if (state.autoDive) {
-                btnText.textContent = "Active";
-                dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+            syncAutoZoomUI();
+        }
+
+        function setCruiseSpeed(spd) {
+            state.cruiseSpeed = spd;
+            [0.5, 1, 2, 4].forEach(s => {
+                const el = document.getElementById(`spd-${s}`);
+                if (!el) return;
+                if (Math.abs(s - spd) < 0.01) {
+                    el.className = "px-2 py-1 rounded-lg text-[10px] mono bg-sky-500/30 text-sky-200 border border-sky-400/40 transition";
+                } else {
+                    el.className = "px-2 py-1 rounded-lg text-[10px] mono text-slate-300 hover:text-white transition";
+                }
+            });
+        }
+
+        function toggleZoomDirection() {
+            state.zoomDirection *= -1;
+            const btn = document.getElementById('dirToggleBtn');
+            btn.textContent = state.zoomDirection > 0 ? "↓ Dive In" : "↑ Pull Out";
+        }
+
+        function toggleColorDrift() {
+            state.colorDrift = !state.colorDrift;
+            const textEl = document.getElementById('colorDriftText');
+            const dotEl = document.getElementById('colorDriftDot');
+            if (state.colorDrift) {
+                textEl.textContent = "Color Drift (ON)";
+                dotEl.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
             } else {
-                btnText.textContent = "Cruise";
-                dot.className = "w-2 h-2 rounded-full bg-slate-400";
+                textEl.textContent = "Static (Locked)";
+                dotEl.className = "w-2 h-2 rounded-full bg-slate-500";
             }
+        }
+
+        function toggleManualPauseBehavior() {
+            state.pauseOnManual = !state.pauseOnManual;
+            const btn = document.getElementById('manualBehaviorBtn');
+            if (state.pauseOnManual) {
+                btn.textContent = "Pause Auto on Manual";
+                btn.className = "px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-amber-300 mono text-[10px] hover:bg-amber-500/30 transition";
+            } else {
+                btn.textContent = "Nudge While Cruising";
+                btn.className = "px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-sky-300 mono text-[10px] hover:bg-sky-500/25 transition";
+            }
+        }
+
+        function handleManualZoomInput(deltaZ) {
+            if (state.pauseOnManual && state.autoDive) {
+                state.autoDive = false;
+                syncAutoZoomUI();
+            }
+            state.targetDepthZ = Math.max(0.0, Math.min(300.0, state.targetDepthZ + deltaZ));
         }
 
         let controlsVisible = true;
@@ -1467,6 +1565,10 @@ fly deploy`
          * 7. INTERACTIVE EVENT LISTENERS & MAIN ANIMATION LOOP
          **************************************************************************/
         document.getElementById('journeySlider').addEventListener('input', (e) => {
+            if (state.pauseOnManual && state.autoDive) {
+                state.autoDive = false;
+                syncAutoZoomUI();
+            }
             state.targetDepthZ = parseFloat(e.target.value);
             state.depthZ = state.targetDepthZ;
             updateHUDReadouts();
@@ -1482,19 +1584,38 @@ fly deploy`
             document.getElementById('complexityValue').textContent = Math.round(state.complexity);
         });
 
-        document.getElementById('speedSlider').addEventListener('input', (e) => {
-            state.cruiseSpeed = parseFloat(e.target.value);
-            document.getElementById('speedLabel').textContent = `${state.cruiseSpeed.toFixed(1)}x`;
-        });
-
-        // Smooth wheel zoom across all 300 Z-units
+        // Smooth wheel zoom across all 300 Z-units (works both when stationary & during Auto-Zoom)
         window.addEventListener('wheel', (e) => {
             if (e.target.closest('#controlPanel') || e.target.closest('header') || e.target.closest('#flyModal')) return;
             e.preventDefault();
             const step = Math.min(Math.max(Math.abs(e.deltaY) * 0.032, 0.6), 4.5);
             const delta = Math.sign(e.deltaY) * step;
-            state.targetDepthZ = Math.max(0.0, Math.min(300.0, state.targetDepthZ + delta));
+            handleManualZoomInput(delta);
         }, { passive: false });
+
+        // Two-finger touch pinch manual zoom support
+        window.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                state.lastPinchDist = Math.hypot(dx, dy);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2 && state.lastPinchDist !== null) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const dist = Math.hypot(dx, dy);
+                const diff = dist - state.lastPinchDist;
+                state.lastPinchDist = dist;
+                handleManualZoomInput(diff * 0.12);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            state.lastPinchDist = null;
+        });
 
         window.addEventListener('pointerdown', (e) => {
             if (e.target.closest('#controlPanel') || e.target.closest('header') || e.target.closest('#infoCard') || e.target.closest('#toggleControlsBtn') || e.target.closest('#flyModal')) return;
@@ -1522,6 +1643,10 @@ fly deploy`
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeFlyModal();
+            if (e.code === 'Space' && !e.target.closest('button') && !e.target.closest('input') && !e.target.closest('select')) {
+                e.preventDefault();
+                toggleAutoJourney();
+            }
         });
 
         function handleResize() {
@@ -1542,8 +1667,16 @@ fly deploy`
             lastTime = now;
             state.time += dt;
 
+            // Color time only advances if the user explicitly turns on Color Drift
+            if (state.colorDrift) {
+                state.colorTime += dt;
+            }
+
             if (state.autoDive) {
-                state.targetDepthZ = (state.targetDepthZ + dt * 7.5 * state.cruiseSpeed) % 300.0;
+                let nextZ = state.targetDepthZ + dt * 7.5 * state.cruiseSpeed * state.zoomDirection;
+                if (nextZ > 300.0) nextZ -= 300.0;
+                if (nextZ < 0.0) nextZ += 300.0;
+                state.targetDepthZ = nextZ;
             }
 
             state.depthZ += (state.targetDepthZ - state.depthZ) * 0.11;
@@ -1553,7 +1686,8 @@ fly deploy`
 
             gl.useProgram(program);
             gl.uniform2f(uniforms.res, glCanvas.width, glCanvas.height);
-            gl.uniform1f(uniforms.time, state.time);
+            // Pass state.colorTime (0.0 by default) so shaders never cycle or pulse colors unless Color Drift is enabled
+            gl.uniform1f(uniforms.time, state.colorTime);
             gl.uniform1f(uniforms.depthZ, state.depthZ);
             gl.uniform1f(uniforms.shapeWarp, state.shapeWarp);
             gl.uniform1f(uniforms.complexity, state.complexity);
