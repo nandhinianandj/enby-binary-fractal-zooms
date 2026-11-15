@@ -136,7 +136,11 @@
                 </div>
                 <div class="hidden md:block">
                     <span class="text-slate-400 block text-[9px]">DEPTH Z</span>
-                    <span id="depthZReadout" class="text-amber-300 font-semibold text-xs sm:text-sm">000.0 / 700</span>
+                    <span id="depthZReadout" class="text-amber-300 font-semibold text-xs sm:text-sm">000.0 / 927.5</span>
+                </div>
+                <div class="hidden lg:block">
+                    <span class="text-slate-400 block text-[9px]">JOURNEY TIME</span>
+                    <span id="timeReadout" class="text-purple-300 font-semibold text-xs sm:text-sm">00:00 / 02:23</span>
                 </div>
             </div>
         </div>
@@ -174,8 +178,8 @@
                 <button onclick="jumpToScene(1)" id="tab-1" class="glass-pill px-3 py-1.5 rounded-xl text-left transition-all flex items-center gap-2 whitespace-nowrap">
                     <span class="mono text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">II</span>
                     <div>
-                        <div class="text-xs font-semibold text-white">Einstein Hat → Skyline</div>
-                        <div class="text-[10px] text-slate-400 hidden sm:block">Plane → Hat IFS → 3D City</div>
+                        <div class="text-xs font-semibold text-white">Einstein Hat → 3D Monotiles</div>
+                        <div class="text-[10px] text-slate-400 hidden sm:block">Hat IFS → Extrusion → 3D Polyhedra</div>
                     </div>
                 </button>
 
@@ -228,27 +232,28 @@
             </div>
         </div>
 
-        <!-- 14-Substage Interactive Breadcrumb Stepper -->
+        <!-- 15-Substage Interactive Breadcrumb Stepper -->
         <div class="mt-3 pt-2.5 border-t border-white/10">
             <div class="flex items-center justify-between text-[9px] mono text-slate-400 mb-1.5">
-                <span>14-PHASE CONTINUOUS MORPHOGENESIS STEPPER (CLICK TO JUMP)</span>
-                <span id="phaseStepCounter" class="text-sky-300 font-semibold">PHASE 1 / 14</span>
+                <span>15-PHASE CONTINUOUS MORPHOGENESIS STEPPER (CLICK TO JUMP)</span>
+                <span id="phaseStepCounter" class="text-sky-300 font-semibold">PHASE 1 / 15</span>
             </div>
-            <div class="grid grid-cols-3 sm:grid-cols-4 gap-1 text-[9px] mono mb-2">
-                <button onclick="jumpToDepth(4)" id="step-0" class="px-1.5 py-1 rounded bg-slate-900/90 border border-sky-400/50 text-sky-200 truncate text-left transition hover:border-sky-400">1. 2D Sierpinski</button>
-                <button onclick="jumpToDepth(16)" id="step-1" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-sky-400">2. 3D Pyramid</button>
-                <button onclick="jumpToDepth(36)" id="step-2" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-sky-400">3. Menger Sponge</button>
-                <button onclick="jumpToDepth(64)" id="step-3" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-sky-400">4. 3D Mandelbulb</button>
-                <button onclick="jumpToDepth(91)" id="step-4" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-amber-400">5. Facet Plane</button>
-                <button onclick="jumpToDepth(135)" id="step-5" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-amber-400">6. Einstein Hat</button>
-                <button onclick="jumpToDepth(205)" id="step-6" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-amber-400">7. 3D Skyline</button>
-                <button onclick="jumpToDepth(272)" id="step-7" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-emerald-400">8. Coast & Charts</button>
-                <button onclick="jumpToDepth(345)" id="step-8" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-emerald-400">9. Beach & Canopy</button>
-                <button onclick="jumpToDepth(415)" id="step-9" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-purple-400">10. Festival Crowd</button>
-                <button onclick="jumpToDepth(475)" id="step-10" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-purple-400">11. Single Head</button>
-                <button onclick="jumpToDepth(540)" id="step-11" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-indigo-400">12. Brain Neural Net</button>
-                <button onclick="jumpToDepth(608)" id="step-12" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-rose-400">13. Vascular Net</button>
-                <button onclick="jumpToDepth(672)" id="step-13" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-rose-400 col-span-2 sm:col-span-2">14. Lung Alveoli Sacs</button>
+            <div class="grid grid-cols-3 sm:grid-cols-5 gap-1 text-[9px] mono mb-2">
+                <button onclick="jumpToDepth(12)" id="step-0" class="px-1.5 py-1 rounded bg-slate-900/90 border border-sky-400/50 text-sky-200 truncate text-left transition hover:border-sky-400">1. 2D Sierpinski</button>
+                <button onclick="jumpToDepth(52)" id="step-1" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-sky-400">2. 3D Pyramid</button>
+                <button onclick="jumpToDepth(92)" id="step-2" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-sky-400">3. Menger Sponge</button>
+                <button onclick="jumpToDepth(132)" id="step-3" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-sky-400">4. 3D Mandelbulb</button>
+                <button onclick="jumpToDepth(168)" id="step-4" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-amber-400">5. Facet Plane</button>
+                <button onclick="jumpToDepth(225)" id="step-5" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-amber-400">6. Einstein Hat</button>
+                <button onclick="jumpToDepth(325)" id="step-6" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-amber-400">7. 2.5D Skyline</button>
+                <button onclick="jumpToDepth(420)" id="step-7" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-amber-400">8. 3D Monotiles</button>
+                <button onclick="jumpToDepth(500)" id="step-8" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-emerald-400">9. Coast & Charts</button>
+                <button onclick="jumpToDepth(572)" id="step-9" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-emerald-400">10. Beach & Canopy</button>
+                <button onclick="jumpToDepth(642)" id="step-10" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-purple-400">11. Festival Crowd</button>
+                <button onclick="jumpToDepth(702)" id="step-11" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-purple-400">12. Single Head</button>
+                <button onclick="jumpToDepth(768)" id="step-12" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-indigo-400">13. Brain Neural</button>
+                <button onclick="jumpToDepth(835)" id="step-13" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-rose-400">14. Vascular Net</button>
+                <button onclick="jumpToDepth(895)" id="step-14" class="px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-rose-400">15. Lung Alveoli</button>
             </div>
             <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-white/10">
                 <div id="journeyProgressBar" class="h-full bg-gradient-to-r from-sky-400 via-amber-400 to-rose-400 rounded-full transition-all duration-75" style="width: 2%;"></div>
@@ -278,16 +283,16 @@
                 </button>
             </div>
 
-            <!-- Master 700-Unit Exponential Depth Scrubber -->
+            <!-- Master 927.5-Unit Exponential Depth Scrubber -->
             <div>
                 <div class="flex justify-between text-xs mb-1">
-                    <span class="text-slate-300 font-medium">Deep-Zoom Depth (Z: 0→700)</span>
-                    <span id="journeyValueLabel" class="mono text-sky-400 text-xs">0.0 / 700</span>
+                    <span class="text-slate-300 font-medium">Deep-Zoom Depth (Z: 0→927.5)</span>
+                    <span id="journeyValueLabel" class="mono text-sky-400 text-xs">0.0 / 927.5</span>
                 </div>
-                <input id="journeySlider" type="range" min="0" max="700" step="0.1" value="0.0">
+                <input id="journeySlider" type="range" min="0" max="927.5" step="0.1" value="0.0">
                 <div class="flex justify-between text-[9px] mono text-slate-500 mt-0.5">
                     <span>10⁰× (Sierpinski)</span>
-                    <span>10¹⁸× (Crowd/Brain)</span>
+                    <span>10¹⁸× (3D Monotiles)</span>
                     <span>10³⁵× (Alveoli)</span>
                 </div>
             </div>
@@ -296,10 +301,15 @@
             <div class="grid grid-cols-1 gap-2 pt-0.5">
                 <div class="bg-slate-900/75 border border-amber-500/25 rounded-xl p-2">
                     <div class="flex items-center justify-between mb-1">
-                        <label class="text-[9px] mono uppercase text-amber-300 font-semibold">Stage II: Einstein Hat IFS Mode</label>
-                        <button id="chaosIfsBtn" onclick="toggleChaosIFS()" class="text-[9px] mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-400/30 hover:bg-amber-500/35 transition">
-                            + Chaos Attractor: ON
-                        </button>
+                        <label class="text-[9px] mono uppercase text-amber-300 font-semibold">Stage II: Einstein Hat IFS & Binary 0/1</label>
+                        <div class="flex items-center gap-1">
+                            <button id="binaryBitBtn" onclick="toggleBinaryBits()" class="text-[9px] mono px-1.5 py-0.5 rounded bg-sky-500/25 text-sky-200 border border-sky-400/40 hover:bg-sky-500/40 transition" title="Toggle 0 (Unreflected Dark Hat) vs 1 (Reflected Translucent Anti-Hat) Binary Discretization">
+                                Binary 0/1: ON
+                            </button>
+                            <button id="chaosIfsBtn" onclick="toggleChaosIFS()" class="text-[9px] mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-400/30 hover:bg-amber-500/35 transition">
+                                + Attractor: ON
+                            </button>
+                        </div>
                     </div>
                     <select id="hatIfsModeSelect" onchange="updateHatIFSMode(this.value)" class="w-full bg-slate-950/90 border border-white/15 rounded-lg px-2 py-1 text-[11px] text-white mono outline-none focus:border-amber-400">
                         <option value="0">Recursive Hat-IFS + H₇/H₈ Fractal Supertiles</option>
@@ -474,6 +484,7 @@
             hatRotation: 0.0,
             hatChiralBias: 0.14,
             hatIfsMode: 0,
+            showBinaryBits: true,
             showChaosAttractor: true,
             hurstExponent: 0.68,
             treeBranchAngle: 0.62,
@@ -951,20 +962,20 @@
             }
 
             // =====================================================================
-            // STAGE 1: CONTINUOUS 2D -> 3D RAYMARCHED FRACTAL EVOLUTION (Z = 0..100)
-            //   1. Z = 0..10:  Flat 2D Sierpinski Triangle
-            //   2. Z = 10..25: 3D Sierpinski Pyramid (Tetrahedron)
-            //   3. Z = 25..50: 3D Menger Sponge
-            //   4. Z = 50..80: 3D Mandelbulb
-            //   5. Z = 80..100: Zoom into Flat Facet Plane -> Etched Einstein Seams
+            // STAGE 1: CONTINUOUS 2D -> 3D RAYMARCHED FRACTAL EVOLUTION (Z = 0..180)
+            //   1. Z = 0..35:   Flat 2D Sierpinski Triangle (Stretched 3.5x longer!)
+            //   2. Z = 35..75:  3D Sierpinski Pyramid (Tetrahedron)
+            //   3. Z = 75..115: 3D Menger Sponge
+            //   4. Z = 115..155: 3D Mandelbulb
+            //   5. Z = 155..180: Zoom into Flat Facet Plane -> Etched Einstein Seams
             // =====================================================================
 
-            // 1A. Exact 2D Sierpinski Triangle SDF (for crisp 2D opening at Z=0..14)
+            // 1A. Exact 2D Sierpinski Triangle SDF (for extended crisp 2D opening at Z=0..38)
             float sdSierpinski2D(vec2 p, out float trap2D) {
                 float scale = 1.0;
                 trap2D = 1e10;
                 p.y += 0.22;
-                for (int i = 0; i < 11; i++) {
+                for (int i = 0; i < 12; i++) {
                     p.x = abs(p.x);
                     // Fold across 60-degree line of equilateral triangle
                     if (p.y + p.x * 0.57735027 < 0.0) {
@@ -1049,9 +1060,9 @@
 
             // Unified 3D Morph SDF across Pyramid -> Menger Sponge -> Mandelbulb -> Flat Facet Plane
             float mapStage1(vec3 p, float zDepth, out float matTrap) {
-                float wMenger = smoothstep(21.0, 32.0, zDepth);
-                float wBulb   = smoothstep(46.0, 58.0, zDepth);
-                float wPlane  = smoothstep(76.0, 93.0, zDepth);
+                float wMenger = smoothstep(68.0, 84.0, zDepth);
+                float wBulb   = smoothstep(108.0, 124.0, zDepth);
+                float wPlane  = smoothstep(150.0, 172.0, zDepth);
 
                 float d1 = 10.0, t1 = 1.0;
                 float d2 = 10.0, t2 = 1.0;
@@ -1072,7 +1083,7 @@
                 d = mix(d, d3, wBulb);
                 t = mix(t, t3, wBulb);
 
-                // Transition Bridge 1 (Z = 76..100):
+                // Transition Bridge 1 (Z = 150..180):
                 // Zoom down onto a single flat terrace/edge plane at z = 0.0
                 if (wPlane > 0.001) {
                     // Subtle polygonal kite/hat relief etching into the flat terrace plane
@@ -1100,13 +1111,16 @@
             }
 
             vec3 renderStage1(vec2 p, float zDepth) {
-                float blend3D = smoothstep(6.0, 15.0, zDepth);
+                float blend3D = smoothstep(28.0, 42.0, zDepth);
 
-                // 1. Crisp 2D Sierpinski Triangle View (Z = 0..15)
+                // 1. Extended Crisp 2D Sierpinski Triangle View (Z = 0..42)
+                // Continuous self-similar log2 zoom into the top-triangle vertex so you can savor multiple recursive levels
                 vec3 col2D = vec3(0.02, 0.04, 0.08);
                 if (blend3D < 0.999) {
-                    float zoom2D = exp2(zDepth * 0.14) * u_zoom;
-                    vec2 uv2D = (p / zoom2D) * 1.65 + u_camera * 0.5;
+                    float cycZ = mod(zDepth * 0.11, 1.0);
+                    float zoom2D = exp2(cycZ * 2.0) * u_zoom;
+                    vec2 apexAnchor = vec2(0.0, 0.36);
+                    vec2 uv2D = apexAnchor + (p / zoom2D) * 1.65 + u_camera * 0.5;
                     float trap2D = 0.0;
                     float d2D = sdSierpinski2D(uv2D, trap2D);
                     float edgeGlow = exp(-abs(d2D) * 140.0 * zoom2D);
@@ -1116,13 +1130,13 @@
                     col2D += getPalette(trap2D * 0.45 + 0.25, u_palette) * edgeGlow * 1.25;
                 }
 
-                // 2. Raymarched 3D Volumetric Fractals: Pyramid -> Menger Sponge -> Mandelbulb -> Facet Plane (Z = 6..100)
+                // 2. Raymarched 3D Volumetric Fractals: Pyramid -> Menger Sponge -> Mandelbulb -> Facet Plane (Z = 28..180)
                 vec3 col3D = vec3(0.02, 0.03, 0.06);
                 if (blend3D > 0.001) {
-                    float wPlane = smoothstep(76.0, 95.0, zDepth);
-                    float distCam = mix(3.15, 0.42, smoothstep(10.0, 96.0, zDepth)) / max(u_zoom, 0.25);
+                    float wPlane = smoothstep(150.0, 174.0, zDepth);
+                    float distCam = mix(3.15, 0.42, smoothstep(32.0, 175.0, zDepth)) / max(u_zoom, 0.25);
 
-                    float orbitAzim = u_sierpinskiSpin * 1.5 + zDepth * 0.028 * (1.0 - wPlane) + u_camera.x * 1.4;
+                    float orbitAzim = u_sierpinskiSpin * 1.5 + (zDepth - 28.0) * 0.020 * (1.0 - wPlane) + u_camera.x * 1.4;
                     float orbitElev = mix(0.42, 0.0, wPlane) + u_camera.y * 1.1;
 
                     vec3 ro = vec3(
@@ -1196,107 +1210,338 @@
                 return fbm(uv + 1.65 * warpR, 8);
             }
 
-            // Phase 10, 11 & 12: Festival/Protest Crowd (385..445) -> Single Human Head (445..505) -> Cerebral Neural Network (505..580)
+            // Helper: Distance to a 2D line segment with rounded capsule radius
+            float sdCapsule2D(vec2 p, vec2 a, vec2 b, float r) {
+                vec2 pa = p - a, ba = b - a;
+                float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-5), 0.0, 1.0);
+                return length(pa - ba * h) - r;
+            }
+
+            // Helper: Distance to an oriented rounded box (for protest signs, smartphones & torsos)
+            float sdRoundBox2D(vec2 p, vec2 b, float r) {
+                vec2 q = abs(p) - b + r;
+                return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+            }
+
+            // Rich 10-Shade Human & Festival Hair Color Picker
+            vec3 getHairColorSpectrum(float hSeed, float hSeed2) {
+                // 0..1 selector across natural & festival-dyed hair colors
+                if (hSeed < 0.22) {
+                    // Jet Black & Raven Blue-Black
+                    return mix(vec3(0.04, 0.04, 0.05), vec3(0.08, 0.09, 0.13), hSeed2);
+                } else if (hSeed < 0.44) {
+                    // Dark Espresso & Warm Chestnut Brown
+                    return mix(vec3(0.16, 0.10, 0.07), vec3(0.34, 0.20, 0.12), hSeed2);
+                } else if (hSeed < 0.60) {
+                    // Honey, Golden & Ash Blonde
+                    return mix(vec3(0.62, 0.48, 0.24), vec3(0.82, 0.70, 0.42), hSeed2);
+                } else if (hSeed < 0.72) {
+                    // Copper Ginger & Deep Auburn Red
+                    return mix(vec3(0.52, 0.17, 0.09), vec3(0.78, 0.32, 0.14), hSeed2);
+                } else if (hSeed < 0.82) {
+                    // Platinum Blonde, Silver & Salt-and-Pepper Grey
+                    return mix(vec3(0.54, 0.56, 0.59), vec3(0.86, 0.85, 0.82), hSeed2);
+                } else if (hSeed < 0.91) {
+                    // Festival Dyed Rose-Pink & Crimson Magenta
+                    return mix(vec3(0.76, 0.16, 0.44), vec3(0.92, 0.36, 0.62), hSeed2);
+                } else {
+                    // Festival Dyed Electric Teal, Cyan & Ultraviolet
+                    return mix(vec3(0.12, 0.68, 0.76), vec3(0.48, 0.26, 0.86), hSeed2);
+                }
+            }
+
+            // Evaluates a depth-sorted staggered row of overhead human figures.
+            // At high altitude (detailLOD -> 0): tightly packed top-down cranial crowns with tiny micro-gaps.
+            // As camera zooms in (detailLOD -> 1): shoulders, collars, ears, noses, raised arms, signs & phones emerge.
+            void evalPersonLayer(vec2 uv, float rowSeed, vec3 sunDir, float detailLOD, out vec3 layerCol, out float layerMask, out float shadowAlpha) {
+                vec2 grid = vec2(uv.x, uv.y);
+                vec2 id = floor(grid);
+                vec2 f = fract(grid) - 0.5;
+
+                float rnd  = hash21(id + rowSeed * 19.37);
+                float rnd2 = hash21(id + rowSeed * 43.11 + 7.3);
+                float rnd3 = hash21(id + rowSeed * 71.89 + 13.7);
+                float rnd4 = hash21(id + rowSeed * 97.53 + 3.1);
+
+                // Almost 99% density at high altitude so there are no empty holes, relaxing slightly at close range
+                float densityThreshold = mix(0.01, 0.05, detailLOD);
+                float isPresent = step(densityThreshold, rnd);
+
+                vec2 posJitter = (vec2(rnd2, rnd3) - 0.5) * mix(vec2(0.24, 0.24), vec2(0.30, 0.26), detailLOD);
+                vec2 p = f - posJitter;
+
+                // Slight individual body orientation toward the festival stage / protest focal point (+Y)
+                float bodyYaw = (rnd - 0.5) * 0.55;
+                p = rot2D(bodyYaw) * p;
+
+                // Head Radius starts larger in cell-space at high altitude (tightly packed top-down sea of heads)
+                // and refines to anatomical head-to-shoulder proportion as we zoom in (detailLOD -> 1)
+                float baseHeadR = mix(0.33, 0.145, detailLOD) + (rnd3 - 0.5) * 0.018;
+
+                // 1. Torso & Shoulders: tucked directly underneath the crown at high altitude, expanding outward as we zoom in
+                float shHalfW = mix(0.18, 0.21, detailLOD);
+                float shRad   = mix(0.14, 0.125, detailLOD);
+                float shoulderD = sdCapsule2D(p, vec2(-shHalfW, -0.04 * detailLOD), vec2(shHalfW, -0.04 * detailLOD), shRad);
+                float shoulderMask = smoothstep(0.018, -0.012, shoulderD) * isPresent;
+
+                // 2. Raised Arms (emerge progressively as detailLOD increases)
+                float hasRaisedArms = step(0.56, rnd2) * smoothstep(0.15, 0.60, detailLOD);
+                float leftArmD  = sdCapsule2D(p, vec2(-0.21, -0.02), vec2(-0.15, 0.24), 0.046);
+                float rightArmD = sdCapsule2D(p, vec2( 0.21, -0.02), vec2( 0.15, 0.24), 0.046);
+                float armsMask = smoothstep(0.014, -0.010, min(leftArmD, rightArmD)) * hasRaisedArms * isPresent;
+
+                // 3. Top-Down Head Crown, Ears & Nose Tip
+                vec2 headCenter = vec2(0.0, 0.022 * detailLOD);
+                vec2 hp = p - headCenter;
+                float headDist = length(hp * vec2(1.06, 0.94));
+                float earScale = smoothstep(0.25, 0.75, detailLOD);
+                float earsDist = min(
+                    length(hp - vec2(-baseHeadR * 0.95, 0.0)),
+                    length(hp - vec2( baseHeadR * 0.95, 0.0))
+                ) - 0.028 * earScale;
+                float noseDist = length(hp - vec2(0.0, baseHeadR * 0.92)) - 0.025 * earScale;
+                float fullHeadD = min(headDist - baseHeadR, min(earsDist, noseDist));
+                float headMask = smoothstep(0.014, -0.010, fullHeadD) * isPresent;
+
+                // 4. Held Protest Placards or Glowing Festival Smartphone Screens (emerge as we zoom in)
+                float propVis = smoothstep(0.22, 0.70, detailLOD);
+                float hasSign = step(0.84, rnd) * hasRaisedArms * propVis * isPresent;
+                float signD = sdRoundBox2D(p - vec2(0.0, 0.29), vec2(0.18, 0.065), 0.015);
+                float signMask = smoothstep(0.012, -0.010, signD) * hasSign;
+
+                float hasPhone = step(0.68, rnd3) * (1.0 - hasSign) * hasRaisedArms * propVis * isPresent;
+                float phoneD = sdRoundBox2D(p - vec2(0.13, 0.25), vec2(0.036, 0.055), 0.008);
+                float phoneMask = smoothstep(0.010, -0.008, phoneD) * hasPhone;
+
+                // Cast Directional Ambient Occlusion / Ground Shadow between tightly packed heads
+                float shadowD = min(
+                    sdCapsule2D(p - vec2(0.06, -0.08), vec2(-shHalfW, -0.04), vec2(shHalfW, -0.04), shRad * 1.08),
+                    length(p - vec2(0.06, -0.06)) - baseHeadR * 1.12
+                );
+                shadowAlpha = smoothstep(0.09, -0.05, shadowD) * 0.68 * isPresent;
+
+                // --- 3D Shading & Materials ---
+                vec3 skinPaletteA = vec3(0.93, 0.75, 0.63);
+                vec3 skinPaletteB = vec3(0.76, 0.54, 0.39);
+                vec3 skinPaletteC = vec3(0.42, 0.27, 0.19);
+                vec3 skinCol = mix(mix(skinPaletteA, skinPaletteB, fract(rnd * 3.7)), skinPaletteC, step(0.66, fract(rnd * 5.3)));
+
+                // Clothing colors (jackets, hoodies, t-shirts)
+                vec3 shirtCol = getPalette(rnd * 1.9 + rnd2 * 0.5, u_palette);
+                shirtCol = mix(shirtCol, vec3(0.14, 0.20, 0.30), 0.32);
+                vec3 shoulderNorm = normalize(vec3(p.x * 2.4, (p.y + 0.05) * 4.2, 0.65));
+                float shoulderDiff = clamp(dot(shoulderNorm, sunDir), 0.0, 1.0);
+                float collarRing = smoothstep(baseHeadR + 0.045, baseHeadR + 0.01, headDist);
+                vec3 shadedShirt = shirtCol * (0.32 + 0.72 * shoulderDiff) * (1.0 - collarRing * 0.35);
+
+                // 3D Spherical Head Normal & Multi-Shade Hair / Cap / Parted Crown Styles
+                vec2 normXY = hp / max(baseHeadR, 0.001);
+                float normZ = sqrt(clamp(1.0 - dot(normXY, normXY), 0.0, 1.0));
+                vec3 headNorm = normalize(vec3(normXY, normZ));
+                float headDiff = clamp(dot(headNorm, sunDir), 0.0, 1.0);
+
+                // Radial hair whorl & strand texture on top of every head
+                vec2 whorlP = hp - vec2((rnd2 - 0.5) * 0.04, -0.02 * baseHeadR);
+                float hairAngle = atan(whorlP.y, whorlP.x);
+                float hairStrands = sin(hairAngle * 20.0 + rnd * 14.0 - length(whorlP) * 16.0) * 0.5 + 0.5;
+                float centerPart = exp(-abs(hp.x) * (28.0 / max(baseHeadR * 5.0, 0.5))) * step(0.48, rnd3);
+
+                // Diverse 10-shade hair color spectrum
+                vec3 hairCol = getHairColorSpectrum(rnd4, rnd2);
+
+                // Anisotropic Kajiya-Kay style hair sheen ring across the top of the crown
+                float hairSpec = pow(clamp(dot(headNorm, normalize(sunDir + vec3(0.0, 0.0, 0.95))), 0.0, 1.0), 12.0);
+                vec3 crownCol = hairCol * (0.28 + 0.74 * headDiff) * (0.82 + 0.28 * hairStrands);
+                crownCol += (hairCol * 0.5 + vec3(0.32, 0.28, 0.24)) * hairSpec * 0.68;
+                crownCol = mix(crownCol, skinCol * 0.85, centerPart * 0.52 * detailLOD);
+
+                // Tightly-curled / afro texture, buns, or festival caps on subsets of the crowd
+                float wearsCap = step(0.84, rnd3);
+                vec3 capColor = getPalette(rnd3 * 2.3 + 0.4, u_palette);
+                float visorMask = smoothstep(0.015, -0.010, sdRoundBox2D(hp - vec2(0.0, baseHeadR * 0.82), vec2(0.075, 0.045) * detailLOD, 0.02)) * wearsCap * detailLOD;
+                crownCol = mix(crownCol, capColor * (0.35 + 0.68 * headDiff), wearsCap * 0.88);
+
+                // Ears & forehead rim show skin tone as we zoom closer
+                float skinRim = smoothstep(baseHeadR * 0.86, baseHeadR * 1.02, headDist) * detailLOD;
+                vec3 finalHeadCol = mix(crownCol, skinCol * (0.35 + 0.65 * headDiff), skinRim * (1.0 - wearsCap));
+                finalHeadCol = mix(finalHeadCol, capColor * 0.75, visorMask);
+
+                // Rim ambient occlusion around each crown so tightly-packed heads stay crisp & distinct
+                float crownEdgeAO = smoothstep(baseHeadR * 1.02, baseHeadR * 0.78, headDist);
+                finalHeadCol *= (0.55 + 0.45 * crownEdgeAO);
+
+                // Compose person from back to front: Arms -> Shoulders -> Head Crown -> Sign / Phone
+                vec3 col = vec3(0.0);
+                float mask = 0.0;
+
+                if (armsMask > 0.001) {
+                    col = mix(col, mix(skinCol, shadedShirt, 0.55) * (0.4 + 0.6 * shoulderDiff), armsMask);
+                    mask = max(mask, armsMask);
+                }
+                if (shoulderMask > 0.001) {
+                    col = mix(col, shadedShirt, shoulderMask);
+                    mask = max(mask, shoulderMask);
+                }
+                if (headMask > 0.001 || visorMask > 0.001) {
+                    float hm = max(headMask, visorMask);
+                    col = mix(col, finalHeadCol, hm);
+                    mask = max(mask, hm);
+                }
+                if (signMask > 0.001) {
+                    float textStripe = step(0.45, sin(p.y * 160.0) * sin(p.x * 45.0));
+                    vec3 placardCol = mix(vec3(0.95, 0.92, 0.84), vec3(0.88, 0.18, 0.16), textStripe * 0.75);
+                    col = mix(col, placardCol, signMask);
+                    mask = max(mask, signMask);
+                }
+                if (phoneMask > 0.001) {
+                    col = mix(col, vec3(0.75, 0.96, 1.0), phoneMask);
+                    mask = max(mask, phoneMask);
+                }
+
+                layerCol = col;
+                layerMask = clamp(mask, 0.0, 1.0);
+            }
+
+            // Phase 11, 12 & 13: Festival/Protest Crowd (385..445) -> Single Human Head (445..505) -> Cerebral Neural Network (505..580)
             vec3 renderCrowdHeadAndBrain(vec2 p, float zDepth, vec2 baseWorldUV) {
-                float wSingleHead = smoothstep(438.0, 466.0, zDepth);
+                float wSingleHead = smoothstep(436.0, 462.0, zDepth);
                 float wBrainNet   = smoothstep(496.0, 526.0, zDepth);
 
                 // -----------------------------------------------------------------
-                // A. PHASE 10 (Z = 385..455): LONG-DISTANCE FESTIVAL / PROTEST HUMAN CROWD
-                // Thousands of festival/protest attendees forming swirling density waves,
-                // banners, stage light cones, and shoulder-to-head silhouettes
+                // A. PHASE 11 (Z = 385..455): HIGH-ALTITUDE SEA OF HEADS -> INDIVIDUAL ANATOMY
+                // Starts at a much higher overhead zoom (36x grid density) where thousands of
+                // top-down heads pack tightly with tiny dark interstitial gaps, then smoothly zooms
+                // in (detailLOD 0 -> 1) so shoulders, raised arms, signs & smartphones emerge!
                 // -----------------------------------------------------------------
                 float crowdProgress = clamp((zDepth - 385.0) / 70.0, 0.0, 1.0);
-                float crowdZoom = exp2(crowdProgress * 3.6) * u_zoom;
-                vec2 crowdUV = (p / crowdZoom) * 14.0 + u_camera * 2.5 + baseWorldUV * 0.2;
+                // Exponential zoom from high-altitude drone shot (zoom=1) to close overhead shot (zoom=32)
+                float crowdZoom = exp2(crowdProgress * 5.0) * u_zoom;
+                // Progressive anatomical detail LOD (0.0 at high altitude -> 1.0 at close range)
+                float detailLOD = smoothstep(0.12, 0.68, crowdProgress);
 
-                // Swirling collective crowd density waves & plaza avenues
-                float crowdWave = fbm(crowdUV * 0.35 + vec2(1.4, -2.1), 5);
-                vec2 crowdCellUV = crowdUV * 2.6 + vec2(cos(crowdWave * 6.28), sin(crowdWave * 6.28)) * 0.35;
-                vec2 cellID = floor(crowdCellUV);
-                vec2 cellF  = fract(crowdCellUV) - 0.5;
+                // Pan camera smoothly to center (0,0) as we zoom toward the single target head
+                float lockToHero = smoothstep(0.35, 0.92, crowdProgress);
+                vec2 panOffset = mix(u_camera * 2.2 + baseWorldUV * 0.15, u_camera * 0.35, lockToHero);
+                // High-altitude base scale (34.0) shows thousands of packed crowns at crowdProgress=0
+                vec2 crowdUV = (p / crowdZoom) * 34.0 + panOffset;
 
-                float personRand = hash21(cellID);
-                vec2 jitter = vec2(hash21(cellID + 7.1), hash21(cellID + 19.3)) - 0.5;
-                vec2 localP = cellF - jitter * 0.36;
+                vec3 sunDir = normalize(vec3(-0.45, 0.55, 0.70));
 
-                // Elliptical shoulders + circular human head crown + cast ground shadow
-                vec2 shoulderP = localP * vec2(1.15, 1.85);
-                float shoulderDist = length(shoulderP);
-                float headDist = length(localP - vec2(0.0, 0.06));
-                float shadowDist = length(localP - vec2(0.14, -0.16));
+                // Dark ambient interstitial shadow beneath the tightly-packed sea of heads
+                float stageBeam = sin(atan(crowdUV.y + 6.0, crowdUV.x) * 7.0) * 0.5 + 0.5;
+                vec3 crowdCol = mix(vec3(0.04, 0.04, 0.06), vec3(0.10, 0.09, 0.12), stageBeam * 0.45);
 
-                float shadowMask   = smoothstep(0.42, 0.12, shadowDist);
-                float shoulderMask = smoothstep(0.38, 0.24, shoulderDist);
-                float headMask     = smoothstep(0.20, 0.11, headDist);
+                // Render 4 overlapping staggered passes so the gaps between heads at high altitude are tiny
+                for (int pass = 0; pass < 4; pass++) {
+                    float pf = float(pass);
+                    vec2 layerOffset = vec2(pf * 0.27, pf * 0.41);
+                    vec2 layerUV = crowdUV * vec2(1.22, 1.28) + layerOffset;
 
-                // Protest/festival placards, flags & glowing torches/phones held aloft by subset of crowd
-                float hasBanner = step(0.84, personRand);
-                float bannerMask = smoothstep(0.16, 0.04, max(abs(localP.x - 0.12), abs(localP.y - 0.18))) * hasBanner;
-                float hasBeacon = step(0.91, hash21(cellID + 41.2));
-                float beaconGlow = exp(-length(localP - vec2(-0.08, 0.14)) * 16.0) * hasBeacon;
+                    // Clear a small pocket right at (0,0) on outer passes when zoomed in so the central hero person stands out cleanly
+                    float centerClear = mix(1.0, smoothstep(0.28, 0.62, length(crowdUV)), detailLOD);
+                    vec3 pCol;
+                    float pMask, pShadow;
+                    evalPersonLayer(layerUV, pf + 1.0, sunDir, detailLOD, pCol, pMask, pShadow);
 
-                vec3 plazaGround = mix(vec3(0.12, 0.11, 0.10), vec3(0.22, 0.19, 0.16), crowdWave);
-                plazaGround *= (1.0 - shadowMask * 0.58);
-
-                // Clothing palette per individual in the crowd
-                vec3 garmentCol = getPalette(personRand * 1.7 + crowdWave * 0.25, u_palette);
-                garmentCol = mix(garmentCol, vec3(0.18, 0.24, 0.34), 0.35);
-
-                // Hair / cranial top tone
-                vec3 hairTone = mix(vec3(0.08, 0.06, 0.05), vec3(0.48, 0.32, 0.20), hash21(cellID + 3.3));
-                float crownSpec = smoothstep(0.16, 0.02, length(localP - vec2(-0.03, 0.09)));
-
-                vec3 crowdCol = plazaGround;
-                crowdCol = mix(crowdCol, garmentCol, shoulderMask);
-                crowdCol = mix(crowdCol, hairTone + vec3(0.22, 0.19, 0.16) * crownSpec, headMask);
-                crowdCol = mix(crowdCol, vec3(0.96, 0.36, 0.22), bannerMask * 0.85);
-                crowdCol += vec3(1.0, 0.88, 0.55) * beaconGlow * 0.9;
-
-                // -----------------------------------------------------------------
-                // B. PHASE 11 (Z = 445..505): ZOOM INTO A SINGLE HUMAN HEAD & CRANIAL CROWN
-                // Focusing on the central individual's head, spiral hair whorl, scalp
-                // dermal ridges, and translucent skull vault revealing cortical gyri beneath
-                // -----------------------------------------------------------------
-                vec3 singleHeadCol = vec3(0.0);
-                if (wSingleHead > 0.001 && wBrainNet < 0.999) {
-                    float headProgress = clamp((zDepth - 442.0) / 64.0, 0.0, 1.0);
-                    float headZoom = exp2(headProgress * 2.85) * u_zoom;
-                    vec2 hp = (p / headZoom) * 1.85 + u_camera * 0.45;
-
-                    float rHead = length(hp * vec2(1.08, 0.92));
-                    float angleH = atan(hp.y, hp.x);
-
-                    // Fibonacci-like hair whorl filaments radiating from the cranial vertex
-                    float spiralPhase = angleH * 9.0 - log(max(rHead, 0.002)) * 14.0 + fbm(hp * 12.0, 5) * 3.5;
-                    float hairStrands = sin(spiralPhase * 8.0) * 0.5 + 0.5;
-                    float fineFollicles = ridgedFbm(hp * 38.0 + vec2(cos(angleH), sin(angleH)) * 2.0, 5);
-
-                    float headSilhouette = smoothstep(0.92, 0.78, rHead);
-                    float skull3DShade = sqrt(clamp(1.0 - rHead * rHead * 1.1, 0.0, 1.0));
-
-                    vec3 scalpSkin = vec3(0.58, 0.42, 0.34);
-                    vec3 darkHair  = vec3(0.09, 0.07, 0.06);
-                    vec3 glintHair = vec3(0.38, 0.28, 0.22);
-
-                    vec3 crownSurface = mix(scalpSkin, darkHair, 0.72 + 0.22 * hairStrands);
-                    crownSurface += glintHair * pow(hairStrands * fineFollicles, 2.0) * skull3DShade * 0.85;
-                    crownSurface *= (0.28 + 0.72 * skull3DShade);
-
-                    // As we zoom deeper into the single head (headProgress > 0.45), X-ray / MRI translucency
-                    // reveals the folded cerebral cortex gyri & sulci pulsing beneath the cranium
-                    float cortexReveal = smoothstep(0.42, 0.92, headProgress);
-                    vec2 gyriWarp = vec2(fbm(hp * 5.5, 5), fbm(hp * 5.5 + 7.4, 5));
-                    float gyriFolds = ridgedFbm(hp * 7.5 + gyriWarp * 1.8, 6);
-                    vec3 cortexPink = mix(vec3(0.22, 0.12, 0.18), vec3(0.82, 0.52, 0.58), gyriFolds);
-                    cortexPink += vec3(0.35, 0.75, 1.0) * pow(gyriFolds, 3.5) * 0.65;
-
-                    singleHeadCol = mix(crowdCol * 0.25, crownSurface, headSilhouette);
-                    singleHeadCol = mix(singleHeadCol, cortexPink, cortexReveal * headSilhouette);
+                    if (pass > 0) {
+                        pMask *= centerClear;
+                        pShadow *= centerClear;
+                    }
+                    crowdCol *= (1.0 - pShadow);
+                    crowdCol = mix(crowdCol, pCol, pMask);
                 }
 
                 // -----------------------------------------------------------------
-                // C. PHASE 12 (Z = 505..575): CEREBRAL NEURAL & SYNAPTIC NETWORK
+                // B. PHASE 12 (Z = 445..505): ZOOM INTO THE CENTRAL HUMAN HEAD & CRANIAL CROWN
+                // High-detail 3D human head with ears, shoulders, natural hair strands &
+                // spiral crown whorl that gradually becomes MRI-translucent to reveal cortical gyri
+                // -----------------------------------------------------------------
+                vec3 singleHeadCol = crowdCol;
+                if (wSingleHead > 0.001 && wBrainNet < 0.999) {
+                    float headProgress = clamp((zDepth - 440.0) / 65.0, 0.0, 1.0);
+                    float headZoom = exp2(headProgress * 2.95) * u_zoom;
+                    vec2 hp = (p / headZoom) * 1.55 + u_camera * 0.42;
+
+                    // Hero person's shoulders & collar framing the head at the start of Phase 12
+                    float heroShoulderD = sdCapsule2D(hp, vec2(-0.82, -0.22), vec2(0.82, -0.22), 0.48);
+                    float heroShoulderMask = smoothstep(0.04, -0.02, heroShoulderD);
+                    vec3 heroJacketCol = getPalette(0.25, u_palette) * (0.45 + 0.55 * clamp(1.0 - length(hp) * 0.5, 0.0, 1.0));
+
+                    // Anatomically proportioned 3D human cranium (slightly longer front-to-back) + left/right ears & nose bridge
+                    vec2 skullP = hp * vec2(1.08, 0.92);
+                    float rHead = length(skullP);
+                    float earL = length(hp - vec2(-0.76, -0.02)) - 0.13;
+                    float earR = length(hp - vec2( 0.76, -0.02)) - 0.13;
+                    float noseTip = length(hp - vec2(0.0, 0.84)) - 0.11;
+
+                    float earMask  = smoothstep(0.02, -0.015, min(earL, earR));
+                    float noseMask = smoothstep(0.02, -0.015, noseTip);
+                    float headSilhouette = smoothstep(0.82, 0.77, rHead);
+
+                    // 3D Spherical Surface Normal of the Cranium
+                    vec2 normXY = skullP / 0.80;
+                    float skullZ = sqrt(clamp(1.0 - dot(normXY, normXY), 0.0, 1.0));
+                    vec3 skullNorm = normalize(vec3(normXY, skullZ));
+                    float sunDiff = clamp(dot(skullNorm, sunDir), 0.0, 1.0);
+
+                    // Natural Hair Whorl (centered slightly toward the posterior vertex)
+                    vec2 whorlCenter = hp - vec2(0.04, -0.10);
+                    float rWhorl = length(whorlCenter);
+                    float angleW = atan(whorlCenter.y, whorlCenter.x);
+
+                    // Thousands of individual flowing hair strands radiating from the crown whorl
+                    float strandCurve = angleW * 18.0 - pow(rWhorl, 0.65) * 9.5 + fbm(whorlCenter * 6.0, 4) * 1.4;
+                    float strandLayer1 = sin(strandCurve * 6.0) * 0.5 + 0.5;
+                    float strandLayer2 = sin(strandCurve * 15.0 + fbm(hp * 24.0, 5) * 4.0) * 0.5 + 0.5;
+                    float fineHair = mix(strandLayer1, strandLayer2, 0.55);
+
+                    // Natural scalp parting at the exact whorl center & forehead hairline
+                    float whorlScalpSpot = exp(-rWhorl * 14.0);
+                    float foreheadSkinRim = smoothstep(0.68, 0.80, rHead) * smoothstep(0.25, 0.75, hp.y);
+
+                    vec3 warmSkin  = vec3(0.84, 0.64, 0.52) * (0.35 + 0.65 * sunDiff);
+                    vec3 rootHair  = vec3(0.08, 0.06, 0.05);
+                    vec3 midHair   = vec3(0.22, 0.14, 0.09);
+                    vec3 sheenHair = vec3(0.55, 0.40, 0.28);
+
+                    // Anisotropic dual-lobe hair specular highlight band
+                    float anisoBand = exp(-pow( skullNorm.y * 0.7 - skullNorm.x * 0.4 - 0.18, 2.0 ) * 18.0);
+                    vec3 hairSurface = mix(rootHair, midHair, fineHair);
+                    hairSurface += sheenHair * anisoBand * (0.4 + 0.6 * fineHair) * skullZ;
+                    hairSurface *= (0.26 + 0.74 * sunDiff);
+
+                    vec3 crownSurface = mix(hairSurface, warmSkin, clamp(whorlScalpSpot * 0.65 + foreheadSkinRim * 0.85, 0.0, 1.0));
+
+                    // Assemble shoulders, ears, nose, and cranial crown
+                    vec3 heroComp = mix(crowdCol * 0.35, heroJacketCol, heroShoulderMask);
+                    heroComp = mix(heroComp, warmSkin * 0.9, max(earMask, noseMask));
+                    heroComp = mix(heroComp, crownSurface, headSilhouette);
+
+                    // As we zoom deeper into the single head (headProgress > 0.42), MRI / bioluminescent translucency
+                    // reveals the left & right cerebral hemispheres, longitudinal fissure, and cortical gyri/sulci
+                    float cortexReveal = smoothstep(0.42, 0.92, headProgress);
+                    if (cortexReveal > 0.001) {
+                        // Left & right hemisphere symmetry with central interhemispheric fissure
+                        float fissure = smoothstep(0.01, 0.06, abs(hp.x + (fbm(hp * 6.0, 3) - 0.5) * 0.04));
+                        vec2 gyriWarp = vec2(fbm(hp * 5.2, 5), fbm(hp * 5.2 + 7.4, 5));
+                        float sulciFolds = ridgedFbm(hp * 7.8 + gyriWarp * 1.65, 6);
+
+                        vec3 sulcusDark = vec3(0.16, 0.07, 0.14);
+                        vec3 gyrusMatter = vec3(0.86, 0.54, 0.60);
+                        vec3 neuralPulse = vec3(0.28, 0.82, 1.00);
+
+                        vec3 cortexCol = mix(sulcusDark, gyrusMatter, smoothstep(0.18, 0.78, sulciFolds) * fissure);
+                        cortexCol *= (0.35 + 0.65 * skullZ);
+                        cortexCol += neuralPulse * pow(sulciFolds, 3.2) * fissure * 0.75;
+
+                        heroComp = mix(heroComp, cortexCol, cortexReveal * headSilhouette);
+                    }
+
+                    singleHeadCol = heroComp;
+                }
+
+                // -----------------------------------------------------------------
+                // C. PHASE 13 (Z = 505..575): CEREBRAL NEURAL & SYNAPTIC NETWORK
                 // Bioluminescent pyramidal neuron somas, branching dendritic arbors,
                 // myelinated axon tracts, and action-potential synaptic flashes
                 // -----------------------------------------------------------------
@@ -1312,22 +1557,18 @@
                     );
                     vec2 warpedN = nUV + nWarp * 0.45;
 
-                    // Multi-layer Voronoi + Ridged fBm for Soma Bodies, Axons, and Dendritic Spines
                     vec2 layer1 = voronoi(warpedN * 2.4);
                     vec2 layer2 = voronoi(warpedN * 5.8 + nWarp * 1.5);
                     vec2 layer3 = voronoi(warpedN * 13.5 - nWarp * 2.2);
 
-                    // Pyramidal Neuron Soma Cores
                     float somaCore1 = exp(-layer1.x * 7.5);
                     float somaCore2 = exp(-layer2.x * 9.0) * 0.75;
 
-                    // Myelinated Axon Tracts & Branching Dendrites
                     float axonWeb1 = smoothstep(0.13, 0.006, layer1.y);
                     float dendriteWeb2 = smoothstep(0.14, 0.008, layer2.y);
                     float spineWeb3 = smoothstep(0.16, 0.010, layer3.y);
                     float filamentNoise = ridgedFbm(warpedN * 8.5, 6);
 
-                    // Synaptic bouton action-potential bursts along the axon intersections
                     float pulsePhase = sin(warpedN.x * 7.0 + warpedN.y * 7.0 - u_time * 3.5 + filamentNoise * 6.0) * 0.5 + 0.5;
                     float synapticSpark = (axonWeb1 * dendriteWeb2) * (0.65 + 0.35 * pulsePhase) + pow(somaCore1, 2.2);
 
@@ -1342,8 +1583,6 @@
                     brainCol += dendriteCyan * (axonWeb1 * 0.85 + somaCore2 * 0.55);
                     brainCol += somaGold * clamp(synapticSpark * 1.35 + somaCore1 * 0.95, 0.0, 1.4);
 
-                    // As we approach Z = 562..582, neuro-vascular blood-brain barrier vessels appear
-                    // to bridge smoothly into Phase 13 (Human Vascular System)
                     float neuroVascBridge = smoothstep(555.0, 580.0, zDepth);
                     float bbbVessel = smoothstep(0.62, 0.92, ridgedFbm(warpedN * 3.2, 5));
                     brainCol = mix(brainCol, vec3(0.88, 0.16, 0.24), neuroVascBridge * bbbVessel * 0.75);
@@ -1354,7 +1593,7 @@
                 return combined;
             }
 
-            // Phase 13 & 14: Murray's Law (r_parent^3 = r_child1^3 + r_child2^3) Vascular System (575..640) & Lung Alveoli (640..700)
+            // Phase 14 & 15: Murray's Law (r_parent^3 = r_child1^3 + r_child2^3) Vascular System (575..640) & Lung Alveoli (640..700)
             vec3 renderVascularAndAlveoli(vec2 p, float zDepth, vec2 baseWorldUV) {
                 // zDepth spans 565 .. 700:
                 // 565 .. 640: Bifurcating Arterial & Venous Vascular Capillary Bed
@@ -1598,27 +1837,35 @@
                 vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / min(u_resolution.x, u_resolution.y);
                 vec3 finalColor = vec3(0.03, 0.04, 0.07);
 
-                if (u_depthZ < 100.0) {
+                // Stage I spans Z = 0..180
+                // Stage II spans Z = 180..472.5 (3 x 15-sec phases = 45s total at 1x:
+                //   Phase 6: 180..277.5 Einstein Hat IFS
+                //   Phase 7: 277.5..375 2.5D Extruded Skyscraper Skyline
+                //   Phase 8: 375..472.5 True 3D Aperiodic Monotiles & Helical Polyhedra)
+                // Stage III spans Z = 472.5..927.5 (mapped to internal s3Depth = 240..700)
+                float s3Depth = u_depthZ - 227.5;
+
+                if (u_depthZ < 180.0) {
                     finalColor = renderStage1(p, u_depthZ);
-                } else if (u_depthZ < 245.0) {
-                    // Stage 2 backdrop beneath the stretched Einstein Hat & 3D Skyscraper City Canvas
+                } else if (u_depthZ < 472.5) {
+                    // Stage 2 backdrop beneath the Einstein Hat, 2.5D Skyline & True 3D Monotile Canvas
                     float radial = length(p);
                     float wave = sin(radial * 10.0 - u_time * 0.8) * 0.5 + 0.5;
                     finalColor = mix(vec3(0.02, 0.03, 0.06), getPalette(wave * 0.3, u_palette) * 0.24, 0.6);
                 } else {
-                    finalColor = renderStage3(p, u_depthZ);
+                    finalColor = renderStage3(p, s3Depth);
                 }
 
-                // Bridge 1: Planar Facet Etch -> Einstein Hat Tiling (Z = 88..114)
-                if (u_depthZ >= 88.0 && u_depthZ < 114.0) {
-                    float w1 = 1.0 - smoothstep(88.0, 112.0, u_depthZ);
-                    vec3 s1 = renderStage1(p, min(u_depthZ, 99.5));
+                // Bridge 1: Planar Facet Etch -> Einstein Hat Tiling (Z = 168..194)
+                if (u_depthZ >= 168.0 && u_depthZ < 194.0) {
+                    float w1 = 1.0 - smoothstep(168.0, 192.0, u_depthZ);
+                    vec3 s1 = renderStage1(p, min(u_depthZ, 179.5));
                     finalColor = mix(finalColor, s1, w1);
                 }
-                // Bridge 2: Stretched 3D Skyscraper Waterfront City Skyline -> Coastal Beach & Charts (Z = 212..256)
-                if (u_depthZ >= 212.0 && u_depthZ < 256.0) {
-                    float w3 = smoothstep(215.0, 252.0, u_depthZ);
-                    vec3 s3 = renderStage3(p, max(u_depthZ, 240.1));
+                // Bridge 2: True 3D Aperiodic Monotile Megastructures -> Coastal Beach & Charts (Z = 440..484)
+                if (u_depthZ >= 440.0 && u_depthZ < 484.0) {
+                    float w3 = smoothstep(444.0, 480.0, u_depthZ);
+                    vec3 s3 = renderStage3(p, max(s3Depth, 240.1));
                     finalColor = mix(finalColor, s3, w3);
                 }
 
@@ -1679,10 +1926,12 @@
         };
 
         /**************************************************************************
-         * 4. MULTI-SCALE EINSTEIN "HAT" GRAPH-DIRECTED IFS & 3D SKYSCRAPER CITY SKYLINE
-         * - Z = 88..178:  Stretched 2D Einstein Hat Monotile + Recursive H7/H8 IFS Supertiles
-         * - Z = 178..252: Stretched Transition Bridge 2 — Zoom into Einstein Edge & Extrude
-         *   into a 3D High-Rise Skyscraper City Skyline along the Coastal Waterfront!
+         * 4. MULTI-SCALE EINSTEIN "HAT" IFS, 2.5D EXTRUDED SKYLINE & TRUE 3D APERIODIC MONOTILES
+         * Stage II is expanded to 292.5 Z-units (45.0 seconds total at 1x speed):
+         * - Phase 6 (Z = 180.0 .. 277.5 | 15.0s): 2D Einstein Hat Monotile + Recursive H7/H8 IFS Supertiles
+         * - Phase 7 (Z = 277.5 .. 375.0 | 15.0s): 2.5D Vertical Prismatic Extrusion into High-Rise City Skyline
+         * - Phase 8 (Z = 375.0 .. 472.5 | 15.0s): True 3D Aperiodic Monotiles (Schmitt-Conway-Danzer twisted
+         *   bipyramidal wedge polyhedra & Socolar-Taylor 3D honeycombs with chiral Z-stacked cantilevers)
          **************************************************************************/
         function renderEinsteinScene(alpha) {
             const w = hatCanvas.width;
@@ -1694,23 +1943,29 @@
             ctx2d.globalAlpha = alpha;
 
             const minDim = Math.min(w, h);
-            const z = state.depthZ;
+            const absZ = state.depthZ;
 
-            // Stretched City Skyline Extrusion Factor (0.0 at Z <= 174, ramps smoothly over 48 units to 1.0 at Z = 222..252)
-            const cityExtrude = Math.max(0.0, Math.min(1.0, (z - 174.0) / 48.0));
-            // Smooth camera glide toward the coastal edge of the Einstein city cluster during Z = 180..248
-            const edgeGlide = Math.max(0.0, Math.min(1.0, (z - 180.0) / 65.0));
+            // Phase 6: 180 .. 277.5 (97.5 Z-units = 15s) -> Pure 2D Einstein Hat IFS inflation
+            // Phase 7: 277.5 .. 375.0 (97.5 Z-units = 15s) -> 2.5D Extruded Skyscraper Skyline
+            // Phase 8: 375.0 .. 472.5 (97.5 Z-units = 15s) -> True 3D Aperiodic Monotiles (SCD / Socolar-Taylor 3D Polyhedra)
+            const cityExtrude = Math.max(0.0, Math.min(1.0, (absZ - 268.0) / 88.0));
+            const true3DMonotile = Math.max(0.0, Math.min(1.0, (absZ - 365.0) / 78.0));
+            // Smooth camera glide toward the coastal harbor edge during the second half of Phase 8 (Z = 410..472.5)
+            const edgeGlide = Math.max(0.0, Math.min(1.0, (absZ - 405.0) / 65.0));
 
-            // Continuous φ² = 2.618034 substitution inflation across Z = 100..178, stabilizing during city skyline view
-            const effectiveZ = z < 178.0 ? Math.max(0.0, z - 95.0) : (83.0 + (z - 178.0) * 0.25);
-            const inflationCycle = (effectiveZ / 28.0) % 1.0;
-            const inflationGeneration = Math.floor(effectiveZ / 28.0);
-            const zoomMultiplier = Math.pow(PHI2, inflationCycle) * state.zoom * (1.0 + cityExtrude * 0.48);
+            // Continuous φ² = 2.618034 substitution inflation across Phase 6 (Z = 180..277.5), stabilizing during 3D phases
+            const hatIfsSpan = Math.max(0.0, Math.min(97.5, absZ - 180.0));
+            const postIfsSpan = Math.max(0.0, absZ - 277.5);
+            const effectiveZ = hatIfsSpan + postIfsSpan * 0.22;
+
+            const inflationCycle = (effectiveZ / 32.5) % 1.0;
+            const inflationGeneration = Math.floor(effectiveZ / 32.5);
+            const zoomMultiplier = Math.pow(PHI2, inflationCycle) * state.zoom * (1.0 + cityExtrude * 0.42 + true3DMonotile * 0.28);
             const baseScale = (minDim / 28.0) * zoomMultiplier;
 
-            const genRotation = state.hatRotation + inflationGeneration * SUBST_ANGLE;
-            // Foreshorten Y-axis slightly as camera tilts into oblique 3D skyscraper skyline view
-            const pitchSquash = 1.0 - cityExtrude * 0.34;
+            const genRotation = state.hatRotation + inflationGeneration * SUBST_ANGLE + true3DMonotile * 0.28;
+            // Foreshorten Y-axis as camera tilts into oblique 2.5D skyline and deeper 3D polyhedral lattice view
+            const pitchSquash = 1.0 - cityExtrude * 0.30 - true3DMonotile * 0.08;
 
             const panOffsetX = (state.camX - edgeGlide * 0.28) * minDim * 0.4;
             const panOffsetY = (-state.camY + edgeGlide * 0.18) * minDim * 0.4;
@@ -1719,9 +1974,7 @@
             ctx2d.scale(1.0, pitchSquash);
             ctx2d.rotate(genRotation);
 
-            // Transform world point (wx, wy) with vertical 3D skyscraper elevation (heightH) into current canvas space
             const cosG = Math.cos(genRotation), sinG = Math.sin(genRotation);
-            // Screen-upward 3D extrusion vector expressed in rotated world coordinates
             const upVecX = (-sinG) / Math.max(0.3, pitchSquash);
             const upVecY = (-cosG) / Math.max(0.3, pitchSquash);
 
@@ -1729,6 +1982,18 @@
                 x: (wx + upVecX * heightH) * baseScale,
                 y: (wy + upVecY * heightH) * baseScale
             });
+
+            // Helper for Phase 8 True 3D Aperiodic Monotile Vertex Transformation:
+            // Applies a helical Schmitt-Conway-Danzer (SCD) screw-rotation & polyhedral taper around (cx, cy)
+            const project3DMonotileVert = (vx, vy, cx, cy, zElev, twistAngle, radialScale) => {
+                const dx = vx - cx;
+                const dy = vy - cy;
+                const cT = Math.cos(twistAngle) * radialScale;
+                const sT = Math.sin(twistAngle) * radialScale;
+                const wx = cx + dx * cT - dy * sT;
+                const wy = cy + dx * sT + dy * cT;
+                return projectPt(wx, wy, zElev);
+            };
 
             const dxM = (state.mouseX * window.devicePixelRatio - (w * 0.5 + panOffsetX));
             const dyM = (state.mouseY * window.devicePixelRatio - (h * 0.5 + panOffsetY)) / pitchSquash;
@@ -1758,7 +2023,6 @@
             const pal = palettes[state.paletteIndex] || palettes[0];
             const bevelShift = (state.shapeWarp - 0.5) * 6.0;
 
-            // Sort tiles back-to-front by screen Y coordinate so 3D extruded skyscrapers occlude properly
             const visibleTiles = einsteinTiles.slice(0, maxVisible);
             if (cityExtrude > 0.01) {
                 visibleTiles.sort((a, b) => {
@@ -1768,11 +2032,11 @@
                 });
             }
 
-            // 1. Draw Primary 13-Sided Einstein Hat Tiles & 3D Extruded Skyscraper Towers
+            // 1. Draw Primary 13-Sided Einstein Hat Tiles, 2.5D Extruded Skyscrapers & True 3D Aperiodic Polyhedra
             for (let i = 0; i < visibleTiles.length; i++) {
                 const tile = visibleTiles[i];
 
-                // Coastal Waterfront Culling: tiles on the outer harbor edge give way to the ocean waterfront as Z -> 195
+                // Coastal Waterfront Culling as we glide toward the harbor edge in late Phase 8
                 const harborEdgeMetric = tile.cx * 0.7 + tile.cy * 0.7;
                 if (edgeGlide > 0.25 && harborEdgeMetric > 14.0 - edgeGlide * 9.0) {
                     continue;
@@ -1785,12 +2049,18 @@
                 const supertileTint = ((tile.supertileId || 0) * 19) % 36;
                 const elevation = tile.isReflected ? 1.0 : (0.15 + 0.3 * wave * tile.elevationBias);
 
-                // Compute 3D vertical extrusion height for this Einstein skyscraper block
+                // Compute 2.5D vertical extrusion height for this Einstein skyscraper block
                 const h3D = cityExtrude * tile.towerHeight * (1.0 + (state.shapeWarp - 0.5) * 0.45);
 
-                // A. If in 3D Skyscraper Mode (cityExtrude > 0.02), draw Street Boulevard Base + Extruded Curtain-Wall Facades
+                // Phase 8 True 3D Aperiodic Monotile parameters:
+                // Socolar-Taylor / Schmitt-Conway-Danzer 3D monotiles break Z-periodicity via irrational screw-twist
+                // (acos(1/4) or golden-angle twist per vertical layer) + non-collinear bipyramidal facets
+                const chiralSign = tile.isReflected ? -1.0 : 1.0;
+                const scdTwist = true3DMonotile * chiralSign * (0.48 + (tile.generation % 3) * 0.14);
+                const roofScale = 1.0 - true3DMonotile * 0.18;
+
+                // A. 2.5D Skyscraper & 3D Monotile Base + Facade Walls
                 if (h3D > 0.02) {
-                    // Dark street-level urban canyon footprint
                     ctx2d.beginPath();
                     for (let v = 0; v < tile.verts.length; v++) {
                         const bp = projectPt(tile.verts[v].x, tile.verts[v].y, 0);
@@ -1801,41 +2071,94 @@
                     ctx2d.fillStyle = "rgba(4, 8, 18, 0.82)";
                     ctx2d.fill();
                     ctx2d.lineWidth = Math.max(1.2, baseScale * 0.06);
-                    ctx2d.strokeStyle = "rgba(251, 191, 36, 0.28)"; // Illuminated street canyon boulevard lines
+                    ctx2d.strokeStyle = "rgba(251, 191, 36, 0.28)";
                     ctx2d.stroke();
 
-                    // Extrude each visible polygon wall edge from z=0 to z=h3D
                     const nVerts = tile.verts.length;
+                    const midZ = h3D * 0.54;
+                    const midTwist = scdTwist * 0.52;
+                    const midScale = 1.0 + true3DMonotile * 0.16 * chiralSign;
+
                     for (let v = 0; v < nVerts; v++) {
                         const v1 = tile.verts[v];
                         const v2 = tile.verts[(v + 1) % nVerts];
                         const b1 = projectPt(v1.x, v1.y, 0);
                         const b2 = projectPt(v2.x, v2.y, 0);
-                        const t2 = projectPt(v2.x, v2.y, h3D);
-                        const t1 = projectPt(v1.x, v1.y, h3D);
+                        const t2 = project3DMonotileVert(v2.x, v2.y, tile.cx, tile.cy, h3D, scdTwist, roofScale);
+                        const t1 = project3DMonotileVert(v1.x, v1.y, tile.cx, tile.cy, h3D, scdTwist, roofScale);
 
-                        // Directional sunlight shading per building wall face
                         const edgeDX = v2.x - v1.x;
                         const edgeDY = v2.y - v1.y;
                         const sunDot = (edgeDX * 0.65 - edgeDY * 0.75) / (Math.hypot(edgeDX, edgeDY) + 1e-4);
                         const wallLight = Math.floor((sunDot * 0.5 + 0.5) * 48);
 
-                        ctx2d.beginPath();
-                        ctx2d.moveTo(b1.x, b1.y);
-                        ctx2d.lineTo(b2.x, b2.y);
-                        ctx2d.lineTo(t2.x, t2.y);
-                        ctx2d.lineTo(t1.x, t1.y);
-                        ctx2d.closePath();
+                        if (true3DMonotile < 0.08) {
+                            // Pure Phase 7: Vertical 2.5D Prismatic Skyscraper Wall
+                            ctx2d.beginPath();
+                            ctx2d.moveTo(b1.x, b1.y);
+                            ctx2d.lineTo(b2.x, b2.y);
+                            ctx2d.lineTo(t2.x, t2.y);
+                            ctx2d.lineTo(t1.x, t1.y);
+                            ctx2d.closePath();
 
-                        if (tile.isReflected) {
-                            ctx2d.fillStyle = `rgb(${Math.min(255, Math.floor(pal.ref[0] * 0.55) + wallLight)}, ${Math.min(255, Math.floor(pal.ref[1] * 0.55) + wallLight)}, ${Math.min(255, Math.floor(pal.ref[2] * 0.65) + wallLight)})`;
+                            if (tile.isReflected) {
+                                ctx2d.fillStyle = `rgb(${Math.min(255, Math.floor(pal.ref[0] * 0.55) + wallLight)}, ${Math.min(255, Math.floor(pal.ref[1] * 0.55) + wallLight)}, ${Math.min(255, Math.floor(pal.ref[2] * 0.65) + wallLight)})`;
+                            } else {
+                                ctx2d.fillStyle = `rgb(${Math.min(255, pal.unref[0] + wallLight)}, ${Math.min(255, pal.unref[1] + wallLight + 6)}, ${Math.min(255, pal.unref[2] + wallLight + 14)})`;
+                            }
+                            ctx2d.fill();
+                            ctx2d.lineWidth = Math.max(0.6, baseScale * 0.018);
+                            ctx2d.strokeStyle = "rgba(148, 163, 184, 0.28)";
+                            ctx2d.stroke();
                         } else {
-                            ctx2d.fillStyle = `rgb(${Math.min(255, pal.unref[0] + wallLight)}, ${Math.min(255, pal.unref[1] + wallLight + 6)}, ${Math.min(255, pal.unref[2] + wallLight + 14)})`;
+                            // Phase 8: True 3D Aperiodic Monotile Polyhedron (Schmitt-Conway-Danzer / Socolar-Taylor)
+                            // Splits each vertical wall into triangulated, helically-twisted bipyramidal facets
+                            // with a cantilevered equatorial ridge (m1, m2) so no 3D translational period exists!
+                            const m1 = project3DMonotileVert(v1.x, v1.y, tile.cx, tile.cy, midZ, midTwist, midScale);
+                            const m2 = project3DMonotileVert(v2.x, v2.y, tile.cx, tile.cy, midZ, midTwist, midScale);
+
+                            // Lower bipyramid wedge facet (b1 -> b2 -> m2 -> m1)
+                            ctx2d.beginPath();
+                            ctx2d.moveTo(b1.x, b1.y);
+                            ctx2d.lineTo(b2.x, b2.y);
+                            ctx2d.lineTo(m2.x, m2.y);
+                            ctx2d.lineTo(m1.x, m1.y);
+                            ctx2d.closePath();
+                            const lowerLight = Math.max(0, wallLight - 12);
+                            if (tile.isReflected) {
+                                ctx2d.fillStyle = `rgb(${Math.min(255, Math.floor(pal.ref[0] * 0.48) + lowerLight)}, ${Math.min(255, Math.floor(pal.ref[1] * 0.48) + lowerLight)}, ${Math.min(255, Math.floor(pal.ref[2] * 0.62) + lowerLight)})`;
+                            } else {
+                                ctx2d.fillStyle = `rgb(${Math.min(255, pal.unref[0] + lowerLight)}, ${Math.min(255, pal.unref[1] + lowerLight + 4)}, ${Math.min(255, pal.unref[2] + lowerLight + 12)})`;
+                            }
+                            ctx2d.fill();
+
+                            // Upper twisted polyhedral facet (m1 -> m2 -> t2 -> t1) + diagonal SCD triangulation crease
+                            ctx2d.beginPath();
+                            ctx2d.moveTo(m1.x, m1.y);
+                            ctx2d.lineTo(m2.x, m2.y);
+                            ctx2d.lineTo(t2.x, t2.y);
+                            ctx2d.lineTo(t1.x, t1.y);
+                            ctx2d.closePath();
+                            const upperLight = Math.min(85, wallLight + 18);
+                            if (tile.isReflected) {
+                                ctx2d.fillStyle = `rgb(${Math.min(255, Math.floor(pal.ref[0] * 0.68) + upperLight)}, ${Math.min(255, Math.floor(pal.ref[1] * 0.68) + upperLight)}, ${Math.min(255, Math.floor(pal.ref[2] * 0.78) + upperLight)})`;
+                            } else {
+                                ctx2d.fillStyle = `rgb(${Math.min(255, pal.unref[0] + upperLight)}, ${Math.min(255, pal.unref[1] + upperLight + 12)}, ${Math.min(255, pal.unref[2] + upperLight + 24)})`;
+                            }
+                            ctx2d.fill();
+
+                            ctx2d.lineWidth = Math.max(0.65, baseScale * 0.019);
+                            ctx2d.strokeStyle = tile.isReflected ? "rgba(253, 224, 71, 0.48)" : "rgba(125, 211, 252, 0.34)";
+                            ctx2d.stroke();
+
+                            // Diagonal Schmitt-Conway-Danzer triangulation edge across the twisted quad
+                            if ((v % 2) === 0) {
+                                ctx2d.beginPath();
+                                ctx2d.moveTo(m1.x, m1.y);
+                                ctx2d.lineTo(t2.x, t2.y);
+                                ctx2d.stroke();
+                            }
                         }
-                        ctx2d.fill();
-                        ctx2d.lineWidth = Math.max(0.6, baseScale * 0.018);
-                        ctx2d.strokeStyle = "rgba(148, 163, 184, 0.28)";
-                        ctx2d.stroke();
 
                         // Architectural Floor Slab Mullions & Illuminated Skyscraper Window Bands
                         const floors = Math.min(8, Math.max(2, Math.floor(tile.towerHeight * 3.0)));
@@ -1847,8 +2170,12 @@
                                 if (((tile.windowSeed + fl + v) % 3) === 0) continue;
                                 const fRatio = fl / floors;
                                 const fh = h3D * fRatio;
-                                const wA = projectPt(v1.x + edgeDX * 0.15, v1.y + edgeDY * 0.15, fh);
-                                const wB = projectPt(v1.x + edgeDX * 0.85, v1.y + edgeDY * 0.85, fh);
+                                const fTwist = scdTwist * fRatio;
+                                const fScale = 1.0 - true3DMonotile * 0.14 * fRatio;
+                                const w1x = v1.x + edgeDX * 0.15, w1y = v1.y + edgeDY * 0.15;
+                                const w2x = v1.x + edgeDX * 0.85, w2y = v1.y + edgeDY * 0.85;
+                                const wA = project3DMonotileVert(w1x, w1y, tile.cx, tile.cy, fh, fTwist, fScale);
+                                const wB = project3DMonotileVert(w2x, w2y, tile.cx, tile.cy, fh, fTwist, fScale);
                                 ctx2d.moveTo(wA.x, wA.y);
                                 ctx2d.lineTo(wB.x, wB.y);
                             }
@@ -1857,10 +2184,10 @@
                     }
                 }
 
-                // B. Draw Rooftop / Top Polygon of the Einstein Hat
+                // B. Draw Rooftop / Top Cap Polygon of the Einstein Hat (with 3D helical twist in Phase 8)
                 ctx2d.beginPath();
                 for (let v = 0; v < tile.verts.length; v++) {
-                    const tp = projectPt(tile.verts[v].x, tile.verts[v].y, h3D);
+                    const tp = project3DMonotileVert(tile.verts[v].x, tile.verts[v].y, tile.cx, tile.cy, h3D, scdTwist, roofScale);
                     const vx = tp.x + (tile.isReflected ? bevelShift : 0);
                     const vy = tp.y + (tile.isReflected ? bevelShift : 0);
                     if (v === 0) ctx2d.moveTo(vx, vy);
@@ -1886,6 +2213,58 @@
                 }
                 ctx2d.fill();
 
+                // Outer 13-sided Hat Rooftop Boundary Stroke
+                ctx2d.lineWidth = Math.max(1.1, baseScale * 0.042);
+                ctx2d.strokeStyle = tile.isReflected ? "#ffffff" : pal.stroke;
+                ctx2d.stroke();
+
+                // B2. PHASE 8 TRUE 3D APERIODIC MONOTILE CROWN POLYHEDRON & SOCOLAR-TAYLOR 3D BRIDGES
+                // Constructs the upper bipyramidal 3D polyhedron cap + second-tier Z-stacked aperiodic cell
+                if (true3DMonotile > 0.05) {
+                    const apexH = h3D + true3DMonotile * (0.55 + tile.elevationBias * 0.55);
+                    const apexTwist = scdTwist * 1.65;
+                    const apexPt = project3DMonotileVert(
+                        tile.cx + chiralSign * 0.18,
+                        tile.cy - chiralSign * 0.14,
+                        tile.cx, tile.cy,
+                        apexH, apexTwist, 0.35
+                    );
+
+                    // Draw polyhedral ridge ribs from every other vertex of the twisted roof cap up to the 3D bipyramid apex
+                    ctx2d.beginPath();
+                    for (let v = 0; v < tile.verts.length; v += 2) {
+                        const tp = project3DMonotileVert(tile.verts[v].x, tile.verts[v].y, tile.cx, tile.cy, h3D, scdTwist, roofScale);
+                        ctx2d.moveTo(tp.x, tp.y);
+                        ctx2d.lineTo(apexPt.x, apexPt.y);
+                    }
+                    ctx2d.strokeStyle = tile.isReflected
+                        ? `rgba(254, 240, 138, ${0.75 * true3DMonotile})`
+                        : `rgba(125, 211, 252, ${0.52 * true3DMonotile})`;
+                    ctx2d.lineWidth = Math.max(0.85, baseScale * 0.026);
+                    ctx2d.stroke();
+
+                    // Upper Z-Stacked Socolar-Taylor 3D Honeycomb Cell (hovering interlocked 3D monotile layer)
+                    if (tile.isReflected || (tile.generation % 2 === 0)) {
+                        const tier2H = apexH + true3DMonotile * 0.42;
+                        const tier2Scale = 0.56 * true3DMonotile;
+                        const tier2Twist = -scdTwist * 1.35 + SUBST_ANGLE;
+                        ctx2d.beginPath();
+                        for (let v = 0; v < tile.verts.length; v++) {
+                            const uPt = project3DMonotileVert(tile.verts[v].x, tile.verts[v].y, tile.cx, tile.cy, tier2H, tier2Twist, tier2Scale);
+                            if (v === 0) ctx2d.moveTo(uPt.x, uPt.y);
+                            else ctx2d.lineTo(uPt.x, uPt.y);
+                        }
+                        ctx2d.closePath();
+                        ctx2d.fillStyle = tile.isReflected
+                            ? `rgba(${pal.ref[0]}, ${pal.ref[1]}, ${pal.ref[2]}, ${0.58 * true3DMonotile})`
+                            : `rgba(${pal.unref[0] + 45}, ${pal.unref[1] + 65}, ${pal.unref[2] + 90}, ${0.52 * true3DMonotile})`;
+                        ctx2d.fill();
+                        ctx2d.strokeStyle = `rgba(255, 255, 255, ${0.65 * true3DMonotile})`;
+                        ctx2d.lineWidth = Math.max(0.8, baseScale * 0.024);
+                        ctx2d.stroke();
+                    }
+                }
+
                 // C. RECURSIVE INWARD HAT-IFS GENERATOR & ROOFTOP PENTHOUSE SUB-TOWERS
                 if ((state.hatIfsMode === 0 || state.hatIfsMode === 2) && tile.childHatsGen1) {
                     const subAlpha = state.hatIfsMode === 2 ? 0.72 : (0.28 + 0.55 * inflationCycle);
@@ -1897,7 +2276,7 @@
                         const subH = h3D + (cityExtrude > 0.15 ? cityExtrude * 0.28 * childHat.towerRatio : 0);
                         ctx2d.beginPath();
                         for (let v = 0; v < childHat.verts.length; v++) {
-                            const cp = projectPt(childHat.verts[v].x, childHat.verts[v].y, subH);
+                            const cp = project3DMonotileVert(childHat.verts[v].x, childHat.verts[v].y, tile.cx, tile.cy, subH, scdTwist * 0.8, roofScale);
                             if (v === 0) ctx2d.moveTo(cp.x, cp.y);
                             else ctx2d.lineTo(cp.x, cp.y);
                         }
@@ -1928,7 +2307,67 @@
                     }
                 }
 
-                // D. Rooftop Helipad Rings & Supertall Antenna Spires in 3D City Skyline Mode
+                // C2. BINARY 0 / 1 CHIRAL DISCRETIZATION GLYPHS
+                // "0" = Dark Unreflected Hat Tile (~85.4% matrix), "1" = Translucent Light Reflected Anti-Hat Core (~14.6% beacon)
+                // As we approach the biological/natural world (Z = 420..480), the rigid 0 and 1 bits fracture & dissolve back into ~ continuity
+                if (state.showBinaryBits && baseScale > 8.5) {
+                    const topCenter = project3DMonotileVert(tile.cx, tile.cy, tile.cx, tile.cy, h3D, scdTwist, roofScale);
+                    const dissolveToBio = Math.max(0.0, Math.min(1.0, (absZ - 418.0) / 52.0));
+
+                    ctx2d.save();
+                    ctx2d.translate(topCenter.x, topCenter.y);
+                    ctx2d.rotate(-genRotation);
+
+                    const fontSize = Math.max(9, Math.min(24, baseScale * (tile.isReflected ? 0.52 : 0.38)));
+                    ctx2d.font = `700 ${fontSize.toFixed(1)}px "JetBrains Mono", monospace`;
+                    ctx2d.textAlign = "center";
+                    ctx2d.textBaseline = "middle";
+
+                    // During late Phase 8 (dissolveToBio > 0), binary 0/1 glyphs drift and morph into "≈" / "∞" biological continuity symbols
+                    const driftY = dissolveToBio * Math.sin(state.time * 2.5 + tile.phase) * baseScale * 0.35;
+                    const bitAlpha = (1.0 - dissolveToBio * 0.78) * (tile.isReflected ? 0.96 : 0.68);
+
+                    let glyph = tile.isReflected ? "1" : "0";
+                    if (dissolveToBio > 0.55 && ((i + tile.windowSeed) % 2 === 0)) {
+                        glyph = tile.isReflected ? "∞" : "≈";
+                    }
+
+                    if (tile.isReflected) {
+                        ctx2d.shadowColor = "rgba(255, 255, 255, 0.85)";
+                        ctx2d.shadowBlur = 8;
+                        ctx2d.fillStyle = `rgba(255, 255, 255, ${bitAlpha})`;
+                    } else {
+                        ctx2d.fillStyle = `rgba(226, 232, 240, ${bitAlpha * 0.78})`;
+                    }
+                    ctx2d.fillText(glyph, 0, driftY);
+
+                    // Sub-bit labels inside the recursive child Hat-IFS tiles when zoomed in on Phase 6
+                    if (cityExtrude < 0.35 && baseScale > 19.0 && tile.childHatsGen1) {
+                        const subFont = Math.max(7, baseScale * 0.16);
+                        ctx2d.font = `600 ${subFont.toFixed(1)}px "JetBrains Mono", monospace`;
+                        for (let c = 0; c < Math.min(4, tile.childHatsGen1.length); c++) {
+                            const ch = tile.childHatsGen1[c];
+                            let scx = 0, scy = 0;
+                            for (let v = 0; v < ch.verts.length; v++) {
+                                scx += ch.verts[v].x;
+                                scy += ch.verts[v].y;
+                            }
+                            scx /= ch.verts.length;
+                            scy /= ch.verts.length;
+                            const subPt = projectPt(scx, scy, h3D);
+                            const relX = subPt.x - topCenter.x;
+                            const relY = subPt.y - topCenter.y;
+                            const rX = relX * Math.cos(-genRotation) - relY * Math.sin(-genRotation);
+                            const rY = relX * Math.sin(-genRotation) + relY * Math.cos(-genRotation);
+                            ctx2d.fillStyle = ch.refl ? "rgba(254, 240, 138, 0.85)" : "rgba(148, 163, 184, 0.55)";
+                            ctx2d.fillText(ch.refl ? "1" : "0", rX, rY);
+                        }
+                    }
+
+                    ctx2d.restore();
+                }
+
+                // D. Rooftop Helipad Rings & Supertall Antenna Spires in 2.5D/3D City Skyline Mode
                 if (cityExtrude > 0.3 && tile.hasHelipad) {
                     const roofC = projectPt(tile.cx, tile.cy, h3D);
                     ctx2d.beginPath();
@@ -1961,11 +2400,33 @@
                     }
                     ctx2d.stroke();
                 }
+            }
 
-                // Outer 13-sided Hat Rooftop Boundary Stroke
-                ctx2d.lineWidth = Math.max(1.1, baseScale * 0.042);
-                ctx2d.strokeStyle = tile.isReflected ? "#ffffff" : pal.stroke;
-                ctx2d.stroke();
+            // 2B. PHASE 8 NON-LOCAL SOCOLAR-TAYLOR 3D APERIODIC SKY-BRIDGES
+            // Socolar-Taylor 3D honeycombs enforce 3D aperiodicity via non-adjacent chiral sky-bridges connecting next-nearest neighbors
+            if (true3DMonotile > 0.12 && supertileClusters.length > 0) {
+                ctx2d.save();
+                ctx2d.globalAlpha = alpha * Math.min(1.0, true3DMonotile * 1.15);
+                ctx2d.strokeStyle = pal.super;
+                ctx2d.lineWidth = Math.max(1.2, baseScale * 0.045);
+                ctx2d.setLineDash([baseScale * 0.16, baseScale * 0.10]);
+
+                for (const cluster of supertileClusters) {
+                    const core = cluster.core;
+                    const coreH = cityExtrude * core.towerHeight + true3DMonotile * 0.55;
+                    const cPt = projectPt(core.cx, core.cy, coreH);
+                    ctx2d.beginPath();
+                    for (let m = 0; m < cluster.members.length; m += 2) {
+                        const member = cluster.members[m];
+                        if (member === core) continue;
+                        const memH = cityExtrude * member.towerHeight + true3DMonotile * 0.42;
+                        const mPt = projectPt(member.cx, member.cy, memH);
+                        ctx2d.moveTo(cPt.x, cPt.y);
+                        ctx2d.lineTo(mPt.x, mPt.y);
+                    }
+                    ctx2d.stroke();
+                }
+                ctx2d.restore();
             }
 
             // 3. Draw H7 / H8 Substitution Supertile Graph-Directed IFS Web (fades out as skyscrapers extrude)
@@ -2000,6 +2461,52 @@
             }
 
             ctx2d.restore();
+
+            // 5. Screen-Space Philosophical Banner & Chiral Binary Legend (0 = Dark Unreflected vs 1 = Translucent Reflected)
+            if (state.showBinaryBits) {
+                ctx2d.save();
+                ctx2d.globalAlpha = alpha;
+                const dpr = window.devicePixelRatio || 1;
+                const padX = 18 * dpr;
+                const topY = 92 * dpr;
+
+                const dissolveToBio = Math.max(0.0, Math.min(1.0, (absZ - 412.0) / 56.0));
+                const boxW = Math.min(w - 36 * dpr, 430 * dpr);
+                const boxH = 54 * dpr;
+
+                ctx2d.fillStyle = "rgba(8, 12, 22, 0.82)";
+                ctx2d.strokeStyle = dissolveToBio > 0.3
+                    ? "rgba(52, 211, 153, 0.55)"
+                    : "rgba(251, 191, 36, 0.45)";
+                ctx2d.lineWidth = 1.2 * dpr;
+                ctx2d.beginPath();
+                if (ctx2d.roundRect) {
+                    ctx2d.roundRect(padX, topY, boxW, boxH, 10 * dpr);
+                } else {
+                    ctx2d.rect(padX, topY, boxW, boxH);
+                }
+                ctx2d.fill();
+                ctx2d.stroke();
+
+                ctx2d.font = `700 ${10.5 * dpr}px "JetBrains Mono", monospace`;
+                ctx2d.textAlign = "left";
+                ctx2d.textBaseline = "top";
+
+                if (dissolveToBio < 0.35) {
+                    ctx2d.fillStyle = "#fde047";
+                    ctx2d.fillText("BINARY DISCRETIZATION // 0 vs 1 CHIRAL PARTITION", padX + 12 * dpr, topY + 9 * dpr);
+                    ctx2d.font = `500 ${9.5 * dpr}px "Inter", sans-serif`;
+                    ctx2d.fillStyle = "#cbd5e1";
+                    ctx2d.fillText("0 = Dark Unreflected Hat (~85.4%)  •  1 = Translucent Reflected Anti-Hat (~14.6%)", padX + 12 * dpr, topY + 28 * dpr);
+                } else {
+                    ctx2d.fillStyle = "#6ee7b7";
+                    ctx2d.fillText("DISSOLVING 0 / 1 BITS → BIOLOGICAL CONTINUITY (≈ / ∞)", padX + 12 * dpr, topY + 9 * dpr);
+                    ctx2d.font = `500 ${9.5 * dpr}px "Inter", sans-serif`;
+                    ctx2d.fillStyle = "#e2e8f0";
+                    ctx2d.fillText("Rigid 0 & 1 city boundaries melt back into continuous coastlines, crowds, neurons & lungs.", padX + 12 * dpr, topY + 28 * dpr);
+                }
+                ctx2d.restore();
+            }
         }
 
         /**************************************************************************
@@ -2169,8 +2676,8 @@
 
         function jumpToScene(sceneIdx) {
             if (sceneIdx === 0) state.targetDepthZ = 0.0;
-            else if (sceneIdx === 1) state.targetDepthZ = 140.0;
-            else state.targetDepthZ = 285.0;
+            else if (sceneIdx === 1) state.targetDepthZ = 225.0;
+            else state.targetDepthZ = 510.0;
             resetCamera();
         }
 
@@ -2193,6 +2700,18 @@
         function updateHatIFSMode(val) {
             state.hatIfsMode = parseInt(val, 10);
             updateHUDReadouts();
+        }
+
+        function toggleBinaryBits() {
+            state.showBinaryBits = !state.showBinaryBits;
+            const btn = document.getElementById('binaryBitBtn');
+            if (state.showBinaryBits) {
+                btn.textContent = "Binary 0/1: ON";
+                btn.className = "text-[9px] mono px-1.5 py-0.5 rounded bg-sky-500/25 text-sky-200 border border-sky-400/40 hover:bg-sky-500/40 transition";
+            } else {
+                btn.textContent = "Binary 0/1: OFF";
+                btn.className = "text-[9px] mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-white/10 hover:text-white transition";
+            }
         }
 
         function toggleChaosIFS() {
@@ -2285,7 +2804,7 @@
                 state.autoDive = false;
                 syncAutoZoomUI();
             }
-            state.targetDepthZ = Math.max(0.0, Math.min(700.0, state.targetDepthZ + deltaZ));
+            state.targetDepthZ = Math.max(0.0, Math.min(927.5, state.targetDepthZ + deltaZ));
         }
 
         let controlsVisible = true;
@@ -2296,18 +2815,25 @@
             const label = document.getElementById('toggleControlsText');
             if (controlsVisible) {
                 panel.classList.remove('hidden');
-                if (infoCard) infoCard.classList.remove('hidden');
+                infoCard.classList.remove('hidden');
                 label.textContent = "Hide Details & Configs";
             } else {
                 panel.classList.add('hidden');
-                if (infoCard) infoCard.classList.add('hidden');
+                infoCard.classList.add('hidden');
                 label.textContent = "Show Details & Configs";
             }
         }
 
+        function formatSecondsMMSS(totalSec) {
+            const sec = Math.max(0, Math.round(totalSec));
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
         function updateHUDReadouts() {
             const z = state.depthZ;
-            const activeScene = z < 100.0 ? 0 : (z < 245.0 ? 1 : 2);
+            const activeScene = z < 180.0 ? 0 : (z < 472.5 ? 1 : 2);
 
             for (let i = 0; i < 3; i++) {
                 const tab = document.getElementById(`tab-${i}`);
@@ -2315,35 +2841,35 @@
                 else tab.classList.remove('active');
             }
 
-            // Determine active 14-phase substage index across Z = 0..700
+            // Determine active 15-phase substage index across Z = 0..927.5
             let phaseIdx = 0;
-            if (z < 10) phaseIdx = 0;
-            else if (z < 25) phaseIdx = 1;
-            else if (z < 50) phaseIdx = 2;
-            else if (z < 80) phaseIdx = 3;
-            else if (z < 100) phaseIdx = 4;
-            else if (z < 176) phaseIdx = 5;
-            else if (z < 245) phaseIdx = 6;
-            else if (z < 305) phaseIdx = 7;
-            else if (z < 385) phaseIdx = 8;
-            else if (z < 445) phaseIdx = 9;
-            else if (z < 505) phaseIdx = 10;
-            else if (z < 575) phaseIdx = 11;
-            else if (z < 640) phaseIdx = 12;
-            else phaseIdx = 13;
+            if (z < 35) phaseIdx = 0;
+            else if (z < 75) phaseIdx = 1;
+            else if (z < 115) phaseIdx = 2;
+            else if (z < 155) phaseIdx = 3;
+            else if (z < 180) phaseIdx = 4;
+            else if (z < 277.5) phaseIdx = 5;
+            else if (z < 375.0) phaseIdx = 6;
+            else if (z < 472.5) phaseIdx = 7;
+            else if (z < 532.5) phaseIdx = 8;
+            else if (z < 612.5) phaseIdx = 9;
+            else if (z < 672.5) phaseIdx = 10;
+            else if (z < 732.5) phaseIdx = 11;
+            else if (z < 802.5) phaseIdx = 12;
+            else if (z < 867.5) phaseIdx = 13;
+            else phaseIdx = 14;
 
-            for (let s = 0; s < 14; s++) {
+            for (let s = 0; s < 15; s++) {
                 const stepBtn = document.getElementById(`step-${s}`);
                 if (!stepBtn) continue;
-                const extraSpan = s === 13 ? " col-span-2 sm:col-span-2" : "";
                 if (s === phaseIdx) {
-                    stepBtn.className = "px-1.5 py-1 rounded bg-sky-500/30 border border-sky-400 text-white font-semibold truncate text-left transition shadow-[0_0_10px_rgba(56,189,248,0.3)]" + extraSpan;
+                    stepBtn.className = "px-1.5 py-1 rounded bg-sky-500/30 border border-sky-400 text-white font-semibold truncate text-left transition shadow-[0_0_10px_rgba(56,189,248,0.3)]";
                 } else {
-                    stepBtn.className = "px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-sky-400/50 hover:text-slate-200" + extraSpan;
+                    stepBtn.className = "px-1.5 py-1 rounded bg-slate-900/60 border border-white/10 text-slate-400 truncate text-left transition hover:border-sky-400/50 hover:text-slate-200";
                 }
             }
             const phaseCounterEl = document.getElementById('phaseStepCounter');
-            if (phaseCounterEl) phaseCounterEl.textContent = `PHASE ${phaseIdx + 1} / 14`;
+            if (phaseCounterEl) phaseCounterEl.textContent = `PHASE ${phaseIdx + 1} / 15`;
 
             const titleEl = document.getElementById('sceneTitle');
             const descEl = document.getElementById('sceneDescription');
@@ -2356,105 +2882,118 @@
                 badgeEl.textContent = "Stage I • 2D Triangle → 3D SDF Morph";
                 badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30";
 
-                if (z < 10) {
+                if (z < 35) {
                     dimEl.textContent = "1.5850 (2D Gasket)";
-                    subStageEl.textContent = "1/14 • 2D Sierpinski Triangle";
-                    descEl.innerHTML = `Starting from a crisp <strong class="text-white">2D Sierpinski Triangle</strong> ($D = \\log(3)/\\log(2) \\approx 1.585$) before tilting in 3D space to extrude into a volumetric tetrahedron.`;
-                } else if (z < 25) {
+                    subStageEl.textContent = "1/15 • 2D Sierpinski Triangle";
+                    descEl.innerHTML = `Starting from a crisp <strong class="text-white">2D Sierpinski Triangle</strong> ($D = \\log(3)/\\log(2) \\approx 1.585$) with recursive self-similar zoom before tilting into 3D space.`;
+                } else if (z < 75) {
                     dimEl.textContent = "2.0000 (3D Tetrahedron)";
-                    subStageEl.textContent = "2/14 • 3D Sierpinski Pyramid";
+                    subStageEl.textContent = "2/15 • 3D Sierpinski Pyramid";
                     descEl.innerHTML = `Extruding the 2D gasket into a raymarched <strong class="text-white">3D Sierpinski Pyramid (Tetrahedron)</strong> via spatial folding across $xy$, $xz$, and $yz$ symmetry planes.`;
-                } else if (z < 50) {
+                } else if (z < 115) {
                     dimEl.textContent = "2.7268 (Menger Sponge)";
-                    subStageEl.textContent = "3/14 • 3D Menger Sponge";
+                    subStageEl.textContent = "3/15 • 3D Menger Sponge";
                     descEl.innerHTML = `Morphing tetrahedral folds into the orthogonal cubic cross-tunnels of a <strong class="text-white">3D Menger Sponge</strong> ($D = \\log(20)/\\log(3) \\approx 2.727$).`;
-                } else if (z < 80) {
+                } else if (z < 155) {
                     dimEl.textContent = `~2.89 (Power-${6 + state.sierpinskiSymmetry} Bulb)`;
-                    subStageEl.textContent = `4/14 • 3D Mandelbulb (Power ${6 + state.sierpinskiSymmetry})`;
+                    subStageEl.textContent = `4/15 • 3D Mandelbulb (Power ${6 + state.sierpinskiSymmetry})`;
                     descEl.innerHTML = `Smoothly blending the Menger Sponge into a spherical-coordinate <strong class="text-white">3D Mandelbulb</strong> with organic ridges and canyons.`;
                 } else {
                     dimEl.textContent = "2.0000 (Facet Plane Bridge)";
-                    subStageEl.textContent = "5/14 • Facet Edge → Planar Hat Etching";
+                    subStageEl.textContent = "5/15 • Facet Edge → Planar Hat Etching";
                     descEl.innerHTML = `Zooming directly onto a single flat terrace edge of the 3D fractal until it flattens into an architectural plane etched with <strong class="text-white">Einstein Hat seams</strong>.`;
                 }
             } else if (activeScene === 1) {
-                titleEl.textContent = "02 // EINSTEIN HAT IFS → 3D SKYSCRAPER SKYLINE";
-                badgeEl.textContent = "Stage II • Aperiodic Tiling → Urban Skyline";
+                titleEl.textContent = "02 // EINSTEIN HAT (0/1 BINARY) → SKYLINE → 3D MONOTILES";
+                badgeEl.textContent = "Stage II • Continuous Broken into 0/1 Binary Chiral Bits";
                 badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30";
 
-                if (z < 176) {
-                    dimEl.textContent = "2.000 (φ²=2.618 IFS)";
-                    const gen = Math.floor(Math.max(0, z - 95) / 28) + 1;
-                    subStageEl.textContent = `6/14 • Einstein Hat IFS (Gen #${gen})`;
-                    descEl.innerHTML = `Emerging from the etched facet plane into the <strong class="text-white">13-sided Einstein "Hat" monotile</strong> and its recursive <strong class="text-white">$H_7/H_8$ Graph-Directed IFS</strong> subdivisions.`;
+                if (z < 277.5) {
+                    dimEl.textContent = "2.000 (0/1 Ratio = 1/φ⁴)";
+                    const gen = Math.floor(Math.max(0, z - 180) / 32.5) + 1;
+                    subStageEl.textContent = `6/15 • Einstein Hat 0/1 Chiral IFS (Gen #${gen} • 15s)`;
+                    descEl.innerHTML = `Continuous space is partitioned into discrete <strong class="text-white">Binary 0 and 1 states</strong>: <strong class="text-white">0 = Dark Unreflected Hats (~85.4%)</strong> vs <strong class="text-white">1 = Translucent Light Reflected Anti-Hats (~14.6%)</strong> whose irrational $1/\\phi^4$ ratio never repeats.`;
+                } else if (z < 375.0) {
+                    dimEl.textContent = "2.5D Digital Grid";
+                    subStageEl.textContent = "7/15 • 2.5D Binary Skyscraper City Skyline (15s)";
+                    descEl.innerHTML = `Human architecture amplifies <strong class="text-white">0 / 1 binary thinking</strong>—extruding discrete ` + "`0`" + ` and ` + "`1`" + ` Einstein tiles into rigid high-rise skyscraper blocks, switched window grids, and street canyons.`;
                 } else {
-                    dimEl.textContent = "2.5D/3D Urban Skyline";
-                    subStageEl.textContent = "7/14 • Aperiodic Skyscraper City Skyline → Harbor";
-                    descEl.innerHTML = `Zooming into the edge of the Einstein Hat cluster as each non-repeating polygon extrudes into a <strong class="text-white">3D High-Rise Skyscraper City Skyline</strong> bordering the coastal waterfront.`;
+                    dimEl.textContent = "3.000 (0/1 → ≈ Dissolve)";
+                    subStageEl.textContent = "8/15 • True 3D Monotiles Dissolving 0/1 into Nature (15s)";
+                    descEl.innerHTML = `At the peak of <strong class="text-white">3D Schmitt–Conway–Danzer / Socolar–Taylor</strong> discretization, the rigid <strong class="text-white">0 and 1 binary labels morph into $\\approx$ and $\\infty$</strong> and dissolve into the continuous coastline.`;
                 }
             } else {
-                if (z < 385) {
-                    titleEl.textContent = "03 // COASTAL CHARTS → BEACH → FOREST TREELINE";
-                    badgeEl.textContent = "Stage III • Waterfront → Beach → Canopy";
+                if (z < 612.5) {
+                    titleEl.textContent = "03 // BIOLOGICAL CONTINUITY: COAST → BEACH → TREELINE";
+                    badgeEl.textContent = "Stage III • Beyond 0/1: Nature is Continuous Again";
                     badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-                    const dNat = (2.0 - state.hurstExponent) + ((z - 245) / 140) * 0.35;
+                    const dNat = (2.0 - state.hurstExponent) + ((z - 472.5) / 140) * 0.35;
                     dimEl.textContent = `~${dNat.toFixed(3)} (H=${state.hurstExponent.toFixed(2)})`;
 
-                    if (z < 305) {
-                        subStageEl.textContent = "8/14 • Waterfront Coastline & Bathymetric Charts";
-                    } else if (z < 348) {
-                        subStageEl.textContent = "9/14 • Sandy Beach Cove, Swash Foam & Foredunes";
+                    if (z < 532.5) {
+                        subStageEl.textContent = "9/15 • Waterfront Coastline & Bathymetric Charts";
+                    } else if (z < 575.5) {
+                        subStageEl.textContent = "10/15 • Sandy Beach Cove, Swash Foam & Foredunes";
                     } else {
-                        subStageEl.textContent = "9/14 • Coastal Forest Canopy Treeline Clearing";
+                        subStageEl.textContent = "10/15 • Coastal Forest Canopy Treeline Clearing";
                     }
 
-                    descEl.innerHTML = `Gliding past the waterfront skyline edge into <strong class="text-white">satellite coastline & bathymetric charts</strong>, zooming down into a <strong class="text-white">golden sandy beach swash zone</strong> and overhead <strong class="text-white">coastal pine & live-oak treeline canopy</strong>.`;
-                } else if (z < 445) {
+                    descEl.innerHTML = `Leaving rigid <strong class="text-white">0 and 1 binary boundaries</strong> behind: biologically and physically, the world is <strong class="text-white">continuous again</strong>—flowing smoothly from ocean waves to sandy beach and forest canopy.`;
+                } else if (z < 672.5) {
                     titleEl.textContent = "04 // COLLECTIVE HUMAN CROWD (FESTIVAL / PROTEST)";
                     badgeEl.textContent = "Stage IV • Macroscopic Human Fluid Dynamics";
                     badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30";
                     dimEl.textContent = "~1.880 (Crowd Density Waves)";
-                    subStageEl.textContent = "10/14 • Long-Distance Festival / Protest Gathering";
+                    subStageEl.textContent = "11/15 • Long-Distance Festival / Protest Gathering";
                     descEl.innerHTML = `Emerging from the coastal treeline clearing into an overhead <strong class="text-white">long-distance view of thousands of humans</strong> at a coastal festival or protest—forming emergent <strong class="text-white">density waves, banners, and collective clusters</strong>.`;
-                } else if (z < 505) {
+                } else if (z < 732.5) {
                     titleEl.textContent = "05 // SINGLE HUMAN HEAD & CRANIAL CROWN";
                     badgeEl.textContent = "Stage V • Individual Cranial Vertex → Cortex";
                     badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/25 text-purple-200 border border-purple-400/40";
                     dimEl.textContent = "~2.140 (Whorl & Cortical Gyri)";
-                    subStageEl.textContent = "11/14 • Single Human Head & Translucent Cranium";
+                    subStageEl.textContent = "12/15 • Single Human Head & Translucent Cranium";
                     descEl.innerHTML = `Zooming from the collective crowd down onto a <strong class="text-white">single human head</strong>—tracing the <strong class="text-white">Fibonacci hair whorl</strong> at the crown before turning translucent to reveal the folded <strong class="text-white">cerebral cortex gyri</strong> beneath.`;
-                } else if (z < 575) {
+                } else if (z < 802.5) {
                     titleEl.textContent = "06 // CEREBRAL NEURAL & SYNAPTIC NETWORK";
                     badgeEl.textContent = "Stage VI • Dendritic Arbors & Connectome";
                     badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/25 text-indigo-200 border border-indigo-400/40";
                     dimEl.textContent = "~2.620 (Dendritic Connectome)";
-                    subStageEl.textContent = "12/14 • Pyramidal Neurons, Axons & Synapses";
+                    subStageEl.textContent = "13/15 • Pyramidal Neurons, Axons & Synapses";
                     descEl.innerHTML = `Inside the brain's <strong class="text-white">86-billion-neuron connectome</strong>: branching <strong class="text-white">dendritic arbors</strong>, myelinated axon highways, and action-potential <strong class="text-white">synaptic flashes</strong> bridging into the neuro-vascular bed.`;
-                } else if (z < 640) {
+                } else if (z < 867.5) {
                     titleEl.textContent = "07 // HUMAN ANATOMICAL VASCULAR NETWORKS";
                     badgeEl.textContent = "Stage VII • Murray's Law Arterial & Venous Tree";
                     badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30";
                     dimEl.textContent = "~2.700 (Murray's Law r³)";
-                    subStageEl.textContent = "13/14 • Arterial, Venous & Capillary Anastomosis";
+                    subStageEl.textContent = "14/15 • Arterial, Venous & Capillary Anastomosis";
                     descEl.innerHTML = `Traveling from the blood-brain barrier into <strong class="text-white">human anatomical vascular networks</strong> governed by <strong class="text-white">Murray's Law ($r_p^3 = r_1^3 + r_2^3$)</strong>—oxygenated arterial trees, venous drainage, and capillary beds.`;
                 } else {
                     titleEl.textContent = "08 // PULMONARY BRONCHIOLES & LUNG ALVEOLI SACS";
                     badgeEl.textContent = "Stage VIII • 23-Generation Weibel Lung Alveoli";
                     badgeEl.className = "text-[10px] mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-500/25 text-rose-200 border border-rose-400/40";
                     dimEl.textContent = "~2.970 (Space-Filling Alveoli)";
-                    subStageEl.textContent = "14/14 • Pulmonary Alveolar Sacs & Septal Capillaries";
+                    subStageEl.textContent = "15/15 • Pulmonary Alveolar Sacs & Septal Capillaries";
                     descEl.innerHTML = `Arriving via the pulmonary circulation deep inside the respiratory tree ($D \\approx 2.97$), where <strong class="text-white">polyhedral lung alveoli sacs</strong>, <strong class="text-white">Pores of Kohn</strong>, and <strong class="text-white">pericapillary gas-exchange septa</strong> oxygenate the blood.`;
                 }
             }
 
-            // 35-order-of-magnitude exponential readout (Z = 0..700 -> 10^0 .. 10^35)
-            const magExp = (z / 700.0) * 35.0 + Math.log10(Math.max(state.zoom, 0.001));
+            // 35-order-of-magnitude exponential readout (Z = 0..927.5 -> 10^0 .. 10^35)
+            const magExp = (z / 927.5) * 35.0 + Math.log10(Math.max(state.zoom, 0.001));
             document.getElementById('zoomReadout').textContent = `10^${magExp.toFixed(2)}×`;
-            document.getElementById('depthZReadout').textContent = `${z.toFixed(1)} / 700`;
-            document.getElementById('journeyValueLabel').textContent = `${z.toFixed(1)} / 700`;
+            document.getElementById('depthZReadout').textContent = `${z.toFixed(1)} / 927.5`;
+            document.getElementById('journeyValueLabel').textContent = `${z.toFixed(1)} / 927.5`;
             document.getElementById('journeySlider').value = z;
             document.getElementById('subMorphValue').textContent = `${Math.round(state.shapeWarp * 100)}%`;
-            document.getElementById('journeyProgressBar').style.width = `${Math.min(100, Math.max(2, (z / 700.0) * 100))}%`;
+            document.getElementById('journeyProgressBar').style.width = `${Math.min(100, Math.max(2, (z / 927.5) * 100))}%`;
+
+            // Live Journey Elapsed / Total Time Readout at current speed preset
+            const effectiveRate = 6.5 * state.cruiseSpeed;
+            const elapsedSec = z / effectiveRate;
+            const totalSec = 927.5 / effectiveRate;
+            const timeEl = document.getElementById('timeReadout');
+            if (timeEl) {
+                timeEl.textContent = `${formatSecondsMMSS(elapsedSec)} / ${formatSecondsMMSS(totalSec)}`;
+            }
         }
 
         /**************************************************************************
@@ -2694,9 +3233,9 @@ fly deploy`
             }
 
             if (state.autoDive) {
-                let nextZ = state.targetDepthZ + dt * 7.5 * state.cruiseSpeed * state.zoomDirection;
-                if (nextZ > 700.0) nextZ -= 700.0;
-                if (nextZ < 0.0) nextZ += 700.0;
+                let nextZ = state.targetDepthZ + dt * 6.5 * state.cruiseSpeed * state.zoomDirection;
+                if (nextZ > 927.5) nextZ -= 927.5;
+                if (nextZ < 0.0) nextZ += 927.5;
                 state.targetDepthZ = nextZ;
             }
 
@@ -2729,13 +3268,13 @@ fly deploy`
 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-            // Compute smooth portal alpha for Stage 2 (Stretched Einstein Hat & 3D Skyline Canvas across Z = 88..256)
+            // Compute smooth portal alpha for Stage 2 (45s Einstein Hat IFS -> 2.5D Skyline -> True 3D Monotiles across Z = 168..484)
             let hatAlpha = 0.0;
-            if (state.depthZ > 88.0 && state.depthZ < 256.0) {
-                if (state.depthZ < 108.0) {
-                    hatAlpha = (state.depthZ - 88.0) / 20.0;
-                } else if (state.depthZ > 228.0) {
-                    hatAlpha = 1.0 - (state.depthZ - 228.0) / 28.0;
+            if (state.depthZ > 168.0 && state.depthZ < 484.0) {
+                if (state.depthZ < 188.0) {
+                    hatAlpha = (state.depthZ - 168.0) / 20.0;
+                } else if (state.depthZ > 454.0) {
+                    hatAlpha = 1.0 - (state.depthZ - 454.0) / 30.0;
                 } else {
                     hatAlpha = 1.0;
                 }
