@@ -95,6 +95,43 @@
         }
     </style>
 </head>
+
+    <!-- START SCREEN: Optional color-palette choice. Chooses once and locks it for the whole session. -->
+    <div id="startScreen" class="fixed inset-0 z-70 flex flex-col items-center justify-center bg-slate-950/92 backdrop-blur-md pointer-events-auto">
+        <div class="w-full max-w-xl px-5">
+            <div class="glass-panel rounded-2xl border border-white/15 p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-white mono">Start Zone</h2>
+                    <button onclick="closeStartScreen()" class="text-slate-400 hover:text-white text-sm mono transition">ESC / Close</button>
+                </div>
+                <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+                    Pick a starting color archetype. This choice is optional, defaults to <strong class="text-sky-200">Bioluminescent Abyss</strong>, and will stay locked for the whole visualization.
+                </p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[10px] mono uppercase text-slate-400 mb-1.5">Optional color palette</label>
+                        <select id="startPaletteSelect" onchange="commitStartPalette(this.value)" class="w-full bg-slate-900/90 border border-white/15 rounded-lg px-3 py-2 text-xs text-white mono outline-none focus:border-sky-400">
+                            <option value="0">01 / Bioluminescent Abyss</option>
+                            <option value="1">02 / Brutalist Obsidian</option>
+                            <option value="2">03 / Boreal Fjord & Moss</option>
+                            <option value="3">04 / Solar Flare Magma</option>
+                            <option value="4">05 / Ultraviolet Quartz</option>
+                            <option value="5">06 / Infrared Basalt</option>
+                        </select>
+                        <p id="startPaletteNote" class="text-[10px] mono text-slate-500 mt-1">Choose a palette, or leave it as the default.</p>
+                    </div>
+                    <div class="text-[11px] text-slate-400 flex items-center gap-2">
+                        <span id="startPaletteCommitLabel" class="text-sky-300 font-medium mono">Using default palette: 01 / Bioluminescent Abyss</span>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-5">
+                    <button onclick="closeStartScreen()" class="flex-1 py-2 rounded-lg bg-slate-800/80 border border-white/10 text-xs text-slate-300 hover:bg-slate-700/60 transition">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</head>
 <body class="relative select-none">
 
     <!-- Primary WebGL Deep-Zoom Shader Canvas -->
@@ -453,6 +490,12 @@
             { x:  0.28171792, y: 0.57710528, name: "Double Scepter" },
             { x: -0.74542800, y: 0.11300900, name: "Spiral Mini-Brot" }
         ];
+
+        // Palette must stay locked to a single choice chosen at the start of the session.
+        const STATE = {
+            SEED: { index: 0, default: "#0000-0000" },
+            PALETTE: { index: 0, default: 0 }
+        };
 
         const state = {
             seedInt: 0,
@@ -2242,9 +2285,22 @@
             }
         }
 
-        function toggleAutoJourney() {
-            state.autoDive = !state.autoDive;
-            syncAutoZoomUI();
+        let controlsVisible = true;
+
+        function toggleControlPanel() {
+            controlsVisible = !controlsVisible;
+            const panel = document.getElementById('controlPanel');
+            const infoCard = document.getElementById('infoCard');
+            const label = document.getElementById('toggleControlsText');
+            if (controlsVisible) {
+                panel.classList.remove('hidden');
+                infoCard.classList.remove('hidden');
+                label.textContent = "Hide Details & Configs";
+            } else {
+                panel.classList.add('hidden');
+                infoCard.classList.add('hidden');
+                label.textContent = "Show Details & Configs";
+            }
         }
 
         function setCruiseSpeed(spd) {
@@ -2713,6 +2769,32 @@ fly deploy`
             switchFlyTab('server');
         }
 
+        function closeStartScreen() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('flex');
+        }
+
+        function commitStartPalette(val) {
+            STATE.PALETTE.index = parseInt(val, 10);
+            const note = document.getElementById('startPaletteNote');
+            const label = document.getElementById('startPaletteCommitLabel');
+            label.textContent = 'Locked palette ' + (parseInt(val, 10) + 1) + ' / ' + PALETTE_NAMES[STATE.PALETTE.index].toUpperCase();
+            localStorage.setItem('morphogenesis_palette', String(STATE.PALETTE.index));
+            note.textContent = 'Palette ' + (parseInt(val, 10) + 1) + ' / ' + PALETTE_NAMES[STATE.PALETTE.index].toUpperCase() + ' is now locked.';
+        }
+
+        function initPaletteFromStorage() {
+            const saved = localStorage.getItem('morphogenesis_palette');
+            if (saved !== null) {
+                const idx = parseInt(saved, 10);
+                if (idx >= 0 && idx < PALETTE_NAMES.length) {
+                    STATE.PALETTE.index = idx;
+                    return idx;
+                }
+            }
+            return 0;
+        }
+
         function closeFlyModal() {
             const modal = document.getElementById('flyModal');
             modal.classList.add('hidden');
@@ -2911,6 +2993,9 @@ fly deploy`
         window.onload = function () {
             handleResize();
             initSeedFromURLOrRandom();
+            const lockedPalette = initPaletteFromStorage();
+            document.getElementById('startPaletteSelect').value = String(lockedPalette);
+            commitStartPalette(String(lockedPalette));
             requestAnimationFrame(animate);
         };
     </script>
