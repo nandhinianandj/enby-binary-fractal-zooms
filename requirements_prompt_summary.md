@@ -120,3 +120,13 @@ At the default **`1x` cruise speed (`6.5 Z-units/sec`)**, the complete start-to-
     * Started the crowd from a much higher overhead altitude so the gaps between heads are tiny, with a 10-shade hair color spectrum.
 
     * Unified the coordinate space and locked the hero head at cell `(0,0)` so zooming from the crowd into the single head has zero cut or color mismatch.
+
+13. **Prompt 16 (Smooth Beach Crowd Transition & Centralized UI Localization):**
+
+    * Eliminated the abrupt cut-scene transition from coastal aerials into crowd heads by placing the crowd directly on the sunlit golden beach scene.
+
+    * Calibrated the camera shore anchor (`uShoreAnchor`) so the zoom target descends smoothly onto the sandy beach between the turquoise ocean surf and dunes.
+
+    * Added high-altitude beach crowd gathering clusters on the sand, soft directional sunlight shadows cast onto the golden sand under each person, and a seamless cross-dissolve blend between the descending coastline and the close-up beach crowd.
+
+    * Extracted all user-facing UI strings, titles, descriptions, and phase telemetry to a centralized `locales/en.json` dictionary with a dynamic `t()` helper and updated `server.js` static serving.

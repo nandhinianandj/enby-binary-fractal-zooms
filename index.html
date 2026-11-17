@@ -124,12 +124,12 @@
             <button id="zenCenterPlayBtn" type="button" onclick="toggleCruiseFromZen(event)" class="zen-center-btn rounded-full px-7 py-4 flex items-center gap-3 text-white group cursor-pointer">
                 <span id="zenPlayIcon" class="w-9 h-9 rounded-full bg-emerald-500/25 border border-emerald-400/60 flex items-center justify-center text-emerald-300 text-base shadow-[0_0_15px_rgba(16,185,129,0.4)] group-hover:bg-emerald-500/40 transition">▶</span>
                 <div class="text-left pr-1">
-                    <div id="zenPlayLabel" class="text-sm md:text-base font-bold tracking-wide text-white">Start Pure Auto-Zoom</div>
-                    <div class="text-[10px] mono text-sky-300/90 uppercase tracking-widest">Pure Zen Cinema Mode // Scroll or Spacebar</div>
+                    <div id="zenPlayLabel" class="text-sm md:text-base font-bold tracking-wide text-white" data-i18n="zen.startPrompt">Start Pure Auto-Zoom</div>
+                    <div class="text-[10px] mono text-sky-300/90 uppercase tracking-widest" data-i18n="zen.subtitle">Pure Zen Cinema Mode // Scroll or Spacebar</div>
                 </div>
             </button>
 
-            <button id="zenExitBtn" type="button" onclick="toggleZenMode(false)" class="px-3.5 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-900 border border-slate-700/80 text-[10px] mono text-slate-300 hover:text-white transition shadow-lg cursor-pointer">
+            <button id="zenExitBtn" type="button" onclick="toggleZenMode(false)" class="px-3.5 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-900 border border-slate-700/80 text-[10px] mono text-slate-300 hover:text-white transition shadow-lg cursor-pointer" data-i18n="zen.exit">
                 ✕ Exit Zen Mode (Esc / Z)
             </button>
         </div>
@@ -143,7 +143,7 @@
             <div class="flex items-center gap-2.5">
                 <div id="brandStatusDot" class="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_12px_#38bdf8]"></div>
                 <div>
-                    <div class="text-[9px] mono tracking-widest uppercase text-sky-400 font-semibold">PROCEDURAL WEBGL + EINSTEIN LIFE ENGINE</div>
+                    <div class="text-[9px] mono tracking-widest uppercase text-sky-400 font-semibold" data-i18n="app.subtitle">PROCEDURAL WEBGL + EINSTEIN LIFE ENGINE</div>
                     <h1 class="text-xs md:text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
                         MORPHOGENESIS
                         <span id="seedBadge" class="text-[10px] mono font-normal px-1.5 py-0.5 rounded bg-slate-800/90 text-emerald-300 border border-emerald-500/30">#SEED</span>
@@ -156,19 +156,19 @@
             <!-- Live Readouts -->
             <div class="flex items-center gap-3 text-xs mono">
                 <div>
-                    <span class="text-slate-400 block text-[8px] uppercase">Hausdorff D</span>
+                    <span class="text-slate-400 block text-[8px] uppercase" data-i18n="readouts.dimension">Hausdorff D</span>
                     <span id="hudDimension" class="text-amber-300 font-semibold">D ≈ 1.585</span>
                 </div>
                 <div>
-                    <span class="text-slate-400 block text-[8px] uppercase">Magnification</span>
+                    <span class="text-slate-400 block text-[8px] uppercase" data-i18n="readouts.magnification">Magnification</span>
                     <span id="hudZoom" class="text-sky-300 font-semibold">1.00 × 10⁰×</span>
                 </div>
                 <div>
-                    <span class="text-slate-400 block text-[8px] uppercase">Depth (Z)</span>
+                    <span class="text-slate-400 block text-[8px] uppercase" data-i18n="readouts.depth">Depth (Z)</span>
                     <span id="hudDepthZ" class="text-purple-300 font-semibold">0.0 / 1025</span>
                 </div>
                 <div>
-                    <span class="text-slate-400 block text-[8px] uppercase">Runtime (1x)</span>
+                    <span class="text-slate-400 block text-[8px] uppercase" data-i18n="readouts.runtime">Runtime (1x)</span>
                     <span id="hudRuntime" class="text-emerald-300 font-semibold">00:00 / 02:37</span>
                 </div>
             </div>
@@ -179,24 +179,24 @@
             <button id="tabStage1" type="button" onclick="jumpToStage(0)" class="glass-pill active px-2.5 py-1.5 rounded-xl text-left flex items-center gap-1.5 cursor-pointer">
                 <span class="w-5 h-5 rounded-md bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-[10px] mono font-bold text-sky-300">I</span>
                 <div class="leading-tight">
-                    <div class="text-[10px] font-semibold text-white">Exact Fractals</div>
-                    <div class="text-[8px] mono text-slate-400">2D→3D SDF</div>
+                    <div class="text-[10px] font-semibold text-white" data-i18n="stages.stage1Title">Exact Fractals</div>
+                    <div class="text-[8px] mono text-slate-400" data-i18n="stages.stage1Sub">2D→3D SDF</div>
                 </div>
             </button>
 
             <button id="tabStage2" type="button" onclick="jumpToStage(210)" class="glass-pill px-2.5 py-1.5 rounded-xl text-left flex items-center gap-1.5 cursor-pointer">
                 <span class="w-5 h-5 rounded-md bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-[10px] mono font-bold text-amber-300">II</span>
                 <div class="leading-tight">
-                    <div class="text-[10px] font-semibold text-white">Einstein 0/1 Life & 3D</div>
-                    <div class="text-[8px] mono text-slate-400">Binary Tyranny (60s)</div>
+                    <div class="text-[10px] font-semibold text-white" data-i18n="stages.stage2Title">Einstein 0/1 Life & 3D</div>
+                    <div class="text-[8px] mono text-slate-400" data-i18n="stages.stage2Sub">Binary Tyranny (60s)</div>
                 </div>
             </button>
 
             <button id="tabStage3" type="button" onclick="jumpToStage(585)" class="glass-pill px-2.5 py-1.5 rounded-xl text-left flex items-center gap-1.5 cursor-pointer">
                 <span class="w-5 h-5 rounded-md bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-[10px] mono font-bold text-emerald-300">III</span>
                 <div class="leading-tight">
-                    <div class="text-[10px] font-semibold text-white">Organic Continuity</div>
-                    <div class="text-[8px] mono text-slate-400">Coast→Crowd→Lungs</div>
+                    <div class="text-[10px] font-semibold text-white" data-i18n="stages.stage3Title">Organic Continuity</div>
+                    <div class="text-[8px] mono text-slate-400" data-i18n="stages.stage3Sub">Coast→Beach Crowd→Lungs</div>
                 </div>
             </button>
 
@@ -221,7 +221,7 @@
             <div class="flex items-center gap-1 bg-slate-950/85 border border-slate-800/90 rounded-xl p-1">
                 <button id="cruiseBtn" type="button" onclick="toggleCruise()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500/30 to-sky-500/30 hover:from-emerald-500/45 hover:to-sky-500/45 border border-emerald-400/60 text-emerald-200 text-xs font-semibold flex items-center gap-1.5 transition shadow-[0_0_15px_rgba(16,185,129,0.25)] cursor-pointer">
                     <span id="cruiseIcon" class="text-emerald-300">▶</span>
-                    <span id="cruiseLabel">Start Auto-Zoom</span>
+                    <span id="cruiseLabel" data-i18n="transport.start">Start Auto-Zoom</span>
                 </button>
                 <div class="flex items-center gap-0.5 px-1">
                     <button type="button" onclick="setCruiseSpeed(0.5)" id="spd05" class="speed-pill px-1.5 py-1 rounded text-[9px] mono text-slate-400 hover:text-white transition cursor-pointer">0.5x</button>
@@ -229,7 +229,7 @@
                     <button type="button" onclick="setCruiseSpeed(2.0)" id="spd20" class="speed-pill px-1.5 py-1 rounded text-[9px] mono text-slate-400 hover:text-white transition cursor-pointer">2x</button>
                     <button type="button" onclick="setCruiseSpeed(4.0)" id="spd40" class="speed-pill px-1.5 py-1 rounded text-[9px] mono text-slate-400 hover:text-white transition cursor-pointer">4x</button>
                 </div>
-                <button type="button" onclick="reverseCruiseDir()" id="dirBtn" title="Toggle Zoom Direction (In / Out)" class="px-1.5 py-1 rounded bg-slate-800/90 hover:bg-slate-700 text-[10px] mono text-sky-300 border border-slate-700 transition cursor-pointer">
+                <button type="button" onclick="reverseCruiseDir()" id="dirBtn" title="Toggle Zoom Direction (In / Out)" class="px-1.5 py-1 rounded bg-slate-800/90 hover:bg-slate-700 text-[10px] mono text-sky-300 border border-slate-700 transition cursor-pointer" data-i18n="transport.dirIn">
                     ↓ In
                 </button>
             </div>
@@ -243,10 +243,10 @@
 
                 <button type="button" onclick="reseedApp()" title="Generate New Procedural Genome Seed" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-200 text-[11px] font-medium flex items-center gap-1 transition cursor-pointer">
                     <span>🎲</span>
-                    <span class="hidden sm:inline">Mutate</span>
+                    <span class="hidden sm:inline" data-i18n="transport.mutateBtn">Mutate</span>
                 </button>
 
-                <button type="button" onclick="toggleControlPanel()" id="topToggleUIBtn" title="Hide or Show Bottom Panels" class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-600/70 text-slate-200 text-[11px] mono font-medium transition cursor-pointer">
+                <button type="button" onclick="toggleControlPanel()" id="topToggleUIBtn" title="Hide or Show Bottom Panels" class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-600/70 text-slate-200 text-[11px] mono font-medium transition cursor-pointer" data-i18n="transport.hideBottomUI">
                     Hide Bottom UI
                 </button>
 
@@ -259,8 +259,8 @@
     </header>
 
     <!-- Floating Restore Bottom UI Button (Visible when Bottom UI is hidden, but NOT in Zen Mode) -->
-    <button id="floatingShowUIBtn" type="button" onclick="toggleControlPanel()" class="ui-force-hidden fixed bottom-4 right-4 z-30 glass-panel px-3.5 py-2 rounded-xl text-xs mono text-sky-300 hover:text-white border border-sky-500/40 flex items-center gap-2 shadow-lg pointer-events-auto transition cursor-pointer">
-        <span>▲ Show Bottom UI & Controls</span>
+    <button id="floatingShowUIBtn" type="button" onclick="toggleControlPanel()" class="ui-force-hidden fixed bottom-4 right-4 z-30 glass-panel px-3.5 py-2 rounded-xl text-xs mono text-sky-300 hover:text-white border border-sky-500/40 flex items-center gap-2 shadow-lg pointer-events-auto transition cursor-pointer" data-i18n="transport.showBottomUIFloating">
+        ▲ Show Bottom UI & Controls
     </button>
 
     <!-- Bottom HUD: Concept Card + 16-Phase Stepper + Lab Controls -->
@@ -272,7 +272,7 @@
                 <span id="stageTag" class="text-[9px] mono uppercase tracking-widest px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30">
                     STAGE I // EXACT SELF-SIMILARITY (2D → 3D SDF)
                 </span>
-                <span id="stageSubTag" class="text-[10px] mono text-slate-400">Scroll / Pinch or Click Any Phase</span>
+                <span id="stageSubTag" class="text-[10px] mono text-slate-400" data-i18n="controls.scrollHint">Scroll / Pinch or Click Any Phase</span>
             </div>
             <h2 id="stageTitle" class="text-sm md:text-base font-bold text-white mb-0.5">
                 Phase 1: 2D Sierpinski Triangle (Step-by-Step Recursion)
@@ -331,9 +331,9 @@
             <!-- Master Zoom Scrubber (0 to 1025) -->
             <div>
                 <div class="flex justify-between text-[10px] mono mb-1">
-                    <span class="text-sky-300">I: 3D FRACTALS</span>
-                    <span class="text-amber-300">II: EINSTEIN 0/1 LIFE & 3D</span>
-                    <span class="text-emerald-300">III: COAST→CROWD→LUNGS</span>
+                    <span class="text-sky-300" data-i18n="controls.fractalsHeader">I: 3D FRACTALS</span>
+                    <span class="text-amber-300" data-i18n="controls.einsteinHeader">II: EINSTEIN 0/1 LIFE & 3D</span>
+                    <span class="text-emerald-300" data-i18n="controls.bioHeader">III: COAST→BEACH CROWD→LUNGS</span>
                 </div>
                 <input id="zoomScrubber" type="range" min="0" max="1025" step="0.1" value="0" oninput="onScrubberInput(this.value)">
                 <div class="flex justify-between text-[9px] mono text-slate-500 mt-0.5">
@@ -350,14 +350,14 @@
             <div class="grid grid-cols-2 gap-2 pt-1.5 border-t border-slate-800/80 text-[10px]">
                 <div>
                     <div class="flex justify-between mono mb-1">
-                        <span class="text-slate-400">Complexity / Octave</span>
+                        <span class="text-slate-400" data-i18n="controls.complexity">Complexity / Octave</span>
                         <span id="lblComplexity" class="text-sky-300">1.00x</span>
                     </div>
                     <input id="sliderComplexity" type="range" min="0.5" max="1.8" step="0.05" value="1.0" oninput="updateComplexity(this.value)">
                 </div>
                 <div>
                     <div class="flex justify-between mono mb-1">
-                        <span class="text-slate-400">Binary 0/1 Life Speed</span>
+                        <span class="text-slate-400" data-i18n="controls.lifeSpeed">Binary 0/1 Life Speed</span>
                         <span id="lblLifeSpeed" class="text-rose-300">2.5 Hz</span>
                     </div>
                     <input id="sliderLifeSpeed" type="range" min="0.0" max="8.0" step="0.5" value="2.5" oninput="updateLifeSpeed(this.value)">
@@ -366,16 +366,16 @@
 
             <!-- Quick Toggles for Binary Life, Randomize 0/1, 3D Text & Color Drift -->
             <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1 border-t border-slate-800/80 text-[10px] mono">
-                <button type="button" onclick="randomizeBinaryLife()" class="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/50 text-rose-200 transition cursor-pointer">
+                <button type="button" onclick="randomizeBinaryLife()" class="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/50 text-rose-200 transition cursor-pointer" data-i18n="controls.randomizeLife">
                     ⚡ Randomize 0/1 Life Seed
                 </button>
-                <button id="btnToggleLife" type="button" onclick="toggleBinaryLifeRule()" class="px-2 py-1 rounded bg-amber-500/20 border border-amber-400/50 text-amber-200 transition cursor-pointer">
+                <button id="btnToggleLife" type="button" onclick="toggleBinaryLifeRule()" class="px-2 py-1 rounded bg-amber-500/20 border border-amber-400/50 text-amber-200 transition cursor-pointer" data-i18n="controls.lifeOn">
                     Conway 0/1 Life: ON
                 </button>
-                <button id="btnToggleDrift" type="button" onclick="toggleColorDrift()" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 transition cursor-pointer">
+                <button id="btnToggleDrift" type="button" onclick="toggleColorDrift()" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 transition cursor-pointer" data-i18n="controls.colorsStatic">
                     Colors: Static
                 </button>
-                <button id="bottomHideUIBtn" type="button" onclick="toggleControlPanel()" class="px-2 py-1 rounded bg-slate-800/90 hover:bg-slate-700 text-sky-300 border border-slate-700 transition cursor-pointer">
+                <button id="bottomHideUIBtn" type="button" onclick="toggleControlPanel()" class="px-2 py-1 rounded bg-slate-800/90 hover:bg-slate-700 text-sky-300 border border-slate-700 transition cursor-pointer" data-i18n="controls.hideUI">
                     ▼ Hide UI
                 </button>
             </div>
@@ -407,6 +407,261 @@
     </div>
 
     <script>
+
+        // ============================================================================
+        // 0. CENTRALIZED LOCALIZATION / I18N SYSTEM (MANDATORY RULE COMPLIANT)
+        // ============================================================================
+        let currentLocale = 'en';
+        let I18N_DATA = {
+        "app": {
+                "title": "MORPHOGENESIS",
+                "subtitle": "PROCEDURAL WEBGL + EINSTEIN LIFE ENGINE"
+        },
+        "readouts": {
+                "dimension": "Hausdorff D",
+                "magnification": "Magnification",
+                "depth": "Depth (Z)",
+                "runtime": "Runtime (1x)"
+        },
+        "zen": {
+                "startPrompt": "Start Pure Auto-Zoom",
+                "pausePrompt": "Pause Pure Auto-Zoom",
+                "subtitle": "Pure Zen Cinema Mode // Scroll or Spacebar",
+                "exit": "\u2715 Exit Zen Mode (Esc / Z)"
+        },
+        "transport": {
+                "start": "Start Auto-Zoom",
+                "pause": "Pause Auto-Zoom",
+                "dirIn": "\u2193 In",
+                "dirOut": "\u2191 Out",
+                "zenBtn": "Zen Mode",
+                "mutateBtn": "Mutate",
+                "hideBottomUI": "Hide Bottom UI",
+                "showBottomUI": "Show Bottom UI",
+                "showBottomUIFloating": "\u25b2 Show Bottom UI & Controls",
+                "flyBtn": "Fly.io"
+        },
+        "stages": {
+                "stage1Title": "Exact Fractals",
+                "stage1Sub": "2D\u21923D SDF",
+                "stage2Title": "Einstein 0/1 Life & 3D",
+                "stage2Sub": "Binary Tyranny (60s)",
+                "stage3Title": "Organic Continuity",
+                "stage3Sub": "Coast\u2192Beach Crowd\u2192Lungs"
+        },
+        "palettes": [
+                "Cyber-Sierpinski Neon",
+                "Bioluminescent Abyss",
+                "Brutalist Obsidian & Amber",
+                "Boreal Fjord & Lichen",
+                "Hyperbolic Infrared",
+                "Quantum Sapphire & Gold",
+                "Chlorophyll & Copper",
+                "Ultraviolet Singularity"
+        ],
+        "controls": {
+                "scrollHint": "Scroll / Pinch or Click Any Phase",
+                "fractalsHeader": "I: 3D FRACTALS",
+                "einsteinHeader": "II: EINSTEIN 0/1 LIFE & 3D",
+                "bioHeader": "III: COAST\u2192BEACH CROWD\u2192LUNGS",
+                "complexity": "Complexity / Octave",
+                "lifeSpeed": "Binary 0/1 Life Speed",
+                "randomizeLife": "\u26a1 Randomize 0/1 Life Seed",
+                "lifeOn": "Conway 0/1 Life: ON",
+                "lifeOff": "Conway 0/1 Life: OFF",
+                "colorsStatic": "Colors: Static",
+                "colorsDrift": "Colors: Dynamic Drift",
+                "hideUI": "\u25bc Hide UI"
+        },
+        "genome": {
+                "palette": "PALETTE",
+                "bulb": "3D BULB",
+                "lifeTick": "0/1 LIFE TICK",
+                "hatTiles": "HAT TILES",
+                "coastHurst": "COAST HURST",
+                "zeroGap": "Zero-Gap H7/H8"
+        },
+        "flyModal": {
+                "tag": "CLOUD DEPLOYMENT KIT",
+                "title": "Deploy Morphogenesis Engine to Fly.io",
+                "close": "\u2715 Close",
+                "ready": "Ready to copy deployment manifest.",
+                "copied": "\u2713 Copied snippet to clipboard!",
+                "copyBtn": "Copy Snippet"
+        },
+        "phases": {
+                "1": {
+                        "tag": "STAGE I // STEP-BY-STEP 2D SIERPINSKI",
+                        "title": "Phase 1: Full Equilateral Triangle \u2192 Step-by-Step Sierpinski",
+                        "desc": "Starts with a complete equilateral triangle (N=0) and carves out the Sierpinski Gasket one recursion step at a time (N=1\u21928, D \u2248 1.585).",
+                        "short": "1.Sierp 2D"
+                },
+                "2": {
+                        "tag": "STAGE I // 3D TETRAHEDRAL EXTRUSION",
+                        "title": "Phase 2: 3D Sierpinski Pyramid",
+                        "desc": "The 2D gasket tilts and extrudes into a raymarched 3D Sierpinski Tetrahedron with four-fold recursive cavities.",
+                        "short": "2.Pyramid3D"
+                },
+                "3": {
+                        "tag": "STAGE I // ORTHOGONAL 3D SPONGE",
+                        "title": "Phase 3: 3D Menger Sponge",
+                        "desc": "Tetrahedral folds morph into the orthogonal cubic cross-tunnels of a 3D Menger Sponge (D = ln 20 / ln 3 \u2248 2.727).",
+                        "short": "3.Menger3D"
+                },
+                "4": {
+                        "tag": "STAGE I // SPHERICAL POWER-BULB",
+                        "title": "Phase 4: 3D Mandelbulb",
+                        "desc": "Cubic tunnels warp into spherical-coordinate 3D Mandelbulb filaments before approaching a flat terrace edge.",
+                        "short": "4.Mandelbulb"
+                },
+                "5": {
+                        "tag": "STAGE I \u2192 II // FACET PLANE BRIDGE",
+                        "title": "Phase 5: Fractal Terrace Facet Plane",
+                        "desc": "Camera lands on a single flat terrace facet etched with polykite seams that lock into the Einstein Hat monotile.",
+                        "short": "5.FacetPlane"
+                },
+                "6": {
+                        "tag": "STAGE II // APERIODIC CONWAY GAME OF LIFE",
+                        "title": "Phase 6: Einstein Hat 0/1 Cellular Automaton",
+                        "desc": "Exact edge-to-edge 13-sided Einstein Hat monotiles interlock with zero gaps, switching between binary 0 and 1 states via an aperiodic Conway's Game of Life rule.",
+                        "short": "6.Hat 0/1 Life"
+                },
+                "7": {
+                        "tag": "STAGE II // STANDARD 3D HAT EXTRUSION",
+                        "title": "Phase 7: Standard 3D Prismatic Einstein Hat Extrusion",
+                        "desc": "The gap-free 2D Einstein Hat plane extrudes directly along the Z-axis into a standard 3D prismatic slab landscape of 0 and 1 columns.",
+                        "short": "7.3D Hat Slab"
+                },
+                "8": {
+                        "tag": "STAGE II // APERIODIC URBAN SKYLINE",
+                        "title": "Phase 8: 3D Skyscraper City Skyline",
+                        "desc": "The extruded Einstein Hat prisms rise into an oblique 3D high-rise skyscraper city skyline with illuminated curtain-wall windows.",
+                        "short": "8.CitySkyline"
+                },
+                "9": {
+                        "tag": "STAGE II \u2192 III // TRUE 3D EINSTEIN MONOTILE",
+                        "title": "Phase 9: True 3D Aperiodic Monotile & 3D Text",
+                        "desc": "True 3D aperiodic polyhedra (Schmitt\u2013Conway\u2013Danzer twisted bipyramids & 3D Einstein text) where harsh 0/1 bits dissolve back into continuous nature (\u2248, \u221e).",
+                        "short": "9.True3D Hat"
+                },
+                "10": {
+                        "tag": "STAGE III // BIOLOGICAL & NATURAL CONTINUITY",
+                        "title": "Phase 10: Coastline & Bathymetric Charts",
+                        "desc": "Binary boundaries melt into continuous orbital coastlines overlaid with hydrographic and bathymetric isolines.",
+                        "short": "10.CoastChart"
+                },
+                "11": {
+                        "tag": "STAGE III // SHORELINE & BEACH CROWDS",
+                        "title": "Phase 11: Coastal Shoreline & Beach Crowd Gathering",
+                        "desc": "The camera descends smoothly from the coastal surf and breaker foam directly onto the sunlit sandy beach where vibrant crowds are standing by the water's edge.",
+                        "short": "11.BeachCrowd"
+                },
+                "12": {
+                        "tag": "STAGE III // CROWD ON THE BEACH",
+                        "title": "Phase 12: Beach Crowd to Central Hero",
+                        "desc": "Gliding among the crowds standing on the golden beach sand, casting soft shadows under the sunlight, locking smoothly onto the central hero individual.",
+                        "short": "12.HeroBeach"
+                },
+                "13": {
+                        "tag": "STAGE III // INDIVIDUAL CRANIAL CROWN",
+                        "title": "Phase 13: Single Human Head & Cortical Reveal",
+                        "desc": "Seamless 1:1 lock onto the hero individual's head and Fibonacci hair whorl on the beach, turning translucent to reveal folded cerebral cortex gyri.",
+                        "short": "13.SingleHead"
+                },
+                "14": {
+                        "tag": "STAGE III // CEREBRAL CONNECTOME",
+                        "title": "Phase 14: Cerebral Neural & Synaptic Network",
+                        "desc": "Inside the brain's continuous web of pyramidal neurons, branching dendrites, and traveling action-potential flashes.",
+                        "short": "14.BrainNet"
+                },
+                "15": {
+                        "tag": "STAGE III // MURRAY'S LAW VASCULATURE",
+                        "title": "Phase 15: Human Arterial & Venous Vascular Network",
+                        "desc": "Bifurcating arterial and venous trees governed by Murray's Law (r_p\u00b3 = r_1\u00b3 + r_2\u00b3) and anastomosing capillary beds.",
+                        "short": "15.Vascular"
+                },
+                "16": {
+                        "tag": "STAGE III // PULMONARY GAS EXCHANGE",
+                        "title": "Phase 16: Pulmonary Lung Alveoli Sacs",
+                        "desc": "Space-filling polyhedral lung alveoli sacs (D \u2248 2.97) with pericapillary gas-exchange septa and Pores of Kohn.",
+                        "short": "16.Alveoli"
+                }
+        }
+};
+
+        function t(key, fallback = '') {
+            if (!I18N_DATA) return fallback || key;
+            const parts = key.split('.');
+            let curr = I18N_DATA;
+            for (let i = 0; i < parts.length; i++) {
+                if (curr && typeof curr === 'object' && parts[i] in curr) {
+                    curr = curr[parts[i]];
+                } else {
+                    return fallback || key;
+                }
+            }
+            return typeof curr === 'string' ? curr : (fallback || key);
+        }
+
+        async function initI18n() {
+            try {
+                const res = await fetch('locales/en.json');
+                if (res.ok) {
+                    I18N_DATA = await res.json();
+                }
+            } catch (err) {
+                // Embedded fallback already active
+            }
+            applyTranslations();
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                const val = t(key);
+                if (val && val !== key) el.textContent = val;
+            });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                const val = t(key);
+                if (val && val !== key) el.title = val;
+            });
+
+            // Sync phase titles and descriptions in PHASES array
+            if (Array.isArray(PHASES)) {
+                for (let i = 0; i < PHASES.length; i++) {
+                    const p = PHASES[i];
+                    p.tag = t(`phases.${p.id}.tag`, p.tag);
+                    p.title = t(`phases.${p.id}.title`, p.title);
+                    p.desc = t(`phases.${p.id}.desc`, p.desc);
+                }
+            }
+
+            // Update breadcrumbs
+            for (let i = 1; i <= 16; i++) {
+                const btn = document.getElementById('stepP' + i);
+                if (btn) {
+                    const shortVal = t(`phases.${i}.short`);
+                    if (shortVal) btn.textContent = shortVal;
+                    const titleVal = t(`phases.${i}.title`);
+                    if (titleVal) btn.title = titleVal;
+                }
+            }
+
+            // Sync Palette dropdown options
+            const sel = document.getElementById('topPaletteSelect');
+            if (sel && Array.isArray(I18N_DATA.palettes)) {
+                for (let i = 0; i < sel.options.length; i++) {
+                    if (I18N_DATA.palettes[i]) {
+                        sel.options[i].textContent = `${i} // ${I18N_DATA.palettes[i]}`;
+                    }
+                }
+            }
+
+            if (typeof updateHUDReadouts === 'function') updateHUDReadouts();
+            if (typeof syncCruiseUI === 'function') syncCruiseUI();
+        }
+
         // ============================================================================
         // 1. DETERMINISTIC PRNG (MULBERRY32) & GLOBAL APPLICATION STATE
         // ============================================================================
@@ -1236,7 +1491,7 @@
                 return vec3(0.15, 0.75, 0.78);
             }
 
-            vec4 evalPersonLayer(vec2 crowdUV, vec2 passOffset, float detailLOD, float isHeroPass) {
+                        vec4 evalPersonLayer(vec2 crowdUV, vec2 passOffset, float detailLOD, float isHeroPass, out float shadowOut) {
                 vec2 cellId = floor(crowdUV + passOffset + 0.5);
                 vec2 local = (crowdUV + passOffset) - cellId;
 
@@ -1245,6 +1500,11 @@
 
                 vec2 jitter = mix((rnd - 0.5) * 0.34, vec2(0.0), isHero);
                 vec2 p = local - jitter;
+
+                // Ambient & directional shadow cast on the beach sand (sun from top-left)
+                vec2 shadowP = (p - vec2(0.08, -0.09)) / vec2(0.36, 0.22);
+                float dShadow = length(shadowP) - 1.0;
+                shadowOut = smoothstep(0.06, -0.12, dShadow) * 0.45;
 
                 float yaw = mix((rnd.x - 0.5) * 1.4, 0.0, isHero);
                 float c = cos(yaw), s = sin(yaw);
@@ -1307,20 +1567,51 @@
                 vec2 crowdUV = uv * crowdScale;
                 float detailLOD = smoothstep(718.0, 758.0, z);
 
-                vec3 bg = vec3(0.05, 0.06, 0.08);
-                vec3 col = bg;
+                // Ground: Warm sunlit golden beach sand with ripples, subtle wind patterns, and fine grain
+                vec2 sandP = uv * 8.0 + vec2(uShoreAnchor.x * 25.0, 0.0);
+                float sNoise = fbm(sandP * 6.0, 0.72);
+                float sRipples = sin(sandP.y * 38.0 + sNoise * 4.0) * 0.032;
+                vec3 sandCol = mix(vec3(0.81, 0.69, 0.48), vec3(0.93, 0.85, 0.66), sNoise * 0.5 + 0.5 + sRipples);
+                float sGrain = (hash12(uv * 420.0) - 0.5) * 0.035;
+                sandCol += sGrain;
 
-                if (z < 792.0) {
-                    vec4 p3 = evalPersonLayer(crowdUV, vec2(0.5, 0.5), detailLOD, 0.0);
-                    col = mix(col, p3.rgb * 0.78, p3.a);
-                    vec4 p2 = evalPersonLayer(crowdUV, vec2(0.5, 0.0), detailLOD, 0.0);
-                    col = mix(col, p2.rgb * 0.88, p2.a);
-                    vec4 p1 = evalPersonLayer(crowdUV, vec2(0.0, 0.5), detailLOD, 0.0);
-                    col = mix(col, p1.rgb * 0.94, p1.a);
+                // Shoreline ocean water and white breaker foam on the left (visible in early crowd view z < 740)
+                float shoreEdge = (uv.x + 0.68) * 1.5;
+                if (shoreEdge < 0.0 && z < 740.0) {
+                    float waterWeight = smoothstep(0.0, -0.28, shoreEdge) * (1.0 - smoothstep(712.0, 738.0, z));
+                    float surfFoam = smoothstep(0.045, 0.0, abs(shoreEdge + 0.02 * sin(uv.y * 22.0 + uTime * 2.2)));
+                    vec3 oceanCol = mix(vec3(0.12, 0.58, 0.70), vec3(0.03, 0.20, 0.38), clamp(-shoreEdge * 2.0, 0.0, 1.0));
+                    oceanCol = mix(oceanCol, vec3(0.96, 0.99, 1.0), surfFoam);
+                    sandCol = mix(sandCol, oceanCol, waterWeight);
                 }
-                vec4 pHero = evalPersonLayer(crowdUV, vec2(0.0, 0.0), 1.0, 1.0);
+
+                // Render crowd standing on the beach sand, with cast shadows on the sand
+                float totShadow = 0.0;
+                float sh0 = 0.0, sh1 = 0.0, sh2 = 0.0, sh3 = 0.0;
+
+                vec4 p3 = vec4(0.0), p2 = vec4(0.0), p1 = vec4(0.0);
+                if (z < 792.0) {
+                    p3 = evalPersonLayer(crowdUV, vec2(0.5, 0.5), detailLOD, 0.0, sh3);
+                    p2 = evalPersonLayer(crowdUV, vec2(0.5, 0.0), detailLOD, 0.0, sh2);
+                    p1 = evalPersonLayer(crowdUV, vec2(0.0, 0.5), detailLOD, 0.0, sh1);
+                    totShadow = max(totShadow, max(sh3, max(sh2, sh1)));
+                }
+                vec4 pHero = evalPersonLayer(crowdUV, vec2(0.0, 0.0), 1.0, 1.0, sh0);
+                totShadow = max(totShadow, sh0);
+
+                // Shadows darken the beach sand underneath people
+                sandCol *= (1.0 - totShadow);
+                vec3 col = sandCol;
+
+                // Blend people layers on top of the beach sand
+                if (z < 792.0) {
+                    col = mix(col, p3.rgb * 0.82, p3.a);
+                    col = mix(col, p2.rgb * 0.90, p2.a);
+                    col = mix(col, p1.rgb * 0.95, p1.a);
+                }
                 col = mix(col, pHero.rgb, pHero.a);
 
+                // Hero Cranial Crown & Cerebral Cortex Reveal (Z = 785..830)
                 float cortexReveal = smoothstep(785.0, 822.0, z);
                 if (cortexReveal > 0.01) {
                     vec2 hp = crowdUV / 0.165;
@@ -1333,6 +1624,7 @@
                     col = mix(col, cortexCol, cortexReveal * mask);
                 }
 
+                // Brain synaptic network (Z = 822..842)
                 float wBrain = smoothstep(822.0, 842.0, z);
                 if (wBrain > 0.01) {
                     float nScale = exp2(-mod((z - 830.0) * 0.08, 2.5)) * 4.5;
@@ -1351,55 +1643,73 @@
             }
 
             vec3 renderStage3(vec2 uv, float z) {
+                // Coastal & Beach landscape zoom
                 if (z < 718.0) {
                     float tCoast = clamp((z - 570.0) / 140.0, 0.0, 1.0);
                     float zoomScale = exp2(-tCoast * 6.2) * 2.4;
                     vec2 p = uShoreAnchor + uv * zoomScale;
 
-                    float h = fbm(p * 2.2, uHurst) - 0.48 + (p.x - uShoreAnchor.x) * 0.35;
-                    float chartFade = 1.0 - smoothstep(595.0, 635.0, z);
-                    float beachFade = smoothstep(615.0, 650.0, z) * (1.0 - smoothstep(675.0, 705.0, z));
-                    float treeFade  = smoothstep(665.0, 695.0, z);
+                    // Calibrated terrain height: uShoreAnchor is centered precisely on the golden beach shoreline
+                    float hShore = fbm(uShoreAnchor * 2.2, uHurst);
+                    float h = fbm(p * 2.2, uHurst) - hShore + 0.022 + (p.x - uShoreAnchor.x) * 0.42;
 
-                    vec3 col;
+                    float chartFade = 1.0 - smoothstep(595.0, 635.0, z);
+                    float beachFade = smoothstep(615.0, 650.0, z);
+
+                    vec3 colCoast;
                     if (h < 0.0) {
+                        // Ocean water with depth gradient and breaker foam
                         float depth = clamp(-h * 4.5, 0.0, 1.0);
-                        col = mix(vec3(0.08, 0.58, 0.68), vec3(0.02, 0.14, 0.28), depth);
+                        colCoast = mix(vec3(0.08, 0.58, 0.68), vec3(0.02, 0.14, 0.28), depth);
                         float foam = smoothstep(0.035, 0.0, abs(h + 0.012 * sin(p.y * 40.0)));
-                        col = mix(col, vec3(0.94, 0.98, 1.0), foam * (0.55 + 0.45 * beachFade));
+                        colCoast = mix(colCoast, vec3(0.94, 0.98, 1.0), foam * (0.55 + 0.45 * beachFade));
                     } else if (h < 0.055) {
+                        // Golden beach sand with natural ripples
                         float ripples = sin(p.y * 180.0 + fbm(p * 30.0, 0.7) * 6.0) * 0.5 + 0.5;
-                        col = mix(vec3(0.76, 0.64, 0.44), vec3(0.92, 0.84, 0.65), h / 0.055) * (0.9 + 0.1 * ripples);
+                        colCoast = mix(vec3(0.78, 0.66, 0.46), vec3(0.93, 0.85, 0.66), h / 0.055) * (0.92 + 0.08 * ripples);
                     } else {
+                        // Inland dunes and coastal trees
                         float crowns = vnoise(p * 85.0);
                         vec3 forest = mix(vec3(0.08, 0.28, 0.14), vec3(0.24, 0.52, 0.22), crowns);
-                        if (treeFade > 0.01) {
-                            vec2 tp = fract(p * 160.0) - 0.5;
-                            float crownD = length(tp);
-                            float boughs = sin(atan(tp.y, tp.x) * 11.0) * 0.08;
-                            float treeMask = smoothstep(0.45 + boughs, 0.1, crownD);
-                            forest = mix(vec3(0.04, 0.12, 0.06), vec3(0.28, 0.58, 0.24), treeMask);
-                        }
-                        col = forest;
+                        vec2 tp = fract(p * 160.0) - 0.5;
+                        float crownD = length(tp);
+                        float boughs = sin(atan(tp.y, tp.x) * 11.0) * 0.08;
+                        float treeMask = smoothstep(0.45 + boughs, 0.1, crownD);
+                        colCoast = mix(vec3(0.04, 0.12, 0.06), vec3(0.28, 0.58, 0.24), treeMask);
                     }
 
+                    // Bathymetric chart contour isolines (fade during early descent)
                     if (chartFade > 0.01) {
                         float iso = smoothstep(0.03, 0.0, abs(fract(h * 18.0) - 0.5));
-                        col = mix(col, vec3(0.85, 0.95, 1.0), iso * chartFade * 0.55);
+                        colCoast = mix(colCoast, vec3(0.85, 0.95, 1.0), iso * chartFade * 0.55);
                     }
 
-                    float terrainLand = exp(-max(h * 9.0, 0.0) * 3.0) * (1.0 - smoothstep(675.0, 705.0, z));
-                    float crowdIn = smoothstep(620.0, 718.0, z) * (0.15 + 0.85 * clamp(terrainLand, 0.0, 1.0));
-                    float tCoast = clamp((z - 570.0) / 140.0, 0.0, 1.0);
-                    float camZoom = exp2(-tCoast * 6.2) * 2.4;
-                    float camp = smoothstep(0.0, 0.10, abs(p.x - uShoreAnchor.x));
-                    float land = smoothstep(0.0, 0.55, camZoom * (0.25 + 0.75 * (1.0 - camp)));
-                    float readyForCrowd = 1.0 - smoothstep(595.0, 625.0, z * land * crowdIn) * 0.5;
-                    float crowdWeight = smoothstep(620.0, 718.0, z) * clamp(readyForCrowd, 0.0, 1.0) * clamp(terrainLand, 0.0, 1.0);
-                    col = mix(col, crowdCol, crowdWeight);
-                    return col;
+                    // High-altitude clusters of people gathering on the beach sand (z = 635..690)
+                    float crowdDensity = smoothstep(635.0, 680.0, z);
+                    if (crowdDensity > 0.01 && h >= 0.005 && h <= 0.052) {
+                        vec2 bGrid = p * 950.0;
+                        vec2 bCell = floor(bGrid);
+                        vec2 bF = fract(bGrid) - 0.5;
+                        vec2 bRnd = hash22(bCell + uSeed * 0.1);
+                        if (bRnd.x > 0.40) {
+                            float dDot = length(bF - (bRnd - 0.5) * 0.35);
+                            float dotMask = smoothstep(0.38, 0.08, dDot);
+                            vec3 pCol = getPalette(bRnd.y, uPalette);
+                            colCoast = mix(colCoast, pCol, dotMask * crowdDensity * 0.85);
+                        }
+                    }
+
+                    // Seamless blend into the close-up crowd on the beach (z = 668..718)
+                    if (z > 668.0) {
+                        vec3 colCrowd = renderCrowdHeadAndBrain(uv, z);
+                        float blendCrowd = smoothstep(668.0, 712.0, z);
+                        return mix(colCoast, colCrowd, blendCrowd);
+                    }
+
+                    return colCoast;
                 }
 
+                // Close-up Beach Crowd, Central Hero Head, Brain, Vascular & Alveoli (z >= 718)
                 if (z < 900.0) {
                     vec3 cCol = renderCrowdHeadAndBrain(uv, z);
                     if (z > 885.0) {
@@ -1411,7 +1721,6 @@
                     }
                     return cCol;
                 }
-
                 if (z < 965.0) {
                     float vScale = exp2(-mod((z - 900.0) * 0.07, 2.2)) * 3.2;
                     vec2 vp = uv * vScale;
@@ -1827,8 +2136,8 @@
             { id: 8, zStart: 375.0, zEnd: 472.5,  dim: 'D ≈ 2.680 (City)', tag: 'STAGE II // APERIODIC URBAN SKYLINE', title: 'Phase 8: 3D Skyscraper City Skyline', desc: 'The extruded Einstein Hat prisms rise into an oblique 3D high-rise skyscraper city skyline with illuminated curtain-wall windows.' },
             { id: 9, zStart: 472.5, zEnd: 570.0,  dim: 'D = 3.000 (3D Hat)', tag: 'STAGE II → III // TRUE 3D EINSTEIN MONOTILE', title: 'Phase 9: True 3D Aperiodic Monotile & 3D Text', desc: 'True 3D aperiodic polyhedra (Schmitt–Conway–Danzer twisted bipyramids & 3D Einstein text) where harsh 0/1 bits dissolve back into continuous nature (≈, ∞).' },
             { id: 10, zStart: 570.0, zEnd: 630.0, dim: 'D ≈ 1.280', tag: 'STAGE III // BIOLOGICAL & NATURAL CONTINUITY', title: 'Phase 10: Coastline & Bathymetric Charts', desc: 'Binary boundaries melt into continuous orbital coastlines overlaid with hydrographic and bathymetric isolines.' },
-            { id: 11, zStart: 630.0, zEnd: 710.0, dim: 'D ≈ 1.640', tag: 'STAGE III // SHORELINE TO CANOPY', title: 'Phase 11: Sandy Beach Swash Zone & Forest Treeline', desc: 'Continuous zoom from breaking surf foam and golden sand ripples directly into overhead sunlit pine and oak forest crowns.' },
-            { id: 12, zStart: 710.0, zEnd: 770.0, dim: 'D ≈ 1.880', tag: 'STAGE III // COLLECTIVE HUMAN CONTINUITY', title: 'Phase 12: Festival / Protest Human Crowd', desc: 'High-altitude overhead shot of a tightly packed sea of human heads with a 10-shade hair spectrum, resolving into 3D shoulders, arms, and signs.' },
+            { id: 11, zStart: 630.0, zEnd: 710.0, dim: 'D ≈ 1.640', tag: 'STAGE III // SHORELINE & BEACH CROWDS', title: 'Phase 11: Coastal Shoreline & Beach Crowd Gathering', desc: 'The camera descends smoothly from the coastal surf and breaker foam directly onto the sunlit sandy beach where vibrant crowds are standing by the water\'s edge.' },
+            { id: 12, zStart: 710.0, zEnd: 770.0, dim: 'D ≈ 1.880', tag: 'STAGE III // CROWD ON THE BEACH', title: 'Phase 12: Beach Crowd to Central Hero', desc: 'Gliding among the crowds standing on the golden beach sand, casting soft shadows under the sunlight, locking smoothly onto the central hero individual.' },
             { id: 13, zStart: 770.0, zEnd: 830.0, dim: 'D ≈ 2.150', tag: 'STAGE III // INDIVIDUAL CRANIAL CROWN', title: 'Phase 13: Single Human Head & Cortical Reveal', desc: 'Seamless 1:1 lock onto the central person\'s head and Fibonacci hair whorl, turning translucent to reveal folded cerebral cortex gyri.' },
             { id: 14, zStart: 830.0, zEnd: 900.0, dim: 'D ≈ 2.650', tag: 'STAGE III // CEREBRAL CONNECTOME', title: 'Phase 14: Cerebral Neural & Synaptic Network', desc: 'Inside the brain\'s continuous web of pyramidal neurons, branching dendrites, and traveling action-potential flashes.' },
             { id: 15, zStart: 900.0, zEnd: 965.0, dim: 'D ≈ 2.780', tag: 'STAGE III // MURRAY\'S LAW VASCULATURE', title: 'Phase 15: Human Arterial & Venous Vascular Network', desc: 'Bifurcating arterial and venous trees governed by Murray\'s Law (r_p³ = r_1³ + r_2³) and anastomosing capillary beds.' },
@@ -1864,9 +2173,9 @@
             const totalSec = TOTAL_Z / BASE_Z_RATE;
             document.getElementById('hudRuntime').textContent = `${formatMMSS(elapsedSec)} / ${formatMMSS(totalSec)}`;
 
-            document.getElementById('stageTag').textContent = activePhase.tag;
-            document.getElementById('stageTitle').textContent = activePhase.title;
-            document.getElementById('stageDesc').textContent = activePhase.desc;
+            document.getElementById('stageTag').textContent = t(`phases.${activePhase.id}.tag`, activePhase.tag);
+            document.getElementById('stageTitle').textContent = t(`phases.${activePhase.id}.title`, activePhase.title);
+            document.getElementById('stageDesc').textContent = t(`phases.${activePhase.id}.desc`, activePhase.desc);
 
             const scrubber = document.getElementById('zoomScrubber');
             if (scrubber && document.activeElement !== scrubber) {
@@ -2232,7 +2541,8 @@
             renderStage2EinsteinCanvas(state.zoomZ, now);
 
             updateHUDReadouts();
-            requestAnimationFrame(renderLoop);
+            initI18n();
+        requestAnimationFrame(renderLoop);
         }
 
         Object.assign(window, {
@@ -2261,6 +2571,7 @@
         const initialSeed = ((Date.now() & 0xffffffff) ^ 0x5F3759DF) >>> 0;
         applySeedGenome(initialSeed);
         updateHUDReadouts();
+        initI18n();
         requestAnimationFrame(renderLoop);
     </script>
 </body>
