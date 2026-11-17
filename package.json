@@ -4,7 +4,9 @@
   "description": "18-Order-of-Magnitude Procedural Fractal, Einstein Hat & Natural fBm WebGL App",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "python3 tests/test_app.py",
+    "test:watch": "python3 tests/watch_tests.py"
   },
   "engines": {
     "node": ">=18.0.0"

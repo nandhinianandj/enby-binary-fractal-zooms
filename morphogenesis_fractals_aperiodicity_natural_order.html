@@ -105,6 +105,105 @@
             border-color: rgba(52, 211, 153, 0.85);
             box-shadow: 0 0 60px rgba(16, 185, 129, 0.45), inset 0 0 25px rgba(52, 211, 153, 0.25);
         }
+
+        /* Self-contained layout & positioning guarantees full UI interactivity even without external Tailwind CDN */
+        #topHeaderBar {
+            position: fixed;
+            top: 10px;
+            left: 12px;
+            right: 12px;
+            z-index: 20;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #bottomHudContainer {
+            position: fixed;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            z-index: 20;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        #zenModeOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        #zenCenterControlWrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            pointer-events: auto;
+            transition: opacity 0.5s ease;
+        }
+        #flyModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 16px;
+            pointer-events: auto;
+        }
+        #floatingShowUIBtn {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            z-index: 30;
+            pointer-events: auto;
+        }
+        .glass-panel, button, input, select, .speed-pill, .zen-center-btn {
+            pointer-events: auto;
+        }
+        /* Fallback utility classes for offline / no-CDN environments */
+        .fixed { position: fixed; }
+        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+        .z-10 { z-index: 10; }
+        .z-20 { z-index: 20; }
+        .z-30 { z-index: 30; }
+        .z-40 { z-index: 40; }
+        .z-50 { z-index: 50; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-wrap { flex-wrap: wrap; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .pointer-events-none { pointer-events: none; }
+        .pointer-events-auto { pointer-events: auto; }
+        .cursor-pointer { cursor: pointer; }
+        .hidden { display: none; }
+        .select-none { user-select: none; -webkit-user-select: none; }
     </style>
 </head>
 <body class="relative select-none">
@@ -1572,7 +1671,7 @@
                 float sNoise = fbm(sandP * 6.0, 0.72);
                 float sRipples = sin(sandP.y * 38.0 + sNoise * 4.0) * 0.032;
                 vec3 sandCol = mix(vec3(0.81, 0.69, 0.48), vec3(0.93, 0.85, 0.66), sNoise * 0.5 + 0.5 + sRipples);
-                float sGrain = (hash12(uv * 420.0) - 0.5) * 0.035;
+                float sGrain = (hash21(uv * 420.0) - 0.5) * 0.035;
                 sandCol += sGrain;
 
                 // Shoreline ocean water and white breaker foam on the left (visible in early crowd view z < 740)
@@ -2316,7 +2415,7 @@
         function reverseCruiseDir() {
             state.cruiseDir *= -1;
             const btn = document.getElementById('dirBtn');
-            if (btn) btn.textContent = state.cruiseDir > 0 ? '↓ In' : '↑ Out';
+            if (btn) btn.textContent = state.cruiseDir > 0 ? t('transport.dirIn', '↓ In') : t('transport.dirOut', '↑ Out');
         }
 
         function changePalette(idx) {
@@ -2349,11 +2448,11 @@
             if (state.bottomUIHidden) {
                 setElementVisible(bottomHud, false);
                 if (!state.zenMode) setElementVisible(floatBtn, true);
-                if (topBtn) topBtn.textContent = 'Show Bottom UI';
+                if (topBtn) topBtn.textContent = t('transport.showBottomUI', 'Show Bottom UI');
             } else {
                 if (!state.zenMode) setElementVisible(bottomHud, true);
                 setElementVisible(floatBtn, false);
-                if (topBtn) topBtn.textContent = 'Hide Bottom UI';
+                if (topBtn) topBtn.textContent = t('transport.hideBottomUI', 'Hide Bottom UI');
             }
         }
 

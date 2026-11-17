@@ -1,0 +1,176 @@
+{
+  "app": {
+    "title": "MORPHOGENESIS",
+    "subtitle": "PROCEDURAL WEBGL + EINSTEIN LIFE ENGINE"
+  },
+  "readouts": {
+    "dimension": "Hausdorff D",
+    "magnification": "Magnification",
+    "depth": "Depth (Z)",
+    "runtime": "Runtime (1x)"
+  },
+  "zen": {
+    "startPrompt": "Start Pure Auto-Zoom",
+    "pausePrompt": "Pause Pure Auto-Zoom",
+    "subtitle": "Pure Zen Cinema Mode // Scroll or Spacebar",
+    "exit": "✕ Exit Zen Mode (Esc / Z)"
+  },
+  "transport": {
+    "start": "Start Auto-Zoom",
+    "pause": "Pause Auto-Zoom",
+    "dirIn": "↓ In",
+    "dirOut": "↑ Out",
+    "zenBtn": "Zen Mode",
+    "mutateBtn": "Mutate",
+    "hideBottomUI": "Hide Bottom UI",
+    "showBottomUI": "Show Bottom UI",
+    "showBottomUIFloating": "▲ Show Bottom UI & Controls",
+    "flyBtn": "Fly.io"
+  },
+  "stages": {
+    "stage1Title": "Exact Fractals",
+    "stage1Sub": "2D→3D SDF",
+    "stage2Title": "Einstein 0/1 Life & 3D",
+    "stage2Sub": "Binary Tyranny (60s)",
+    "stage3Title": "Organic Continuity",
+    "stage3Sub": "Coast→Beach Crowd→Lungs"
+  },
+  "palettes": [
+    "Cyber-Sierpinski Neon",
+    "Bioluminescent Abyss",
+    "Brutalist Obsidian & Amber",
+    "Boreal Fjord & Lichen",
+    "Hyperbolic Infrared",
+    "Quantum Sapphire & Gold",
+    "Chlorophyll & Copper",
+    "Ultraviolet Singularity"
+  ],
+  "controls": {
+    "scrollHint": "Scroll / Pinch or Click Any Phase",
+    "fractalsHeader": "I: 3D FRACTALS",
+    "einsteinHeader": "II: EINSTEIN 0/1 LIFE & 3D",
+    "bioHeader": "III: COAST→BEACH CROWD→LUNGS",
+    "complexity": "Complexity / Octave",
+    "lifeSpeed": "Binary 0/1 Life Speed",
+    "randomizeLife": "⚡ Randomize 0/1 Life Seed",
+    "lifeOn": "Conway 0/1 Life: ON",
+    "lifeOff": "Conway 0/1 Life: OFF",
+    "colorsStatic": "Colors: Static",
+    "colorsDrift": "Colors: Dynamic Drift",
+    "hideUI": "▼ Hide UI"
+  },
+  "genome": {
+    "palette": "PALETTE",
+    "bulb": "3D BULB",
+    "lifeTick": "0/1 LIFE TICK",
+    "hatTiles": "HAT TILES",
+    "coastHurst": "COAST HURST",
+    "zeroGap": "Zero-Gap H7/H8"
+  },
+  "flyModal": {
+    "tag": "CLOUD DEPLOYMENT KIT",
+    "title": "Deploy Morphogenesis Engine to Fly.io",
+    "close": "✕ Close",
+    "ready": "Ready to copy deployment manifest.",
+    "copied": "✓ Copied snippet to clipboard!",
+    "copyBtn": "Copy Snippet"
+  },
+  "phases": {
+    "1": {
+      "tag": "STAGE I // STEP-BY-STEP 2D SIERPINSKI",
+      "title": "Phase 1: Full Equilateral Triangle → Step-by-Step Sierpinski",
+      "desc": "Starts with a complete equilateral triangle (N=0) and carves out the Sierpinski Gasket one recursion step at a time (N=1→8, D ≈ 1.585).",
+      "short": "1.Sierp 2D"
+    },
+    "2": {
+      "tag": "STAGE I // 3D TETRAHEDRAL EXTRUSION",
+      "title": "Phase 2: 3D Sierpinski Pyramid",
+      "desc": "The 2D gasket tilts and extrudes into a raymarched 3D Sierpinski Tetrahedron with four-fold recursive cavities.",
+      "short": "2.Pyramid3D"
+    },
+    "3": {
+      "tag": "STAGE I // ORTHOGONAL 3D SPONGE",
+      "title": "Phase 3: 3D Menger Sponge",
+      "desc": "Tetrahedral folds morph into the orthogonal cubic cross-tunnels of a 3D Menger Sponge (D = ln 20 / ln 3 ≈ 2.727).",
+      "short": "3.Menger3D"
+    },
+    "4": {
+      "tag": "STAGE I // SPHERICAL POWER-BULB",
+      "title": "Phase 4: 3D Mandelbulb",
+      "desc": "Cubic tunnels warp into spherical-coordinate 3D Mandelbulb filaments before approaching a flat terrace edge.",
+      "short": "4.Mandelbulb"
+    },
+    "5": {
+      "tag": "STAGE I → II // FACET PLANE BRIDGE",
+      "title": "Phase 5: Fractal Terrace Facet Plane",
+      "desc": "Camera lands on a single flat terrace facet etched with polykite seams that lock into the Einstein Hat monotile.",
+      "short": "5.FacetPlane"
+    },
+    "6": {
+      "tag": "STAGE II // APERIODIC CONWAY GAME OF LIFE",
+      "title": "Phase 6: Einstein Hat 0/1 Cellular Automaton",
+      "desc": "Exact edge-to-edge 13-sided Einstein Hat monotiles interlock with zero gaps, switching between binary 0 and 1 states via an aperiodic Conway's Game of Life rule.",
+      "short": "6.Hat 0/1 Life"
+    },
+    "7": {
+      "tag": "STAGE II // STANDARD 3D HAT EXTRUSION",
+      "title": "Phase 7: Standard 3D Prismatic Einstein Hat Extrusion",
+      "desc": "The gap-free 2D Einstein Hat plane extrudes directly along the Z-axis into a standard 3D prismatic slab landscape of 0 and 1 columns.",
+      "short": "7.3D Hat Slab"
+    },
+    "8": {
+      "tag": "STAGE II // APERIODIC URBAN SKYLINE",
+      "title": "Phase 8: 3D Skyscraper City Skyline",
+      "desc": "The extruded Einstein Hat prisms rise into an oblique 3D high-rise skyscraper city skyline with illuminated curtain-wall windows.",
+      "short": "8.CitySkyline"
+    },
+    "9": {
+      "tag": "STAGE II → III // TRUE 3D EINSTEIN MONOTILE",
+      "title": "Phase 9: True 3D Aperiodic Monotile & 3D Text",
+      "desc": "True 3D aperiodic polyhedra (Schmitt–Conway–Danzer twisted bipyramids & 3D Einstein text) where harsh 0/1 bits dissolve back into continuous nature (≈, ∞).",
+      "short": "9.True3D Hat"
+    },
+    "10": {
+      "tag": "STAGE III // BIOLOGICAL & NATURAL CONTINUITY",
+      "title": "Phase 10: Coastline & Bathymetric Charts",
+      "desc": "Binary boundaries melt into continuous orbital coastlines overlaid with hydrographic and bathymetric isolines.",
+      "short": "10.CoastChart"
+    },
+    "11": {
+      "tag": "STAGE III // SHORELINE & BEACH CROWDS",
+      "title": "Phase 11: Coastal Shoreline & Beach Crowd Gathering",
+      "desc": "The camera descends smoothly from the coastal surf and breaker foam directly onto the sunlit sandy beach where vibrant crowds are standing by the water's edge.",
+      "short": "11.BeachCrowd"
+    },
+    "12": {
+      "tag": "STAGE III // CROWD ON THE BEACH",
+      "title": "Phase 12: Beach Crowd to Central Hero",
+      "desc": "Gliding among the crowds standing on the golden beach sand, casting soft shadows under the sunlight, locking smoothly onto the central hero individual.",
+      "short": "12.HeroBeach"
+    },
+    "13": {
+      "tag": "STAGE III // INDIVIDUAL CRANIAL CROWN",
+      "title": "Phase 13: Single Human Head & Cortical Reveal",
+      "desc": "Seamless 1:1 lock onto the hero individual's head and Fibonacci hair whorl on the beach, turning translucent to reveal folded cerebral cortex gyri.",
+      "short": "13.SingleHead"
+    },
+    "14": {
+      "tag": "STAGE III // CEREBRAL CONNECTOME",
+      "title": "Phase 14: Cerebral Neural & Synaptic Network",
+      "desc": "Inside the brain's continuous web of pyramidal neurons, branching dendrites, and traveling action-potential flashes.",
+      "short": "14.BrainNet"
+    },
+    "15": {
+      "tag": "STAGE III // MURRAY'S LAW VASCULATURE",
+      "title": "Phase 15: Human Arterial & Venous Vascular Network",
+      "desc": "Bifurcating arterial and venous trees governed by Murray's Law (r_p³ = r_1³ + r_2³) and anastomosing capillary beds.",
+      "short": "15.Vascular"
+    },
+    "16": {
+      "tag": "STAGE III // PULMONARY GAS EXCHANGE",
+      "title": "Phase 16: Pulmonary Lung Alveoli Sacs",
+      "desc": "Space-filling polyhedral lung alveoli sacs (D ≈ 2.97) with pericapillary gas-exchange septa and Pores of Kohn.",
+      "short": "16.Alveoli"
+    }
+  }
+}
