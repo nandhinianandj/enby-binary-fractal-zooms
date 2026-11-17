@@ -130,3 +130,14 @@ At the default **`1x` cruise speed (`6.5 Z-units/sec`)**, the complete start-to-
     * Added high-altitude beach crowd gathering clusters on the sand, soft directional sunlight shadows cast onto the golden sand under each person, and a seamless cross-dissolve blend between the descending coastline and the close-up beach crowd.
 
     * Extracted all user-facing UI strings, titles, descriptions, and phase telemetry to a centralized `locales/en.json` dictionary with a dynamic `t()` helper and updated `server.js` static serving.
+
+14. **Prompt 17 (Parallel Dev Endpoint & Multi-File Fly.io Deployment Packaging):**
+
+    * **Parallel Development Endpoint (`/dev` & `/preview`):** Configured zero-dependency HTTP routing in `server.js` to serve `morphogenesis_fractals_aperiodicity_natural_order.html` under `/dev` and `/preview` (`X-Environment: development`, `Cache-Control: no-cache, no-store, must-revalidate`) while serving `index.html` at `/` (`X-Environment: production`).
+
+    * **Fly.io Production & Dev Deployment:** Updated `Dockerfile` to bundle both `index.html`, `morphogenesis_fractals_aperiodicity_natural_order.html`, and `locales/` into the Alpine container. Added `.dockerignore` to keep image builds lean (excluding `.git`, tests, and development caches). Running `fly deploy` deploys both parallel endpoints together.
+
+    * **Visual Environment Badging & Header Navigation:** Added a distinctive `DEV // morphogenesis.html` badge and header toggle links (`Dev (/dev)` in production and `Prod (/)` in development) allowing instantaneous switching between environments.
+
+    * **Automated Playwright Test Suite [8/8]:** Added test coverage asserting `200 OK` status, distinct `X-Environment` headers, JSON endpoint map on `/healthz`, and live DOM rendering of the environment badge.
+

@@ -6,11 +6,13 @@ and all interactive buttons/controls using Playwright headless browser.
 """
 
 import asyncio
+import json
 import os
 import socket
 import subprocess
 import sys
 import time
+import urllib.request
 from playwright.async_api import async_playwright
 
 def find_free_port():
@@ -51,7 +53,7 @@ async def run_tests():
             await asyncio.sleep(1.2)
 
             # 1. Shader & Console Check
-            print("\n[1/7] Testing WebGL Shader Compilation & Linking...")
+            print("\n[1/8] Testing WebGL Shader Compilation & Linking...")
             shader_errs = [l for l in console_logs if "shader" in l.lower() or "not linked" in l.lower() or "not valid" in l.lower()]
             if shader_errs:
                 err_msg = f"Shader errors detected: {shader_errs}"
@@ -62,7 +64,7 @@ async def run_tests():
                 print("  ✓ WebGL Shaders compiled & linked with 0 errors")
 
             # 2. UI Localization Check
-            print("\n[2/7] Testing UI Localization Dictionary...")
+            print("\n[2/8] Testing UI Localization Dictionary...")
             i18n_ready = await page.evaluate("typeof t === 'function' && t('app.title') === 'MORPHOGENESIS'")
             phase11_title = await page.evaluate("t('phases.11.title')")
             if i18n_ready and "Beach" in phase11_title:
@@ -74,7 +76,7 @@ async def run_tests():
                 print(f"  ❌ {err_msg}")
 
             # 3. Zen Mode Full Cycle
-            print("\n[3/7] Testing Pure Zen Cinema Mode...")
+            print("\n[3/8] Testing Pure Zen Cinema Mode...")
             zen_btn = await page.wait_for_selector("#topZenBtn", timeout=3000)
             await zen_btn.click()
             await asyncio.sleep(0.3)
@@ -103,7 +105,7 @@ async def run_tests():
                 print(f"  ❌ {err_msg}")
 
             # 4. Transport Controls & Speed Presets
-            print("\n[4/7] Testing Auto-Zoom Transport, Speeds & Direction...")
+            print("\n[4/8] Testing Auto-Zoom Transport, Speeds & Direction...")
             cruise_btn = await page.wait_for_selector("#cruiseBtn")
             await cruise_btn.click()
             
@@ -129,7 +131,7 @@ async def run_tests():
                 print(f"  ❌ {err_msg}")
 
             # 5. UI Panel Collapse & Reseed
-            print("\n[5/7] Testing UI Collapse/Restore & Procedural Seed Mutation...")
+            print("\n[5/8] Testing UI Collapse/Restore & Procedural Seed Mutation...")
             hide_btn = await page.wait_for_selector("#topToggleUIBtn")
             await hide_btn.click()
             await asyncio.sleep(0.2)
@@ -153,7 +155,7 @@ async def run_tests():
                 print(f"  ❌ {err_msg}")
 
             # 6. Stage Tabs & Phase Stepper Breadcrumbs
-            print("\n[6/7] Testing Stage Tabs (I, II, III) & Phase Steppers...")
+            print("\n[6/8] Testing Stage Tabs (I, II, III) & Phase Steppers...")
             tab_checks = []
             for tab_id, z_val in [("#tabStage2", 210), ("#tabStage3", 585), ("#tabStage1", 0)]:
                 tab = await page.wait_for_selector(tab_id)
@@ -177,7 +179,7 @@ async def run_tests():
                 print(f"  ❌ {err_msg}")
 
             # 7. Simulation Toggles & Fly.io Modal
-            print("\n[7/7] Testing Life / Drift Toggles & Fly.io Deployment Modal...")
+            print("\n[7/8] Testing Life / Drift Toggles & Fly.io Deployment Modal...")
             life_btn = await page.wait_for_selector("#btnToggleLife")
             l1 = await page.evaluate("state.lifeEnabled")
             await life_btn.click()
@@ -209,6 +211,50 @@ async def run_tests():
                 print("  ✓ Conway Life, color drift toggles, and Fly.io modal tabs passed")
             else:
                 err_msg = f"Toggles or Fly Modal failed: life={l1!=l2}, drift={dr1!=dr2}, modal_open={modal_open}, modal_closed={modal_closed}"
+                errors.append(err_msg)
+                print(f"  ❌ {err_msg}")
+
+            # 8. Parallel Dev vs Prod Routing & Healthz Check
+            print("\n[8/8] Testing Parallel Dev (/dev) vs Prod (/) Endpoints & Fly.io Packaging...")
+            prod_req = urllib.request.Request(f"http://localhost:{port}/")
+            with urllib.request.urlopen(prod_req) as prod_resp:
+                prod_status = prod_resp.status
+                prod_env = prod_resp.headers.get("X-Environment")
+
+            dev_req = urllib.request.Request(f"http://localhost:{port}/dev")
+            with urllib.request.urlopen(dev_req) as dev_resp:
+                dev_status = dev_resp.status
+                dev_env = dev_resp.headers.get("X-Environment")
+                dev_cache = dev_resp.headers.get("Cache-Control")
+
+            health_req = urllib.request.Request(f"http://localhost:{port}/healthz")
+            with urllib.request.urlopen(health_req) as health_resp:
+                health_data = json.loads(health_resp.read().decode('utf-8'))
+
+            # Visit /dev in browser to ensure devBadge is rendered
+            await page.goto(f"http://localhost:{port}/dev", timeout=10000)
+            await asyncio.sleep(0.5)
+            has_dev_badge = await page.evaluate("!!document.getElementById('devBadge')")
+            badge_text = await page.evaluate("document.getElementById('devBadge')?.textContent || ''")
+
+            endpoints_ok = (
+                prod_status == 200 and
+                prod_env == 'production' and
+                dev_status == 200 and
+                dev_env == 'development' and
+                'no-cache' in (dev_cache or '') and
+                health_data.get('endpoints', {}).get('development') == '/dev' and
+                has_dev_badge and
+                'DEV' in badge_text
+            )
+
+            if endpoints_ok:
+                passed_tests.append("Parallel Dev (/dev) vs Prod (/) Endpoints & Headers")
+                print(f"  ✓ Production (/): 200 OK [X-Environment: {prod_env}]")
+                print(f"  ✓ Development (/dev): 200 OK [X-Environment: {dev_env}, Badge: '{badge_text}']")
+                print(f"  ✓ Health check (/healthz): {health_data['endpoints']}")
+            else:
+                err_msg = f"Endpoint routing failed: prod_env={prod_env}, dev_env={dev_env}, has_dev_badge={has_dev_badge}"
                 errors.append(err_msg)
                 print(f"  ❌ {err_msg}")
 

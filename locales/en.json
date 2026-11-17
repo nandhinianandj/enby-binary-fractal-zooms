@@ -3,6 +3,12 @@
     "title": "MORPHOGENESIS",
     "subtitle": "PROCEDURAL WEBGL + EINSTEIN LIFE ENGINE"
   },
+  "env": {
+    "prodBadge": "PROD",
+    "devBadge": "DEV // morphogenesis.html",
+    "switchToDev": "Dev (/dev)",
+    "switchToProd": "Prod (/)"
+  },
   "readouts": {
     "dimension": "Hausdorff D",
     "magnification": "Magnification",

@@ -244,8 +244,9 @@
                 <div>
                     <div class="text-[9px] mono tracking-widest uppercase text-sky-400 font-semibold" data-i18n="app.subtitle">PROCEDURAL WEBGL + EINSTEIN LIFE ENGINE</div>
                     <h1 class="text-xs md:text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
-                        MORPHOGENESIS
+                        <span data-i18n="app.title">MORPHOGENESIS</span>
                         <span id="seedBadge" class="text-[10px] mono font-normal px-1.5 py-0.5 rounded bg-slate-800/90 text-emerald-300 border border-emerald-500/30">#SEED</span>
+                        <a href="/dev" title="Switch to Dev / Preview Endpoint" class="text-[9px] mono px-1.5 py-0.5 rounded bg-purple-500/20 hover:bg-purple-500/35 text-purple-300 border border-purple-400/40 transition">Dev (/dev)</a>
                     </h1>
                 </div>
             </div>
@@ -2485,8 +2486,11 @@
             dockerfile: [
                 "FROM node:20-alpine",
                 "WORKDIR /app",
-                "COPY package.json server.js index.html ./",
+                "COPY package.json server.js index.html morphogenesis_fractals_aperiodicity_natural_order.html ./",
+                "COPY locales/ ./locales/",
                 "EXPOSE 8080",
+                "ENV NODE_ENV=production",
+                "ENV PORT=8080",
                 "CMD [\"node\", \"server.js\"]"
             ].join("\n"),
             flytoml: [
@@ -2499,22 +2503,28 @@
                 "  auto_start_machines = true"
             ].join("\n"),
             server: [
+                "// server.js - Zero-dependency Node.js production & dev server for Fly.io",
                 "const http = require('http');",
                 "const fs = require('fs');",
                 "const path = require('path');",
+                "const zlib = require('zlib');",
                 "const PORT = process.env.PORT || 8080;",
+                "const INDEX = path.join(__dirname, 'index.html');",
+                "const DEV = path.join(__dirname, 'morphogenesis_fractals_aperiodicity_natural_order.html');",
                 "http.createServer((req, res) => {",
-                "  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });",
-                "  fs.createReadStream(path.join(__dirname, 'index.html')).pipe(res);",
+                "  const isDev = req.url.startsWith('/dev') || req.url.startsWith('/preview');",
+                "  const target = isDev ? DEV : (req.url === '/locales/en.json' ? path.join(__dirname, 'locales/en.json') : INDEX);",
+                "  res.writeHead(200, { 'Content-Type': target.endsWith('.json') ? 'application/json' : 'text/html' });",
+                "  fs.createReadStream(target).pipe(res);",
                 "}).listen(PORT, '0.0.0.0', () => {",
-                "  console.log('Morphogenesis Engine listening on port ' + PORT);",
+                "  console.log('Production: / | Development: /dev');",
                 "});"
             ].join("\n"),
             cli: [
                 "# 1. Authenticate with Fly.io",
                 "fly auth login",
                 "",
-                "# 2. Launch & Deploy the Single-File WebGL + Einstein Life App",
+                "# 2. Launch & Deploy both Production (/) and Dev (/dev) endpoints",
                 "fly launch --now"
             ].join("\n")
         };
