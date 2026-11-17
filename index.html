@@ -2549,7 +2549,9 @@
             });
         }
         function copyFlySnippet() {
-            navigator.clipboard.writeText(FLY_SNIPPETS[activeFlyKey]);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(FLY_SNIPPETS[activeFlyKey]).catch(() => {});
+            }
             document.getElementById('copyConfirm').textContent = 'Copied ' + activeFlyKey + ' to clipboard!';
         }
 
