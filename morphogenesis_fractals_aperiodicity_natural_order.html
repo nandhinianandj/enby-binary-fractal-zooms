@@ -398,8 +398,8 @@
                 <button type="button" onclick="jumpToStage(735)" id="stepP12" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">12.Crowd</button>
                 <button type="button" onclick="jumpToStage(795)" id="stepP13" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">13.SingleHead</button>
                 <button type="button" onclick="jumpToStage(860)" id="stepP14" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">14.BrainNet</button>
-                <button type="button" onclick="jumpToStage(930)" id="stepP15" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">15.Vascular</button>
-                <button type="button" onclick="jumpToStage(990)" id="stepP16" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">16.Alveoli</button>
+                <button type="button" onclick="jumpToStage(930)" id="stepP15" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Bilateral Lung Lobes & Bronchial Airway Tree">15.Lungs</button>
+                <button type="button" onclick="jumpToStage(990)" id="stepP16" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="3D Alveoli Sac Clusters & Blood Oxygenation">16.Alveoli</button>
             </div>
 
             <!-- Active Seed Genome Strip -->
@@ -1743,6 +1743,251 @@
                 return col;
             }
 
+            // Phase 15: Anatomical Dual Lung Lobes, Bronchial Airway Tree & Respiration Dynamics
+            vec3 renderBronchialLungs(vec2 uv, float z) {
+                float tLungs = clamp((z - 900.0) / 65.0, 0.0, 1.0);
+                float zoomScale = exp2(-tLungs * 3.8);
+                vec2 p = uv * zoomScale;
+
+                // Rhythmic respiration tidal breathing cycle (~3.9s period)
+                float breathPhase = uTime * 1.6;
+                float breath = 0.5 + 0.5 * sin(breathPhase); // 0.0 = full exhale, 1.0 = full inhale
+                float breathExpansion = 1.0 + 0.12 * breath;
+                vec2 bp = p / breathExpansion;
+
+                // Deep warm thoracic cavity background
+                vec3 col = vec3(0.04, 0.02, 0.03);
+
+                // 1. Bilateral Lung Parenchyma (Left & Right Lung Lobes)
+                for (int sIdx = 0; sIdx < 2; sIdx++) {
+                    float s = (sIdx == 0) ? -1.0 : 1.0;
+                    vec2 lungCenter = vec2(s * 0.36, -0.06 + 0.03 * breath);
+                    vec2 lp = bp - lungCenter;
+
+                    // Asymmetric organic lung contour (3 lobes on right, 2 on left)
+                    float lobeD = length(lp * vec2(1.22, 0.88)) + 0.06 * sin(lp.y * 7.0 + s * 1.5);
+                    if (s < 0.0) {
+                        // Cardiac notch for heart impression on left lung
+                        float cNotch = exp(-length(bp - vec2(-0.11, -0.14)) * 12.0);
+                        lobeD += cNotch * 0.24;
+                    }
+
+                    float lungMask = smoothstep(0.46, 0.38, lobeD);
+                    if (lungMask > 0.001) {
+                        // Spongy lung parenchyma tissue with microvascular network
+                        float sponge = vnoise(lp * 42.0) * 0.6 + vnoise(lp * 95.0 + uTime * 0.1) * 0.4;
+                        vec3 tissueCol = mix(vec3(0.48, 0.12, 0.18), vec3(0.86, 0.38, 0.44), sponge);
+
+                        // Sub-surface scattering depth glow & pleural boundary highlight
+                        float pleuraRim = smoothstep(0.36, 0.45, lobeD) * (1.0 - smoothstep(0.45, 0.48, lobeD));
+                        tissueCol += vec3(0.96, 0.72, 0.78) * pleuraRim * 1.3;
+
+                        // Interlobar fissures separating pulmonary lobes
+                        float fissure = smoothstep(0.015, 0.0, abs(lp.y - (0.08 - s * 0.04) + lp.x * 0.25));
+                        tissueCol *= (1.0 - fissure * 0.55);
+
+                        col = mix(col, tissueCol, lungMask);
+                    }
+                }
+
+                // 2. Central Trachea Airway Tube (with cartilaginous C-rings)
+                float trY = p.y;
+                float trX = p.x;
+                float trR = 0.062;
+                if (trY >= 0.16 && trY <= 0.60) {
+                    float dTr = abs(trX);
+                    if (dTr < trR) {
+                        float trNormZ = sqrt(max(0.0, 1.0 - (dTr / trR) * (dTr / trR)));
+                        float trLight = 0.35 + 0.65 * trNormZ;
+                        // Cartilaginous C-rings: regular horizontal ribbing along the trachea
+                        float ringPhase = cos(trY * 110.0);
+                        float cRing = smoothstep(0.1, 0.7, ringPhase) * (1.0 - dTr / trR);
+
+                        vec3 airwayWallCol = mix(vec3(0.72, 0.62, 0.68), vec3(0.92, 0.88, 0.94), cRing) * trLight;
+                        airwayWallCol = mix(airwayWallCol, vec3(0.55, 0.22, 0.28), smoothstep(0.3, -0.4, ringPhase) * 0.5);
+
+                        float spec = pow(max(0.0, trNormZ * 0.9 + 0.1), 16.0);
+                        airwayWallCol += vec3(0.8, 0.9, 1.0) * spec * 0.6;
+
+                        col = mix(col, airwayWallCol, smoothstep(trR, trR - 0.006, dTr));
+                    }
+                }
+
+                // 3. Carina Bifurcation splitting into Left & Right Main Bronchi
+                vec2 cp = p - vec2(0.0, 0.18);
+                vec2 cLocal = vec2(abs(cp.x), cp.y);
+                vec2 bDir = normalize(vec2(0.72, -0.68));
+                float proj = dot(cLocal, bDir);
+                vec2 perp = cLocal - bDir * proj;
+                float brR = 0.052 - proj * 0.055;
+                if (proj > 0.0 && proj < 0.42 && brR > 0.008) {
+                    float dBr = length(perp);
+                    if (dBr < brR) {
+                        float brNormZ = sqrt(max(0.0, 1.0 - (dBr / brR) * (dBr / brR)));
+                        float brLight = 0.35 + 0.65 * brNormZ;
+                        float brRings = cos(proj * 140.0);
+                        float brRingHi = smoothstep(0.1, 0.7, brRings) * (1.0 - dBr / brR);
+                        vec3 brCol = mix(vec3(0.70, 0.58, 0.65), vec3(0.90, 0.85, 0.92), brRingHi) * brLight;
+                        col = mix(col, brCol, smoothstep(brR, brR - 0.005, dBr));
+                    }
+                }
+
+                // 4. Fractal Bronchial Tree & Vasculature (Murray's Law Branching)
+                vec2 treeP = p * 1.8;
+                float branchAccum = 0.0;
+                float artAccum = 0.0;
+                float veinAccum = 0.0;
+                vec2 tp = treeP;
+                float tubeW = 0.055;
+
+                for (int i = 0; i < 5; i++) {
+                    vec2 cell = fract(tp * 1.4) - 0.5;
+                    float dSeg = abs(cell.x * 0.85 + cell.y * 0.52) - tubeW;
+                    float segMask = smoothstep(0.008, 0.0, dSeg) * exp(-float(i) * 0.45);
+                    branchAccum += segMask;
+
+                    // Pulmonary artery (deoxygenated, deep blue-violet)
+                    float dArt = abs(cell.x * 0.85 + cell.y * 0.52 + 0.012) - tubeW * 0.55;
+                    artAccum += smoothstep(0.006, 0.0, dArt) * exp(-float(i) * 0.4);
+
+                    // Pulmonary vein (oxygenated, vivid scarlet)
+                    float dVein = abs(cell.x * 0.85 + cell.y * 0.52 - 0.012) - tubeW * 0.55;
+                    veinAccum += smoothstep(0.006, 0.0, dVein) * exp(-float(i) * 0.4);
+
+                    tp = abs(tp * 1.65) - vec2(0.28, 0.18);
+                    tp = vec2(tp.x * 0.707 - tp.y * 0.707, tp.x * 0.707 + tp.y * 0.707);
+                    tubeW *= 0.64;
+                }
+
+                vec3 branchCol = vec3(0.84, 0.76, 0.82);
+                col = mix(col, branchCol, clamp(branchAccum * 0.85, 0.0, 1.0));
+                col = mix(col, vec3(0.22, 0.28, 0.85), clamp(artAccum * 0.75, 0.0, 1.0));
+                col = mix(col, vec3(0.95, 0.12, 0.18), clamp(veinAccum * 0.75, 0.0, 1.0));
+
+                // 5. Dynamic Inhaled Airflow & Oxygen Gas Wisps (How Lungs Work!)
+                float airVelocity = 6.5;
+                float airStream = sin(trY * 70.0 + uTime * airVelocity) * 0.5 + 0.5;
+                airStream += sin(length(p) * 45.0 - p.y * 30.0 + uTime * airVelocity * 1.3) * 0.5;
+                airStream = pow(airStream, 3.0);
+                float inhaleIntensity = smoothstep(-0.2, 0.8, sin(breathPhase));
+
+                if (abs(trX) < trR && trY >= 0.18 && trY <= 0.58) {
+                    vec3 airFlowCol = mix(vec3(0.35, 0.85, 1.0), vec3(0.95, 1.0, 1.0), airStream);
+                    col += airFlowCol * airStream * inhaleIntensity * 0.95;
+                }
+                float o2Part = vnoise(p * 28.0 + vec2(0.0, uTime * 4.0));
+                float o2Glow = pow(smoothstep(0.65, 0.92, o2Part), 3.0);
+                col += vec3(0.30, 0.85, 1.0) * o2Glow * inhaleIntensity * 0.75;
+
+                return col;
+            }
+
+            // Phase 16: Microscopic 3D Alveoli Sac Clusters, Breathing Inflation & Capillary Gas Exchange
+            vec3 renderRealisticAlveoli(vec2 uv, float z) {
+                float tAlv = clamp((z - 965.0) / 60.0, 0.0, 1.0);
+                float aScale = exp2(-mod(tAlv * 3.6, 3.0)) * 5.8;
+                vec2 ap = uv * aScale;
+
+                // Rhythmic respiration tidal breathing (~3.9s period)
+                float breathPhase = uTime * 1.6;
+                float breath = 0.5 + 0.5 * sin(breathPhase);
+                float inflation = 1.0 + 0.22 * breath;
+
+                // 1. True 3D Grape-Cluster Bulbous Alveoli Geometry (Acini)
+                vec2 iCell = floor(ap);
+                vec2 fCell = fract(ap);
+                float minDist = 1e9;
+                vec2 bestOffset = vec2(0.0);
+                float bestRadius = 0.45;
+                float bestId = 0.0;
+                float secondDist = 1e9;
+
+                for (int y = -1; y <= 1; y++) {
+                    for (int x = -1; x <= 1; x++) {
+                        vec2 nb = vec2(float(x), float(y));
+                        vec2 cellId = iCell + nb;
+                        vec2 jitter = (hash22(cellId + 1.23) - 0.5) * 0.38;
+                        vec2 center = nb + 0.5 + jitter;
+                        float rAlv = (0.42 + 0.16 * hash21(cellId * 13.7)) * inflation;
+                        float d = length(fCell - center) - rAlv;
+                        if (d < minDist) {
+                            secondDist = minDist;
+                            minDist = d;
+                            bestOffset = fCell - center;
+                            bestRadius = rAlv;
+                            bestId = hash21(cellId * 7.1);
+                        } else if (d < secondDist) {
+                            secondDist = d;
+                        }
+                    }
+                }
+
+                float rNorm = length(bestOffset) / max(0.01, bestRadius);
+                float normZ = sqrt(max(0.0, 1.0 - min(1.0, rNorm * rNorm)));
+                vec3 N = normalize(vec3(bestOffset / max(0.01, bestRadius), normZ));
+
+                // 3D Directional Lighting from upper-left
+                vec3 L = normalize(vec3(0.52, 0.68, 0.75));
+                vec3 V = vec3(0.0, 0.0, 1.0);
+                vec3 H = normalize(L + V);
+
+                float diff = max(0.0, dot(N, L));
+                float spec = pow(max(0.0, dot(N, H)), 24.0);
+                float fresnel = pow(1.0 - normZ, 3.2);
+
+                float septum = max(0.0, secondDist - minDist);
+                float creviceAO = smoothstep(0.0, 0.18, septum);
+
+                // Base alveolar membrane color (stretches & thins on inhale)
+                vec3 membraneCol = mix(vec3(0.52, 0.14, 0.20), vec3(0.92, 0.54, 0.62), (1.0 - rNorm * 0.6));
+                membraneCol = mix(membraneCol, vec3(0.98, 0.72, 0.78), breath * 0.35);
+
+                vec3 col = membraneCol * (0.35 + 0.65 * diff) * creviceAO;
+                col += vec3(1.0, 0.95, 0.98) * spec * (0.75 + 0.25 * breath);
+                col += vec3(0.95, 0.55, 0.65) * fresnel * 0.85;
+
+                // 2. Microscopic Pericapillary Basket-Weave Mesh wrapping the spherical dome
+                float theta = atan(bestOffset.y, bestOffset.x);
+                float phi = asin(clamp(rNorm, 0.0, 1.0));
+                float capWeave1 = sin(theta * 7.0 + phi * 11.0);
+                float capWeave2 = cos(theta * 5.0 - phi * 9.0);
+                float capGrid = abs(capWeave1 * capWeave2);
+                float isCapillary = smoothstep(0.24, 0.06, capGrid);
+
+                // 3. Micro-Circulation: Red blood cells converting Deox (purple) -> Ox (scarlet)
+                float flowSpeed = 0.55;
+                float flowProg = fract((theta + PI) / (2.0 * PI) + uTime * flowSpeed + bestId);
+                float rbcCell = sin(flowProg * 36.0 - uTime * 14.0) * 0.5 + 0.5;
+                rbcCell = pow(rbcCell, 3.5);
+
+                vec3 deoxBlood = vec3(0.26, 0.04, 0.18);
+                vec3 oxBlood = vec3(0.98, 0.09, 0.12);
+                vec3 bloodCol = mix(deoxBlood, oxBlood, smoothstep(0.18, 0.82, flowProg));
+
+                if (isCapillary > 0.01) {
+                    vec3 capCol = mix(bloodCol * 0.7, bloodCol * 1.35, rbcCell);
+                    col = mix(col, capCol, isCapillary * (0.75 + 0.25 * normZ));
+                }
+
+                // 4. Molecular O2 Gas Diffusion across respiratory membrane
+                float o2Noise = vnoise(bestOffset * 38.0 + vec2(0.0, uTime * 3.5));
+                float o2Flux = pow(smoothstep(0.68, 0.94, o2Noise), 4.0);
+                float o2Intensity = (0.6 + 0.4 * breath);
+                col += vec3(0.35, 0.92, 1.0) * o2Flux * o2Intensity * 1.25;
+
+                // 5. Pores of Kohn (Inter-alveolar collateral ventilation pores)
+                vec2 poreCenter = (hash22(vec2(bestId, 4.39)) - 0.5) * bestRadius * 0.7;
+                float dPore = length(bestOffset - poreCenter);
+                float poreR = 0.052;
+                if (dPore < poreR) {
+                    float poreRim = smoothstep(poreR, poreR - 0.012, dPore);
+                    vec3 poreLumenCol = vec3(0.12, 0.03, 0.06);
+                    col = mix(col, poreLumenCol, poreRim * 0.85);
+                }
+
+                return col;
+            }
+
             vec3 renderStage3(vec2 uv, float z) {
                 // Coastal & Beach landscape zoom
                 if (z < 718.0) {
@@ -1810,60 +2055,32 @@
                     return colCoast;
                 }
 
-                // Close-up Beach Crowd, Central Hero Head, Brain, Vascular & Alveoli (z >= 718)
-                if (z < 900.0) {
+                // Close-up Beach Crowd, Central Hero Head & Cortex (z = 718..905)
+                if (z < 905.0) {
                     vec3 cCol = renderCrowdHeadAndBrain(uv, z);
+                    // Smooth cross-dissolve from cerebral connectome down into the thoracic lungs
                     if (z > 885.0) {
-                        float wVasc = smoothstep(885.0, 900.0, z);
-                        vec2 vp = uv * 3.5;
-                        float vField = abs(fbm(vp * 2.5, 0.65) - 0.5);
-                        vec3 vCol = mix(vec3(0.85, 0.08, 0.15), vec3(0.18, 0.02, 0.05), smoothstep(0.0, 0.14, vField));
-                        return mix(cCol, vCol, wVasc);
+                        float wLungs = smoothstep(885.0, 905.0, z);
+                        vec3 lCol = renderBronchialLungs(uv, z);
+                        return mix(cCol, lCol, wLungs);
                     }
                     return cCol;
                 }
+
+                // Phase 15: Anatomical Dual Lung Lobes & Bronchial Airway Tree (z = 905..965)
                 if (z < 965.0) {
-                    float vScale = exp2(-mod((z - 900.0) * 0.07, 2.2)) * 3.2;
-                    vec2 vp = uv * vScale;
-                    float art = abs(fbm(vp * 2.2, 0.65) - 0.48);
-                    float vein = abs(fbm(vp * 2.2 + vec2(4.2, 1.7), 0.68) - 0.48);
-                    float cap = abs(vnoise(vp * 14.0) - 0.5);
-
-                    vec3 col = vec3(0.12, 0.02, 0.04);
-                    col += vec3(0.92, 0.12, 0.18) * exp(-26.0 * art);
-                    col += vec3(0.18, 0.32, 0.78) * exp(-28.0 * vein);
-                    col += vec3(0.75, 0.22, 0.32) * exp(-45.0 * cap) * 0.55;
-
+                    vec3 lCol = renderBronchialLungs(uv, z);
+                    // Smooth zoom from terminal bronchiole down into 3D Alveoli Sac Clusters
                     if (z > 952.0) {
                         float wAlv = smoothstep(952.0, 965.0, z);
-                        vec2 ap = uv * 6.0;
-                        float sac = vnoise(ap);
-                        vec3 alvCol = mix(vec3(0.92, 0.48, 0.55), vec3(0.22, 0.04, 0.08), smoothstep(0.2, 0.7, sac));
-                        col = mix(col, alvCol, wAlv);
+                        vec3 alvCol = renderRealisticAlveoli(uv, z);
+                        return mix(lCol, alvCol, wAlv);
                     }
-                    return col;
+                    return lCol;
                 }
 
-                float aScale = exp2(-mod((z - 965.0) * 0.07, 2.0)) * 5.2;
-                vec2 ap = uv * aScale;
-                vec2 iCell = floor(ap);
-                vec2 fCell = fract(ap);
-                float minD1 = 1e9, minD2 = 1e9;
-                for (int y = -1; y <= 1; y++) {
-                    for (int x = -1; x <= 1; x++) {
-                        vec2 nb = vec2(float(x), float(y));
-                        vec2 pt = hash22(iCell + nb);
-                        float d = length(nb + pt - fCell);
-                        if (d < minD1) { minD2 = minD1; minD1 = d; }
-                        else if (d < minD2) { minD2 = d; }
-                    }
-                }
-                float septum = minD2 - minD1;
-                float wall = exp(-22.0 * septum);
-                float pore = smoothstep(0.16, 0.05, minD1);
-                vec3 sacCol = mix(vec3(0.32, 0.08, 0.14), vec3(0.96, 0.58, 0.64), wall);
-                sacCol = mix(sacCol, vec3(0.06, 0.01, 0.03), pore * 0.75);
-                return sacCol;
+                // Phase 16: Microscopic 3D Alveoli Sac Clusters & Blood Oxygenation (z >= 965)
+                return renderRealisticAlveoli(uv, z);
             }
 
             void main() {
@@ -2241,8 +2458,8 @@
             { id: 12, zStart: 710.0, zEnd: 770.0, dim: 'D ≈ 1.880', tag: 'STAGE III // CROWD ON THE BEACH', title: 'Phase 12: Beach Crowd to Central Hero', desc: 'Gliding among the crowds standing on the golden beach sand, casting soft shadows under the sunlight, locking smoothly onto the central hero individual.' },
             { id: 13, zStart: 770.0, zEnd: 830.0, dim: 'D ≈ 2.150', tag: 'STAGE III // INDIVIDUAL CRANIAL CROWN', title: 'Phase 13: Single Human Head & Cortical Reveal', desc: 'Seamless 1:1 lock onto the central person\'s head and Fibonacci hair whorl, turning translucent to reveal folded cerebral cortex gyri.' },
             { id: 14, zStart: 830.0, zEnd: 900.0, dim: 'D ≈ 2.650', tag: 'STAGE III // CEREBRAL CONNECTOME', title: 'Phase 14: Cerebral Neural & Synaptic Network', desc: 'Inside the brain\'s continuous web of pyramidal neurons, branching dendrites, and traveling action-potential flashes.' },
-            { id: 15, zStart: 900.0, zEnd: 965.0, dim: 'D ≈ 2.780', tag: 'STAGE III // MURRAY\'S LAW VASCULATURE', title: 'Phase 15: Human Arterial & Venous Vascular Network', desc: 'Bifurcating arterial and venous trees governed by Murray\'s Law (r_p³ = r_1³ + r_2³) and anastomosing capillary beds.' },
-            { id: 16, zStart: 965.0, zEnd: 1025.0, dim: 'D ≈ 2.970', tag: 'STAGE III // PULMONARY GAS EXCHANGE', title: 'Phase 16: Pulmonary Lung Alveoli Sacs', desc: 'Space-filling polyhedral lung alveoli sacs (D ≈ 2.97) with pericapillary gas-exchange septa and Pores of Kohn.' }
+            { id: 15, zStart: 900.0, zEnd: 965.0, dim: 'D ≈ 2.780', tag: 'STAGE III // RESPIRATORY LUNGS & BRONCHI', title: 'Phase 15: Dual Lung Lobes & Bronchial Airway Tree', desc: 'Anatomical bilateral lung lobes expanding with tidal respiration, ribbed cartilaginous trachea, branching fractal bronchi (Murray\'s Law), and oxygen airflow streams.' },
+            { id: 16, zStart: 965.0, zEnd: 1025.0, dim: 'D ≈ 2.970', tag: 'STAGE III // 3D PULMONARY ALVEOLI & GAS EXCHANGE', title: 'Phase 16: Microscopic 3D Alveoli Sac Clusters & Blood Oxygenation', desc: 'True 3D bulbous grape clusters of inflating alveoli sacs (acini) wrapped in capillary mesh, with red blood cells converting from deoxygenated purple to arterial scarlet as O₂ diffuses.' }
         ];
 
         function formatMMSS(sec) {

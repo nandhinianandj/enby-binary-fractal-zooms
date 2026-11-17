@@ -167,15 +167,15 @@
       "short": "14.BrainNet"
     },
     "15": {
-      "tag": "STAGE III // MURRAY'S LAW VASCULATURE",
-      "title": "Phase 15: Human Arterial & Venous Vascular Network",
-      "desc": "Bifurcating arterial and venous trees governed by Murray's Law (r_p³ = r_1³ + r_2³) and anastomosing capillary beds.",
-      "short": "15.Vascular"
+      "tag": "STAGE III // RESPIRATORY LUNGS & BRONCHI",
+      "title": "Phase 15: Dual Lung Lobes & Bronchial Airway Tree",
+      "desc": "Anatomical bilateral lung lobes expanding with tidal respiration, ribbed cartilaginous trachea, branching fractal bronchi (Murray's Law), and oxygen airflow streams.",
+      "short": "15.Lungs"
     },
     "16": {
-      "tag": "STAGE III // PULMONARY GAS EXCHANGE",
-      "title": "Phase 16: Pulmonary Lung Alveoli Sacs",
-      "desc": "Space-filling polyhedral lung alveoli sacs (D ≈ 2.97) with pericapillary gas-exchange septa and Pores of Kohn.",
+      "tag": "STAGE III // 3D PULMONARY ALVEOLI & GAS EXCHANGE",
+      "title": "Phase 16: Microscopic 3D Alveoli Sac Clusters & Blood Oxygenation",
+      "desc": "True 3D bulbous grape clusters of inflating alveoli sacs (acini) wrapped in capillary mesh, with red blood cells converting from deoxygenated purple to arterial scarlet as O₂ diffuses.",
       "short": "16.Alveoli"
     }
   }
