@@ -1987,66 +1987,203 @@
                 return col;
             }
 
+            // ── Fractal coastal terrain helpers ──────────────────────────────────────────
+            // Domain-warped fBm coastline (Hausdorff D ≈ 1.25)
+            // Returns raw fBm height – subtract baseline & add slope externally
+            float coastHeight(vec2 p, float H) {
+                // First warp pass – large-scale headlands & bays
+                vec2 warp1 = vec2(fbm(p * 1.8 + vec2(3.1, 7.4), H),
+                                  fbm(p * 1.8 + vec2(8.3, 2.1), H));
+                // Second warp pass – small coves & inlets (fractal self-similarity)
+                vec2 warp2 = vec2(fbm(p * 3.6 + warp1 * 0.9 + vec2(1.7, 5.3), H * 0.85),
+                                  fbm(p * 3.6 + warp1 * 0.9 + vec2(9.2, 0.6), H * 0.85));
+                return fbm(p * 2.2 + warp2 * 0.55, H);
+            }
+
+            // Spectral ocean wave field (additive sinusoidal bands + capillary fBm)
+            float oceanWaves(vec2 p, float t) {
+                float w = 0.0;
+                w += 0.42 * sin(p.x *  6.2 + p.y *  1.8 + t * 0.80);
+                w += 0.28 * sin(p.x * 11.5 + p.y *  4.3 + t * 1.10 + 1.3);
+                w += 0.14 * sin(p.x * 23.0 + p.y *  9.1 + t * 1.60 + 2.7);
+                w += 0.09 * sin(p.x * 47.0 + p.y * 19.7 + t * 2.20 + 0.5);
+                w += 0.05 * fbm(p * 60.0 + vec2(t * 0.3, 0.0), 0.65);
+                return w; // range ~ [-1, +1]
+            }
+
+            // Fractal tree canopy: three recursive crown tiers (macro / meso / micro)
+            float treeCanopy(vec2 p, float scale) {
+                vec2 g    = p * scale;
+                vec2 cell = floor(g);
+                vec2 f    = fract(g) - 0.5;
+                vec2 rnd  = hash22(cell + 13.7);
+                vec2 trunk = (rnd - 0.5) * 0.6;
+                vec2 rel   = f - trunk;
+
+                float canopy = 0.0;
+                for (int k = 0; k < 3; k++) {
+                    float kf      = float(k);
+                    float subS    = pow(0.52, kf);
+                    float subR    = 0.30 * subS;
+                    float angOff  = rnd.x * 6.2832 + kf * 2.0944; // 120° apart
+                    vec2 subC     = trunk + vec2(cos(angOff), sin(angOff)) * 0.18 * subS;
+                    float dr      = length(f - subC);
+                    float jagg    = fbm(rel * (8.0 + kf * 4.0) + vec2(rnd.y * 5.0, kf), 0.75) * 0.12;
+                    canopy = max(canopy, smoothstep(subR + jagg + 0.04, subR - 0.02, dr));
+                }
+                return canopy;
+            }
+
             vec3 renderStage3(vec2 uv, float z) {
-                // Coastal & Beach landscape zoom
+                // ── Phase 10–11: Fractal Coastline → Beach zoom (z = 570..718) ───────────
                 if (z < 718.0) {
-                    float tCoast = clamp((z - 570.0) / 140.0, 0.0, 1.0);
-                    float zoomScale = exp2(-tCoast * 6.2) * 2.4;
+                    float tCoast   = clamp((z - 570.0) / 140.0, 0.0, 1.0);
+                    float zoomScale = exp2(-tCoast * 6.4) * 2.6;
                     vec2 p = uShoreAnchor + uv * zoomScale;
+                    float t = uTime * 0.55; // animation time
 
-                    // Calibrated terrain height: uShoreAnchor is centered precisely on the golden beach shoreline
-                    float hShore = fbm(uShoreAnchor * 2.2, uHurst);
-                    float h = fbm(p * 2.2, uHurst) - hShore + 0.022 + (p.x - uShoreAnchor.x) * 0.42;
+                    // ── Terrain height (domain-warped fractal coastline) ──────
+                    float hBase = coastHeight(uShoreAnchor, uHurst);
+                    float h = coastHeight(p, uHurst) - hBase
+                              + 0.018
+                              + (p.x - uShoreAnchor.x) * 0.38;
+                    // h < 0 = ocean, [0, sandWidth] = beach sand, > sandWidth = land
 
-                    float chartFade = 1.0 - smoothstep(595.0, 635.0, z);
-                    float beachFade = smoothstep(615.0, 650.0, z);
+                    float sandWidth  = 0.058;
+                    float chartFade  = 1.0 - smoothstep(590.0, 630.0, z);
+                    float beachFade  = smoothstep(610.0, 655.0, z);
+
+                    // ── SKY (visible when zoomed out at high altitude) ────────
+                    float horizonY = mix(0.22, -0.9, tCoast);
+                    vec3 sky = mix(vec3(0.55, 0.75, 0.95), vec3(0.90, 0.92, 1.00),
+                                  smoothstep(horizonY, horizonY + 0.35, uv.y));
+                    float cloud = smoothstep(0.42, 0.56,
+                                  fbm(uv * vec2(4.0, 2.5) + vec2(t * 0.08, 0.0), 0.60));
+                    sky = mix(sky, vec3(1.0, 1.0, 1.0), cloud * 0.75);
 
                     vec3 colCoast;
-                    if (h < 0.0) {
-                        // Ocean water with depth gradient and breaker foam
-                        float depth = clamp(-h * 4.5, 0.0, 1.0);
-                        colCoast = mix(vec3(0.08, 0.58, 0.68), vec3(0.02, 0.14, 0.28), depth);
-                        float foam = smoothstep(0.035, 0.0, abs(h + 0.012 * sin(p.y * 40.0)));
-                        colCoast = mix(colCoast, vec3(0.94, 0.98, 1.0), foam * (0.55 + 0.45 * beachFade));
-                    } else if (h < 0.055) {
-                        // Golden beach sand with natural ripples
-                        float ripples = sin(p.y * 180.0 + fbm(p * 30.0, 0.7) * 6.0) * 0.5 + 0.5;
-                        colCoast = mix(vec3(0.78, 0.66, 0.46), vec3(0.93, 0.85, 0.66), h / 0.055) * (0.92 + 0.08 * ripples);
+                    bool isSky = (uv.y > horizonY + 0.02) && (h < -0.12) && (tCoast < 0.55);
+
+                    if (isSky) {
+                        colCoast = sky;
+
+                    } else if (h < 0.0) {
+                        // ── OCEAN ─────────────────────────────────────────────
+                        float depth   = clamp(-h * 5.0, 0.0, 1.0);
+                        vec3 deepCol  = vec3(0.02, 0.10, 0.22);
+                        vec3 nearCol  = vec3(0.08, 0.52, 0.65);
+                        // sub-surface scatter near the breaker
+                        float ssr     = smoothstep(-0.08, 0.0, h);
+                        vec3 ssrCol   = mix(nearCol, vec3(0.18, 0.72, 0.68), ssr * 0.5);
+                        colCoast = mix(deepCol, ssrCol, 1.0 - depth);
+
+                        // Spectral wave crests & whitecap foam
+                        float wv      = oceanWaves(p, t);
+                        float foamCrest  = smoothstep(0.68, 0.90, wv * 0.5 + 0.5);
+                        float shoalFoam  = smoothstep(0.055, 0.0, abs(h + 0.008 * wv));
+                        float swash      = smoothstep(0.025, 0.0,
+                                           abs(h + 0.018 * sin(p.y * 28.0 + t * 2.1)));
+                        float totalFoam = max(foamCrest * 0.55, max(shoalFoam, swash));
+                        colCoast = mix(colCoast, vec3(0.96, 0.99, 1.00), totalFoam);
+
+                        // Sun glint (sparkle)
+                        float glint = smoothstep(0.92, 1.0,
+                                      fbm(p * 120.0 + vec2(t * 0.4, 0.0), 0.5));
+                        colCoast = mix(colCoast, vec3(1.0, 0.98, 0.9), glint * 0.5 * (1.0 - beachFade));
+
+                    } else if (h < sandWidth) {
+                        // ── BEACH SAND ────────────────────────────────────────
+                        float normH  = h / sandWidth;
+                        float wetness = 1.0 - smoothstep(0.0, 0.25, normH);
+                        vec3 drySand  = vec3(0.90, 0.82, 0.60);
+                        vec3 wetSand  = vec3(0.52, 0.46, 0.33);
+                        colCoast = mix(drySand, wetSand, wetness * 0.70);
+
+                        // Anisotropic wind ripples (finer as we zoom in)
+                        float ripFreq = mix(220.0, 820.0, beachFade);
+                        float ripWarp = fbm(p * 18.0 + vec2(0.0, t * 0.05), 0.70) * 0.8;
+                        float ripple  = sin(p.y * ripFreq + ripWarp) * 0.5 + 0.5;
+                        colCoast *= (0.90 + 0.10 * ripple);
+
+                        // Voronoi pebble scatter (visible close-up)
+                        if (beachFade > 0.05) {
+                            vec2 pGrid = p * 1800.0;
+                            vec2 pCell = floor(pGrid);
+                            vec2 pF    = fract(pGrid);
+                            float minD = 1.0;
+                            for (int dx = -1; dx <= 1; dx++) {
+                                for (int dy = -1; dy <= 1; dy++) {
+                                    vec2 nb  = vec2(float(dx), float(dy));
+                                    vec2 rp  = hash22(pCell + nb + uSeed * 0.07);
+                                    float dp = length(pF - nb - rp * 0.9);
+                                    minD = min(minD, dp);
+                                }
+                            }
+                            float pebble   = smoothstep(0.28, 0.44, minD);
+                            vec3 pebbleCol = mix(vec3(0.42, 0.38, 0.30), vec3(0.70, 0.65, 0.52), pebble);
+                            colCoast = mix(colCoast, pebbleCol, beachFade * 0.30);
+                        }
+
+                        // Foam lace / swash tongue near water edge
+                        float laceFoam = smoothstep(0.045, 0.012, abs(h - 0.012))
+                                       * (0.5 + 0.5 * sin(p.y * 310.0 + t * 1.8));
+                        colCoast = mix(colCoast, vec3(0.97, 0.98, 0.99), laceFoam * 0.70);
+
                     } else {
-                        // Inland dunes and coastal trees
-                        float crowns = vnoise(p * 85.0);
-                        vec3 forest = mix(vec3(0.08, 0.28, 0.14), vec3(0.24, 0.52, 0.22), crowns);
-                        vec2 tp = fract(p * 160.0) - 0.5;
-                        float crownD = length(tp);
-                        float boughs = sin(atan(tp.y, tp.x) * 11.0) * 0.08;
-                        float treeMask = smoothstep(0.45 + boughs, 0.1, crownD);
-                        colCoast = mix(vec3(0.04, 0.12, 0.06), vec3(0.28, 0.58, 0.24), treeMask);
+                        // ── LAND: dune crest → fractal tree canopy ───────────
+                        float landT   = clamp((h - sandWidth) / 0.12, 0.0, 1.0);
+                        vec3 dune     = mix(vec3(0.78, 0.74, 0.52), vec3(0.42, 0.56, 0.28), landT);
+
+                        // Three overlapping canopy scales for self-similarity
+                        float c1 = treeCanopy(p, 28.0);
+                        float c2 = treeCanopy(p + vec2(1.3, 0.7),  70.0);
+                        float c3 = treeCanopy(p + vec2(2.5, 1.9), 180.0);
+                        float canopy = max(c1, max(c2 * 0.8, c3 * 0.6));
+
+                        // Crown lit edge vs shaded interior
+                        float litEdge   = c1 * (1.0 - c2 * 0.6);
+                        vec3 crownDark  = mix(vec3(0.04, 0.14, 0.06), vec3(0.07, 0.22, 0.09), landT);
+                        vec3 crownLight = mix(vec3(0.22, 0.52, 0.18), vec3(0.38, 0.68, 0.24), landT);
+                        vec3 crownCol   = mix(crownDark, crownLight, litEdge);
+
+                        // Canopy-occlusion shadow (AO)
+                        crownCol *= (1.0 - c1 * c2 * 0.5 * 0.45);
+
+                        colCoast = mix(dune, crownCol, smoothstep(0.05, 0.55, canopy));
+
+                        // Fine undergrowth fBm under canopy
+                        float ugrowth = fbm(p * 140.0, 0.80) * canopy;
+                        colCoast = mix(colCoast, vec3(0.08, 0.18, 0.08), ugrowth * 0.35);
                     }
 
-                    // Bathymetric chart contour isolines (fade during early descent)
+                    // ── Bathymetric / topo contour isolines (Phase 10) ───────
                     if (chartFade > 0.01) {
-                        float iso = smoothstep(0.03, 0.0, abs(fract(h * 18.0) - 0.5));
-                        colCoast = mix(colCoast, vec3(0.85, 0.95, 1.0), iso * chartFade * 0.55);
+                        float iso    = smoothstep(0.025, 0.0, abs(fract(h * 16.0 + 0.5) - 0.5));
+                        vec3 isoCol  = (h < 0.0) ? vec3(0.60, 0.88, 1.0) : vec3(0.70, 0.90, 0.60);
+                        colCoast = mix(colCoast, isoCol, iso * chartFade * 0.60);
+                        // Secondary (coarser) contour band
+                        float iso2 = smoothstep(0.012, 0.0, abs(fract(h * 8.0 + 0.5) - 0.5));
+                        colCoast = mix(colCoast, vec3(0.80, 0.95, 1.0), iso2 * chartFade * 0.25);
                     }
 
-                    // High-altitude clusters of people gathering on the beach sand (z = 635..690)
+                    // ── Crowd dots appearing on sand as we zoom in ────────────
                     float crowdDensity = smoothstep(635.0, 680.0, z);
-                    if (crowdDensity > 0.01 && h >= 0.005 && h <= 0.052) {
-                        vec2 bGrid = p * 950.0;
+                    if (crowdDensity > 0.01 && h >= 0.004 && h <= sandWidth) {
+                        vec2 bGrid = p * 980.0;
                         vec2 bCell = floor(bGrid);
-                        vec2 bF = fract(bGrid) - 0.5;
-                        vec2 bRnd = hash22(bCell + uSeed * 0.1);
-                        if (bRnd.x > 0.40) {
-                            float dDot = length(bF - (bRnd - 0.5) * 0.35);
-                            float dotMask = smoothstep(0.38, 0.08, dDot);
-                            vec3 pCol = getPalette(bRnd.y, uPalette);
-                            colCoast = mix(colCoast, pCol, dotMask * crowdDensity * 0.85);
+                        vec2 bF    = fract(bGrid) - 0.5;
+                        vec2 bRnd  = hash22(bCell + uSeed * 0.1);
+                        if (bRnd.x > 0.38) {
+                            float dDot    = length(bF - (bRnd - 0.5) * 0.38);
+                            float dotMask = smoothstep(0.40, 0.06, dDot);
+                            vec3 pCol     = getPalette(bRnd.y, uPalette);
+                            colCoast = mix(colCoast, pCol, dotMask * crowdDensity * 0.90);
                         }
                     }
 
-                    // Seamless blend into the close-up crowd on the beach (z = 668..718)
+                    // ── Blend to close-up crowd scene (z = 668..718) ─────────
                     if (z > 668.0) {
-                        vec3 colCrowd = renderCrowdHeadAndBrain(uv, z);
+                        vec3 colCrowd   = renderCrowdHeadAndBrain(uv, z);
                         float blendCrowd = smoothstep(668.0, 712.0, z);
                         return mix(colCoast, colCrowd, blendCrowd);
                     }
