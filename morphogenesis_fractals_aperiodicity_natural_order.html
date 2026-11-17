@@ -204,6 +204,10 @@
         .cursor-pointer { cursor: pointer; }
         .hidden { display: none; }
         .select-none { user-select: none; -webkit-user-select: none; }
+        /* Phase transition easing: shared cubic-bezier helper */
+        .phase-transition {
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease, filter 0.6s ease;
+        }
     </style>
 </head>
 <body class="relative select-none">
@@ -828,7 +832,21 @@
             lastLifeStepTime: 0,
             binaryDiscomfortGlitch: 0.0,
             startTime: performance.now(),
-            lastFrameTime: performance.now()
+            lastFrameTime: performance.now(),
+
+            // --- Phase 8 Skyline camera transition state (zoom-out + pan) ---
+            phase8ZoomOut: {
+                active: false,
+                startZ: 375.0,
+                endZ: 472.5,
+                startPanX: 0.0,
+                startPanY: 0.0,
+                endPanX: 0.45,
+                endPanY: -0.32,
+                duration: 1.0,
+                startTime: 0,
+                ease: 0
+            }
         };
 
         function setElementVisible(el, visible) {
@@ -2984,14 +3002,21 @@
                 }
             }
 
-            state.zoomZ += (state.targetZoomZ - state.zoomZ) * Math.min(1.0, dt * 10.0);
-            state.panX += (state.targetPanX - state.panX) * Math.min(1.0, dt * 8.0);
-            state.panY += (state.targetPanY - state.panY) * Math.min(1.0, dt * 8.0);
+            state.zoomZ += (state.targetZoomZ - state.zoomZ) * Math.min(1.0, dt * 5.0);
+            state.panX += (state.targetPanX - state.panX) * Math.min(1.0, dt * 4.0);
+            state.panY += (state.targetPanY - state.panY) * Math.min(1.0, dt * 4.0);
 
             gl.useProgram(prog);
             gl.uniform2f(uLocs.uRes, glCanvas.width, glCanvas.height);
             gl.uniform1f(uLocs.uZoomZ, state.zoomZ);
-            gl.uniform2f(uLocs.uPan, state.panX, state.panY);
+            // Phase 8 City Skyline: zoom-out + pan camera transition
+            let phase8PanX = 0.0, phase8PanY = 0.0;
+            if (state.zoomZ >= 375.0 && state.zoomZ <= 472.5) {
+                const p = (state.zoomZ - 375.0) / (472.5 - 375.0);
+                phase8PanX = state.phase8ZoomOut.startPanX + (state.phase8ZoomOut.endPanX - state.phase8ZoomOut.startPanX) * p;
+                phase8PanY = state.phase8ZoomOut.startPanY + (state.phase8ZoomOut.endPanY - state.phase8ZoomOut.startPanY) * p;
+            }
+            gl.uniform2f(uLocs.uPan, state.panX + phase8PanX, state.panY + phase8PanY);
             gl.uniform1f(uLocs.uTime, (now - state.startTime) * 0.001);
             gl.uniform1f(uLocs.uSeed, (state.seed % 10000) * 0.1);
             gl.uniform1i(uLocs.uPalette, state.paletteIdx);

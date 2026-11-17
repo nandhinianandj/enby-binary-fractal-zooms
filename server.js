@@ -2,7 +2,6 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const zlib = require('zlib');
 
 const PORT = process.env.PORT || 8080;
 const PUBLIC_DIR = __dirname;
@@ -72,10 +71,9 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, {
       'Content-Type': contentType,
       'Cache-Control': isDevRoute ? 'no-cache, no-store, must-revalidate' : 'public, max-age=3600',
-      'X-Environment': envHeader,
-      'Content-Encoding': 'gzip'
+      'X-Environment': envHeader
     });
-    zlib.gzip(data, (_, compressed) => res.end(compressed));
+    res.end(data);
   });
 });
 
