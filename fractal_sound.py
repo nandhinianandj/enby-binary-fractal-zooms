@@ -7,7 +7,7 @@
 #
 #* Creation Date : 15-11-2026
 #
-#* Last Modified : Sunday 15 November 2026 09:15:01 PM
+#* Last Modified : Sunday 22 November 2026 01:39:20 PM
 #
 #* Created By : Yaay Nands
 #_._._._._._._._._._._._._._._._._._._._._.#
@@ -18,21 +18,35 @@ import numpy as np
 import soundfile as sf
 from scipy.signal import resample
 
-def transform_audio(audio, sr, speed_factor, gain, pan):
-    """Scales time/pitch, adjusts volume, and pans stereo."""
-    # Resample changes both duration and pitch simultaneously (true fractal scaling)
+
+def transform_audio(audio, speed_factor, gain, pan):
     new_length = int(len(audio) / speed_factor)
     if new_length < 10:
         return np.zeros((10, 2))
     
-    scaled = resample(audio, new_length) * gain
+    # Linear interpolation: faster than FFT resample and avoids transient ringing spikes
+    old_idx = np.linspace(0, len(audio) - 1, len(audio))
+    new_idx = np.linspace(0, len(audio) - 1, new_length)
+    scaled = np.interp(new_idx, old_idx, audio) * gain
     
-    # Apply constant-power stereo panning (-1.0 left to 1.0 right)
     angle = (pan + 1.0) * (np.pi / 4.0)
-    left = scaled * np.cos(angle)
-    right = scaled * np.sin(angle)
-    
-    return np.column_stack((left, right))
+    return np.column_stack((scaled * np.cos(angle), scaled * np.sin(angle)))
+
+#def transform_audio(audio, sr, speed_factor, gain, pan):
+#    """Scales time/pitch, adjusts volume, and pans stereo."""
+#    # Resample changes both duration and pitch simultaneously (true fractal scaling)
+#    new_length = int(len(audio) / speed_factor)
+#    if new_length < 10:
+#        return np.zeros((10, 2))
+#    
+#    scaled = resample(audio, new_length) * gain
+#    
+#    # Apply constant-power stereo panning (-1.0 left to 1.0 right)
+#    angle = (pan + 1.0) * (np.pi / 4.0)
+#    left = scaled * np.cos(angle)
+#    right = scaled * np.sin(angle)
+#    
+#    return np.column_stack((left, right))
 
 def generate_audio_fractal(seed_file, output_file, iterations=5):
     # Load seed clip and convert to mono float array
@@ -63,7 +77,7 @@ def generate_audio_fractal(seed_file, output_file, iterations=5):
         
         for offset_ratio, speed, gain, pan in rules:
             # Apply the rule to the ENTIRE previous generation
-            branch = transform_audio(current_state[:, 0], sr, speed, gain, pan)
+            branch = transform_audio(current_state[:, 0], speed, gain, pan)
             start_sample = int(len(current_state) * offset_ratio)
             end_sample = start_sample + len(branch)
             
@@ -74,7 +88,18 @@ def generate_audio_fractal(seed_file, output_file, iterations=5):
         next_state = np.zeros((max_end, 2))
         for start_sample, branch in transformed_branches:
             next_state[start_sample:start_sample + len(branch)] += branch
-            
+           
+        # Mix stereo to mono so right-panned branches aren't dropped
+        mono_prev = np.mean(current_state, axis=1)
+    
+        for offset_ratio, speed, gain, pan in rules:
+            branch = transform_audio(mono_prev, speed, gain, pan)
+
+        # Replace raw peak normalization with RMS-target + soft-clipping
+        rms = np.sqrt(np.mean(next_state**2))
+        if rms > 1e-9:
+            next_state = next_state * (0.15 / rms)  # Bring average loudness to a healthy -16 dBFS
+            next_state = np.tanh(next_state) * 0.9  # Soft-limit stray crackle spikes without crushing the mixkj
         # Prevent clipping between generations
         peak = np.max(np.abs(next_state))
         if peak > 0:
@@ -88,5 +113,5 @@ def generate_audio_fractal(seed_file, output_file, iterations=5):
 
 if __name__ == "__main__":
     # Replace 'seed.wav' with your short sound clip
-    generate_audio_fractal("seed.wav", "fractal_output.wav", iterations=5)
+    generate_audio_fractal("./sounds/inputs/501417__visionear__aachen_burning-fireplace-crackling-fire-sounds.wav", "./sounds/outputs/fractal_output.wav", iterations=5)
 
