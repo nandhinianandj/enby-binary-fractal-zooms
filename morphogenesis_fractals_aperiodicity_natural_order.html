@@ -2787,6 +2787,13 @@
             }
             syncCruiseUI();
             if (state.zenMode) scheduleZenControlAutoHide();
+
+            // Audio: start on cruise-on (keepAlive), stop on cruise-off
+            if (state.autoCruise) {
+                morphAudio.notifyActivity(window.currentMorphPhase || 1, true);
+            } else {
+                morphAudio.notifyStop();
+            }
         }
 
         function setCruiseSpeed(spd) {
@@ -2951,6 +2958,8 @@
             const delta = Math.sign(e.deltaY) * 3.8;
             state.targetZoomZ = Math.max(0, Math.min(TOTAL_Z, state.targetZoomZ + delta));
             if (state.zenMode) scheduleZenControlAutoHide();
+            // Audio: user is actively scrolling → play with idle timer
+            morphAudio.notifyActivity(window.currentMorphPhase || 1, false);
         }, { passive: true });
 
         let isDragging = false, lastX = 0, lastY = 0, downTime = 0;
@@ -2970,6 +2979,8 @@
             lastY = e.clientY;
             state.targetPanX -= dx * 1.5;
             state.targetPanY += dy * 1.5;
+            // Audio: user is actively dragging/panning → play with idle timer
+            morphAudio.notifyActivity(window.currentMorphPhase || 1, false);
         });
         window.addEventListener('pointerup', () => {
             if (isDragging && state.zenMode && (performance.now() - downTime < 220)) {
@@ -3009,10 +3020,11 @@ const PHASE_AUDIO_CONFIG = {
   // 1-indexed phase ids matching PHASES[].id above:
   //   Phase 6 = Einstein Hat 0/1 Cellular Automaton (zStart 180.0)
   //   Phase 8 = 3D Skyscraper City Skyline          (zStart 375.0)
-  einsteinPhase: 6,   // first phase of Einstein Hat regime
-  cityPhase: 8,       // first phase of City Skyline regime
-  crossfadeSec: 2.5,  // linear crossfade duration (seconds)
-  masterVolume: 0.75,
+  einsteinPhase: 6,     // first phase of Einstein Hat regime
+  cityPhase:     8,     // first phase of City Skyline regime
+  crossfadeSec:  2.5,   // linear crossfade duration (seconds)
+  masterVolume:  0.75,
+  manualIdleSec: 2.0,   // seconds of scroll/pan inactivity before audio fades out
   tracks: {
     preEinstein:    "/sounds/outputs/morph_881293__oolita__sea-waves-los-escullos_fast_50.0s.wav",
     einsteinToCity: "/sounds/outputs/morph_209073__lukesharples__blade-slice2_fast_70.0s.wav",
@@ -3022,15 +3034,18 @@ const PHASE_AUDIO_CONFIG = {
 
 class MorphAudioEngine {
   constructor(config) {
-    this.config = config;
-    this.ctx = null;
-    this.masterGain = null;
-    this.nodes = {}; // { key: { audioEl, source, gain } }
+    this.config      = config;
+    this.ctx         = null;
+    this.masterGain  = null;
+    this.nodes       = {};   // { key: { audioEl, source, gain } }
     this.activeTrack = null;
-    this.enabled = false;
+    this.playing     = false; // is audio actually audible right now?
+    this.wanted      = false; // user preference: does the user WANT audio?
+    this._idleTimer  = null;
   }
 
-  init() {
+  // ── Lazy AudioContext init (must happen inside a user-gesture handler) ──────
+  _init() {
     if (this.ctx) return;
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     this.ctx = new AudioCtx();
@@ -3038,81 +3053,113 @@ class MorphAudioEngine {
     this.masterGain.gain.value = 0;
     this.masterGain.connect(this.ctx.destination);
 
-    // Use HTMLAudioElement + MediaElementSource so large WAVs stream instead of blocking RAM
+    // HTMLAudioElement + MediaElementSource → large WAVs stream, not buffered
     for (const [key, url] of Object.entries(this.config.tracks)) {
       const audioEl = new Audio(url);
-      audioEl.loop = true;
+      audioEl.loop        = true;
       audioEl.crossOrigin = "anonymous";
-      audioEl.preload = "auto";
-
+      audioEl.preload     = "auto";
       const source = this.ctx.createMediaElementSource(audioEl);
-      const gain = this.ctx.createGain();
+      const gain   = this.ctx.createGain();
       gain.gain.value = 0;
-
       source.connect(gain);
       gain.connect(this.masterGain);
-
       this.nodes[key] = { audioEl, source, gain };
     }
   }
 
-  async toggle(currentPhase = 0) {
-    this.init();
-    if (this.ctx.state === "suspended") {
-      await this.ctx.resume();
-    }
+  // ── User clicks the toggle button: flip preference, never start audio ───────
+  //    Returns the new wanted state so the caller can update button text.
+  setWanted(wantAudio) {
+    this.wanted = wantAudio;
+    // If user turns it OFF while playing → fade out now
+    if (!this.wanted && this.playing) this._fadeOut();
+    return this.wanted;
+  }
 
-    this.enabled = !this.enabled;
-    const now = this.ctx.currentTime;
+  // ── Called by autoCruise start / wheel / drag: start audio if wanted ─────
+  async notifyActivity(phase, keepAlive = false) {
+    if (!this.wanted) return;          // preference is OFF → do nothing
 
-    if (this.enabled) {
-      // Start all tracks silently in sync so crossfades are instantaneous
-      Object.values(this.nodes).forEach(({ audioEl }) => {
-        audioEl.play().catch(() => {});
-      });
+    // Resume AudioContext (required after first user gesture)
+    this._init();
+    if (this.ctx.state === "suspended") await this.ctx.resume();
+
+    if (!this.playing) {
+      // Kick all tracks playing silently so crossfades work instantly
+      Object.values(this.nodes).forEach(({ audioEl }) => audioEl.play().catch(() => {}));
+      this.playing = true;
+      const now = this.ctx.currentTime;
       this.masterGain.gain.cancelScheduledValues(now);
       this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
       this.masterGain.gain.linearRampToValueAtTime(this.config.masterVolume, now + 1.0);
-      this.updatePhase(currentPhase, true);
-    } else {
-      this.masterGain.gain.cancelScheduledValues(now);
-      this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
-      this.masterGain.gain.linearRampToValueAtTime(0, now + 0.5);
+      this.updatePhase(phase, true);
     }
 
-    return this.enabled;
+    // keepAlive = true → autoCruise is running; don't set idle timer
+    if (keepAlive) {
+      this._clearIdleTimer();
+    } else {
+      // Manual scroll/pan → reset idle timer; fade when user stops interacting
+      this._resetIdleTimer();
+    }
   }
 
-  getTrackForPhase(phase) {
-    if (phase < this.config.einsteinPhase) return "preEinstein";
-    if (phase < this.config.cityPhase) return "einsteinToCity";
-    return "cityAndBeyond";
+  // ── Called by autoCruise stop ─────────────────────────────────────────────
+  notifyStop() {
+    this._fadeOut();
   }
 
+  // ── Called every frame from updateHUDReadouts when playing ───────────────
   updatePhase(phase, force = false) {
-    if (!this.enabled || !this.ctx) return;
+    if (!this.playing || !this.ctx) return;
     const targetTrack = this.getTrackForPhase(phase);
     if (targetTrack === this.activeTrack && !force) return;
 
-    const now = this.ctx.currentTime;
+    const now  = this.ctx.currentTime;
     const fade = this.config.crossfadeSec;
-
     for (const [key, { gain }] of Object.entries(this.nodes)) {
       gain.gain.cancelScheduledValues(now);
       gain.gain.setValueAtTime(gain.gain.value, now);
       gain.gain.linearRampToValueAtTime(key === targetTrack ? 1.0 : 0.0, now + fade);
     }
-
     this.activeTrack = targetTrack;
+  }
+
+  getTrackForPhase(phase) {
+    if (phase < this.config.einsteinPhase) return "preEinstein";
+    if (phase < this.config.cityPhase)     return "einsteinToCity";
+    return "cityAndBeyond";
+  }
+
+  // ── Internal helpers ─────────────────────────────────────────────────────
+  _fadeOut() {
+    if (!this.ctx || !this.playing) return;
+    const now = this.ctx.currentTime;
+    this.masterGain.gain.cancelScheduledValues(now);
+    this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+    this.masterGain.gain.linearRampToValueAtTime(0, now + 0.8);
+    this.playing = false;
+    this.activeTrack = null;
+  }
+
+  _resetIdleTimer() {
+    this._clearIdleTimer();
+    this._idleTimer = setTimeout(() => this._fadeOut(), this.config.manualIdleSec * 1000);
+  }
+
+  _clearIdleTimer() {
+    if (this._idleTimer) { clearTimeout(this._idleTimer); this._idleTimer = null; }
   }
 }
 
 const morphAudio = new MorphAudioEngine(PHASE_AUDIO_CONFIG);
-const audioBtn = document.getElementById("audio-toggle");
+const audioBtn   = document.getElementById("audio-toggle");
 
-audioBtn.addEventListener("click", async () => {
-  const isOn = await morphAudio.toggle(window.currentMorphPhase || 1);
-  audioBtn.textContent = isOn
+// Button is a preference toggle only — it never triggers playback directly
+audioBtn.addEventListener("click", () => {
+  const nowWanted = morphAudio.setWanted(!morphAudio.wanted);
+  audioBtn.textContent = nowWanted
     ? t('audio.on',  '🔊 Audio: On')
     : t('audio.off', '🔇 Audio: Off');
 });
