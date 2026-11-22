@@ -250,7 +250,8 @@
                     <h1 class="text-xs md:text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
                         <span data-i18n="app.title">MORPHOGENESIS</span>
                         <span id="seedBadge" class="text-[10px] mono font-normal px-1.5 py-0.5 rounded bg-slate-800/90 text-emerald-300 border border-emerald-500/30">#SEED</span>
-                        <a href="/dev" title="Switch to Dev / Preview Endpoint" class="text-[9px] mono px-1.5 py-0.5 rounded bg-purple-500/20 hover:bg-purple-500/35 text-purple-300 border border-purple-400/40 transition">Dev (/dev)</a>
+                        <span id="devBadge" class="text-[9px] mono font-semibold px-2 py-0.5 rounded bg-purple-500/30 text-purple-200 border border-purple-400/60 shadow-[0_0_12px_rgba(168,85,247,0.35)]" data-i18n="env.devBadge">DEV // morphogenesis.html</span>
+                        <a href="/" title="Switch to Production Endpoint" class="text-[9px] mono px-1.5 py-0.5 rounded bg-sky-500/20 hover:bg-sky-500/35 text-sky-300 border border-sky-400/40 transition" data-i18n="env.switchToProd">Prod (/)</a>
                     </h1>
                 </div>
             </div>
@@ -404,7 +405,16 @@
                 <button type="button" onclick="jumpToStage(930)" id="stepP15" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Bilateral Lung Lobes & Bronchial Airway Tree">15.Lungs</button>
                 <button type="button" onclick="jumpToStage(990)" id="stepP16" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="3D Alveoli Sac Clusters & Blood Oxygenation">16.Alveoli</button>
             </div>
-
+            <div class="grid grid-cols-5 gap-1.5 pt-2 mt-1.5 border-t border-slate-600 text-[9px] mono">
+                  <button id="audio-toggle" style="
+                      position: fixed; bottom: 20px; right: 20px; z-index: 100;
+                      background: rgba(10, 10, 15, 0.7); color: #e0e0e0;
+                      border: 1px solid rgba(255,255,255,0.2); border-radius: 6px;
+                      padding: 8px 14px; font-family: monospace; cursor: pointer;
+                      backdrop-filter: blur(6px); ">
+                   🔇 Audio: Off
+                </button>
+            </div>
             <!-- Active Seed Genome Strip -->
             <div class="grid grid-cols-5 gap-1.5 pt-2 mt-1.5 border-t border-slate-800/80 text-[9px] mono">
                 <div class="bg-slate-900/70 rounded px-2 py-1 border border-slate-800">
@@ -2649,6 +2659,11 @@
             document.getElementById('stageTitle').textContent = t(`phases.${activePhase.id}.title`, activePhase.title);
             document.getElementById('stageDesc').textContent = t(`phases.${activePhase.id}.desc`, activePhase.desc);
 
+            // Expose current 1-indexed phase id globally so audio engine can read it
+            window.currentMorphPhase = activePhase.id;
+            // Drive crossfade live from render loop (no-op when audio is disabled)
+            if (typeof morphAudio !== 'undefined') morphAudio.updatePhase(activePhase.id);
+
             const scrubber = document.getElementById('zoomScrubber');
             if (scrubber && document.activeElement !== scrubber) {
                 scrubber.value = z.toFixed(1);
@@ -2717,12 +2732,14 @@
             const bottomHud = document.getElementById('bottomHudContainer');
             const floatBtn = document.getElementById('floatingShowUIBtn');
             const zenOverlay = document.getElementById('zenModeOverlay');
+            const audioToggleBtn = document.getElementById('audio-toggle');
 
             if (state.zenMode) {
                 setElementVisible(topBar, false);
                 setElementVisible(bottomHud, false);
                 setElementVisible(floatBtn, false);
                 setElementVisible(zenOverlay, true);
+                if (audioToggleBtn) audioToggleBtn.style.display = 'none';
                 syncCruiseUI();
                 scheduleZenControlAutoHide();
                 if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
@@ -2731,6 +2748,7 @@
             } else {
                 setElementVisible(topBar, true);
                 setElementVisible(zenOverlay, false);
+                if (audioToggleBtn) audioToggleBtn.style.display = '';
                 if (state.zenFadeTimer) clearTimeout(state.zenFadeTimer);
                 if (state.bottomUIHidden) {
                     setElementVisible(bottomHud, false);
@@ -2753,12 +2771,18 @@
 
         function jumpToStage(targetZ) {
             state.targetZoomZ = Math.max(0, Math.min(TOTAL_Z, parseFloat(targetZ)));
+            // Seek audio to the correct cue point for the destination phase
+            const destPhase = PHASES.find(p => targetZ >= p.zStart && targetZ <= p.zEnd) || PHASES[0];
+            morphAudio.seekToPhase(destPhase.id);
         }
 
         function onScrubberInput(val) {
             state.targetZoomZ = parseFloat(val);
             state.zoomZ = state.targetZoomZ;
             updateHUDReadouts();
+            // Seek audio on scrub
+            const destPhase = PHASES.find(p => state.zoomZ >= p.zStart && state.zoomZ <= p.zEnd) || PHASES[0];
+            morphAudio.seekToPhase(destPhase.id);
         }
 
         function toggleCruise() {
@@ -2769,6 +2793,13 @@
             }
             syncCruiseUI();
             if (state.zenMode) scheduleZenControlAutoHide();
+
+            // Audio: start on cruise-on (keepAlive), stop on cruise-off
+            if (state.autoCruise) {
+                morphAudio.notifyActivity(window.currentMorphPhase || 1, true);
+            } else {
+                morphAudio.notifyStop();
+            }
         }
 
         function setCruiseSpeed(spd) {
@@ -2933,6 +2964,8 @@
             const delta = Math.sign(e.deltaY) * 3.8;
             state.targetZoomZ = Math.max(0, Math.min(TOTAL_Z, state.targetZoomZ + delta));
             if (state.zenMode) scheduleZenControlAutoHide();
+            // Audio: user is actively scrolling → play with idle timer
+            morphAudio.notifyActivity(window.currentMorphPhase || 1, false);
         }, { passive: true });
 
         let isDragging = false, lastX = 0, lastY = 0, downTime = 0;
@@ -2952,6 +2985,8 @@
             lastY = e.clientY;
             state.targetPanX -= dx * 1.5;
             state.targetPanY += dy * 1.5;
+            // Audio: user is actively dragging/panning → play with idle timer
+            morphAudio.notifyActivity(window.currentMorphPhase || 1, false);
         });
         window.addEventListener('pointerup', () => {
             if (isDragging && state.zenMode && (performance.now() - downTime < 220)) {
@@ -2982,6 +3017,191 @@
             gl.viewport(0, 0, glCanvas.width, glCanvas.height);
         }
         window.addEventListener('resize', resizeCanvases);
+
+        // ============================================================================
+        // 6. PHASE-BASED WEB AUDIO ENGINE  (HTMLAudioElement + GainNode crossfader)
+        // ============================================================================
+
+// ── Per-phase audio cue table ────────────────────────────────────────────────
+// track:     which looping WAV to bring up (key into PHASE_AUDIO_CONFIG.tracks)
+// cuePoint:  seconds into the WAV to seek when this phase is JUMPED TO directly;
+//            null = continue wherever the track currently is (sequential playback)
+// label:     human-readable note for tuning — edit me!
+const PHASE_AUDIO_CUES = {
+  //  id  What you see                             Track          Seek-to (jump)   Note
+  1:  { track: "seaWaves",    cuePoint:  0,    label: "Sierpinski 2D — open cosmos" },
+  2:  { track: "seaWaves",    cuePoint:  5.4,  label: "Pyramid 3D — continue seamlessly" },
+  3:  { track: "seaWaves",    cuePoint: 11.5,  label: "Menger Sponge" },
+  4:  { track: "seaWaves",    cuePoint: 17.7,  label: "Mandelbulb" },
+  5:  { track: "bladeSlice",  cuePoint:  0,    label: "Facet Plane — blade intro CUT HERE" },
+  6:  { track: "bladeSlice",  cuePoint: 15.0,  label: "Einstein Hat 0/1 — aperiodic edge" },
+  7:  { track: "bladeSlice",  cuePoint: 30.0,  label: "3D Hat Slab — geometric tension" },
+  8:  { track: "bladeSlice",  cuePoint: 45.0,  label: "City Skyline — urban geometry" },
+  9:  { track: "bladeSlice",  cuePoint: 60.0,  label: "True 3D Monotile — still aperiodic" },
+  10: { track: "streetOrgan", cuePoint:  0,    label: "Coastline — organic world begins" },
+  11: { track: "streetOrgan", cuePoint: 27.7,  label: "Beach Crowd — human scale" },
+  12: { track: "streetOrgan", cuePoint: 50.0,  label: "Hero Beach — intimate" },
+  13: { track: "streetOrgan", cuePoint: 68.5,  label: "Single Head — interior" },
+  14: { track: "streetOrgan", cuePoint: 77.7,  label: "Neural Net — synaptic" },
+  15: { track: "streetOrgan", cuePoint: 88.5,  label: "Lung Lobes — respiratory" },
+  16: { track: "streetOrgan", cuePoint: 98.5,  label: "Alveoli — cellular" },
+};
+
+const PHASE_AUDIO_CONFIG = {
+  crossfadeSec:  2.5,   // linear crossfade duration (seconds)
+  masterVolume:  0.75,
+  manualIdleSec: 2.0,   // seconds of scroll/pan inactivity before audio fades out
+  tracks: {
+    seaWaves:    "/sounds/outputs/morph_881293__oolita__sea-waves-los-escullos_fast_50.0s.wav",
+    bladeSlice:  "/sounds/outputs/morph_209073__lukesharples__blade-slice2_fast_70.0s.wav",
+    streetOrgan: "/sounds/outputs/morph_881518__klankbeeld__street-organ-vegetable-market-markt-s-hertogenbosch-nertherlands-1040-am-261121_00071_fast_138.0s.wav",
+  }
+};
+
+class MorphAudioEngine {
+  constructor(config, cues) {
+    this.config      = config;
+    this.cues        = cues;
+    this.ctx         = null;
+    this.masterGain  = null;
+    this.nodes       = {};   // { key: { audioEl, source, gain } }
+    this.activeTrack = null;
+    this.playing     = false;
+    this.wanted      = false;
+    this._idleTimer  = null;
+    this._lastPhaseId = null;
+  }
+
+  // ── Lazy AudioContext init (must happen inside a user-gesture handler) ──────
+  _init() {
+    if (this.ctx) return;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    this.ctx = new AudioCtx();
+    this.masterGain = this.ctx.createGain();
+    this.masterGain.gain.value = 0;
+    this.masterGain.connect(this.ctx.destination);
+
+    // HTMLAudioElement + MediaElementSource → large WAVs stream, not buffered
+    for (const [key, url] of Object.entries(this.config.tracks)) {
+      const audioEl = new Audio(url);
+      audioEl.loop        = true;
+      audioEl.crossOrigin = "anonymous";
+      audioEl.preload     = "auto";
+      const source = this.ctx.createMediaElementSource(audioEl);
+      const gain   = this.ctx.createGain();
+      gain.gain.value = 0;
+      source.connect(gain);
+      gain.connect(this.masterGain);
+      this.nodes[key] = { audioEl, source, gain };
+    }
+  }
+
+  // ── User clicks the toggle button: preference only, never starts playback ──
+  setWanted(wantAudio) {
+    this.wanted = wantAudio;
+    if (!this.wanted && this.playing) this._fadeOut();
+    return this.wanted;
+  }
+
+  // ── Called by autoCruise start / wheel / drag: start audio if wanted ───────
+  async notifyActivity(phaseId, keepAlive = false) {
+    if (!this.wanted) return;
+    this._init();
+    if (this.ctx.state === "suspended") await this.ctx.resume();
+
+    if (!this.playing) {
+      Object.values(this.nodes).forEach(({ audioEl }) => audioEl.play().catch(() => {}));
+      this.playing = true;
+      const now = this.ctx.currentTime;
+      this.masterGain.gain.cancelScheduledValues(now);
+      this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+      this.masterGain.gain.linearRampToValueAtTime(this.config.masterVolume, now + 1.0);
+      this.updatePhase(phaseId, true, false);
+    }
+
+    if (keepAlive) { this._clearIdleTimer(); }
+    else           { this._resetIdleTimer(); }
+  }
+
+  // ── Called when user jumps directly to a phase (button/scrubber) ───────────
+  //    Seeks the target track to its cue point so the right musical moment plays.
+  seekToPhase(phaseId) {
+    const cue = this.cues[phaseId] || this.cues[1];
+    if (cue.cuePoint !== null && this.nodes[cue.track]) {
+      this.nodes[cue.track].audioEl.currentTime = cue.cuePoint;
+    }
+    if (this.playing) this.updatePhase(phaseId, true, true);
+  }
+
+  // ── Called by autoCruise stop ─────────────────────────────────────────────
+  notifyStop() { this._fadeOut(); }
+
+  // ── Called every frame from updateHUDReadouts ─────────────────────────────
+  //    isJump=true means the user clicked a phase button (cuePoint seek applies)
+  updatePhase(phaseId, force = false, isJump = false) {
+    if (!this.playing || !this.ctx) return;
+
+    const cue = this.cues[phaseId] || this.cues[1];
+    const targetTrack   = cue.track;
+    const isTrackChange = targetTrack !== this.activeTrack;
+
+    // Skip if nothing changed
+    if (!isTrackChange && phaseId === this._lastPhaseId && !force) return;
+
+    const now  = this.ctx.currentTime;
+    const fade = this.config.crossfadeSec;
+
+    // Seek the incoming track when:
+    //  • it's a different track (always seek so we start at a musical moment)
+    //  • OR it's the same track but the user jumped (not sequential scrolling)
+    if (cue.cuePoint !== null && (isTrackChange || isJump)) {
+      const incoming = this.nodes[targetTrack];
+      if (incoming) incoming.audioEl.currentTime = cue.cuePoint;
+    }
+
+    // Crossfade gains
+    for (const [key, { gain }] of Object.entries(this.nodes)) {
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.linearRampToValueAtTime(key === targetTrack ? 1.0 : 0.0, now + fade);
+    }
+
+    this.activeTrack  = targetTrack;
+    this._lastPhaseId = phaseId;
+  }
+
+  // ── Internal helpers ─────────────────────────────────────────────────────
+  _fadeOut() {
+    if (!this.ctx || !this.playing) return;
+    const now = this.ctx.currentTime;
+    this.masterGain.gain.cancelScheduledValues(now);
+    this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+    this.masterGain.gain.linearRampToValueAtTime(0, now + 0.8);
+    this.playing      = false;
+    this.activeTrack  = null;
+    this._lastPhaseId = null;
+  }
+
+  _resetIdleTimer() {
+    this._clearIdleTimer();
+    this._idleTimer = setTimeout(() => this._fadeOut(), this.config.manualIdleSec * 1000);
+  }
+
+  _clearIdleTimer() {
+    if (this._idleTimer) { clearTimeout(this._idleTimer); this._idleTimer = null; }
+  }
+}
+
+const morphAudio = new MorphAudioEngine(PHASE_AUDIO_CONFIG, PHASE_AUDIO_CUES);
+const audioBtn   = document.getElementById("audio-toggle");
+
+// Button is a preference toggle only — it never triggers playback directly
+audioBtn.addEventListener("click", () => {
+  const nowWanted = morphAudio.setWanted(!morphAudio.wanted);
+  audioBtn.textContent = nowWanted
+    ? t('audio.on',  '🔊 Audio: On')
+    : t('audio.off', '🔇 Audio: Off');
+});
 
         // ============================================================================
         // 7. MAIN ANIMATION LOOP & IMMEDIATE BOOT
@@ -3064,5 +3284,6 @@
         initI18n();
         requestAnimationFrame(renderLoop);
     </script>
+
 </body>
 </html>
