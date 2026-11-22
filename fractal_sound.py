@@ -57,6 +57,76 @@ def normalize_and_saturate(audio, target_rms=0.14):
     return audio
 
 
+def analyze_seed(data, sr):
+    """Extracts duration, percussiveness (crest factor), and brightness (spectral centroid)."""
+    duration = len(data) / sr
+    rms = np.sqrt(np.mean(data**2)) + 1e-9
+    crest_factor = float(np.max(np.abs(data)) / rms)
+
+    # Spectral centroid via rFFT (weighted mean frequency in Hz)
+    magnitudes = np.abs(np.fft.rfft(data))
+    freqs = np.fft.rfftfreq(len(data), d=1.0 / sr)
+    centroid_hz = float(np.sum(magnitudes * freqs) / (np.sum(magnitudes) + 1e-9))
+
+    return {
+        "duration": duration,
+        "crest_factor": crest_factor,
+        "centroid_hz": centroid_hz,
+    }
+
+
+def adapt_for_preservation(data, sr, rules, max_iterations, preserve=0.75):
+    """
+    Adjusts the seed and fractal rules based on audio analysis so the
+    original timbre survives the fractal zoom.
+    preserve: 0.0 (wild/abstract) to 1.0 (strictly recognizable)
+    """
+    stats = analyze_seed(data, sr)
+    print(
+        f"  [Analysis] Dur: {stats['duration']:.2f}s | "
+        f"Crest: {stats['crest_factor']:.1f} | "
+        f"Centroid: {stats['centroid_hz']:.0f} Hz"
+    )
+
+    # 1. Cap iterations on short clips so pitch doesn't compound 7 octaves
+    safe_iters = min(max_iterations, 3 if stats["duration"] < 2.0 else 4)
+
+    # 2. Soften sharp transients (like a blade swish) so stacking doesn't create drums
+    seed = data.copy()
+    if stats["crest_factor"] > 6.0 and preserve > 0.3:
+        fade_len = max(16, int(len(seed) * 0.15 * preserve))
+        t = np.linspace(0, np.pi / 2, fade_len)
+        seed[:fade_len] *= np.sin(t)
+        seed[-fade_len:] *= np.cos(t)
+
+    # 3. Compute safe per-generation speed bounds to keep centroid in audible/recognizable range
+    # Target: keep cumulative shift within ~1.5 octaves of original, bounded by [250Hz, 9000Hz]
+    min_target_hz = max(250.0, stats["centroid_hz"] / (2.5 - 1.5 * preserve))
+    max_target_hz = min(9000.0, stats["centroid_hz"] * (2.5 - 1.5 * preserve))
+
+    min_speed = (min_target_hz / max(stats["centroid_hz"], 1.0)) ** (1.0 / safe_iters)
+    max_speed = (max_target_hz / max(stats["centroid_hz"], 1.0)) ** (1.0 / safe_iters)
+
+    # 4. Adapt rules: clamp speeds, preserve an original-pitch anchor, and break rhythmic grids
+    adapted_rules = []
+    golden_offsets = [0.0, 0.382, 0.618, 0.236, 0.764]
+
+    for idx, (offset, speed, gain, pan) in enumerate(rules):
+        if idx == 0:
+            # Keep branch 0 anchored at 1.0x so the original timbre stays recognizable
+            new_speed = 1.0
+        else:
+            # Pull speed toward 1.0 based on preserve strength, then clamp to safe spectral bounds
+            pulled = 1.0 + (speed - 1.0) * (1.0 - 0.65 * preserve)
+            new_speed = float(np.clip(pulled, min_speed, max_speed))
+
+        # Use irrational offsets for percussive sounds to prevent accidental drum beats
+        new_offset = golden_offsets[idx % len(golden_offsets)] if stats["crest_factor"] > 6.0 else offset
+        adapted_rules.append((new_offset, new_speed, gain, pan))
+
+    print(f"  [Preservation] Capped to {safe_iters} gens | Speeds: {[round(r[1], 2) for r in adapted_rules]}")
+    return seed, adapted_rules, safe_iters
+
 def make_seamless_loop(audio, sr, target_duration, crossfade_sec=3.0):
     """Trims or tiles audio to target_duration with an equal-power tail-to-head crossfade."""
     target_samples = int(target_duration * sr)
@@ -92,6 +162,7 @@ def generate_audio_fractal(
     min_iterations=3,
     max_iterations=7,
     crossfade_sec=3.0,
+    preserve=True
 ):
     data, sr = sf.read(seed_file)
     if data.ndim > 1:
@@ -103,7 +174,11 @@ def generate_audio_fractal(
     if peak == 0 or np.isnan(peak):
         raise ValueError(f"Seed file '{seed_file}' is silent or contains NaNs.")
     data = data / peak
-
+    data, rules, effective_max_iter = adapt_for_preservation(
+        data, sr, PROFILES[mode], max_iterations, preserve=preserve
+    )
+    current_state = np.column_stack((data, data))
+    
     rules = PROFILES[mode]
     current_state = np.column_stack((data, data))
     target_samples_with_fade = int((target_duration + crossfade_sec) * sr)
@@ -161,10 +236,13 @@ def generate_audio_fractal(
 
 
 def main():
+    import sys
+
     parser = argparse.ArgumentParser(
         description="Generate seamless fractal audio loops for the WebGL morphogenesis engine."
     )
-    parser.add_argument("-i", "--input", required=True, default="./sounds/inputs/209073__lukesharples__blade-slice2.wav", help="Path to seed audio file (.wav/.ogg/.flac)")
+    parser.add_argument("-i", "--input", required=True, 
+                        default="./sounds/inputs/209073__lukesharples__blade-slice2.wav", help="Path to seed audio file (.wav/.ogg/.flac)")
     parser.add_argument("-o", "--output-dir", default="./sounds/outputs", help="Output directory")
     parser.add_argument(
         "-m", "--mode",
@@ -177,13 +255,22 @@ def main():
     parser.add_argument("--max-iter", type=int, default=7, help="Maximum fractal iterations")
     parser.add_argument("--crossfade", type=float, default=3.0, help="Seamless loop crossfade in seconds")
     parser.add_argument("--format", choices=["ogg", "wav"], default="ogg", help="Output format (ogg recommended for web)")
+    parser.add_argument(
+            "-p", "--preserve", type=float, default=0.75,
+            help="Timbre preservation strength: 0.0 (abstract) to 1.0 (faithful)"
+        )
 
     args = parser.parse_args()
     modes = list(PROFILES.keys()) if args.mode == "all" else [args.mode]
 
+    print("RAW sys.argv:", sys.argv)
+    print("PARSED args:", vars(args))
+
     for mode in modes:
-        fname = args.input.split('.')[0].split('/')[-1]
-        out_path = os.path.join(args.output_dir, f"morph_{fname}_{mode}.{args.format}")
+        # Fix (returns "209073__lukesharples__blade-slice2")
+        fname = os.path.splitext(os.path.basename(args.input))[0]
+        out_path = os.path.join(args.output_dir, f"morph_{fname}_{mode}_{args.duration}s.{args.format}")
+        print(out_path)
         generate_audio_fractal(
             seed_file=args.input,
             output_file=out_path,
@@ -192,6 +279,8 @@ def main():
             min_iterations=args.min_iter,
             max_iterations=args.max_iter,
             crossfade_sec=args.crossfade,
+            preserve=args.preserve
+            
         )
 
 
