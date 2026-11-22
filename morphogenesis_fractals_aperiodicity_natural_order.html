@@ -405,7 +405,16 @@
                 <button type="button" onclick="jumpToStage(930)" id="stepP15" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Bilateral Lung Lobes & Bronchial Airway Tree">15.Lungs</button>
                 <button type="button" onclick="jumpToStage(990)" id="stepP16" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="3D Alveoli Sac Clusters & Blood Oxygenation">16.Alveoli</button>
             </div>
-
+            <div class="grid grid-cols-5 gap-1.5 pt-2 mt-1.5 border-t border-slate-600 text-[9px] mono">
+                  <button id="audio-toggle" style="
+                      position: fixed; bottom: 20px; right: 20px; z-index: 100;
+                      background: rgba(10, 10, 15, 0.7); color: #e0e0e0;
+                      border: 1px solid rgba(255,255,255,0.2); border-radius: 6px;
+                      padding: 8px 14px; font-family: monospace; cursor: pointer;
+                      backdrop-filter: blur(6px); ">
+                   🔇 Audio: Off
+                </button>
+            </div>
             <!-- Active Seed Genome Strip -->
             <div class="grid grid-cols-5 gap-1.5 pt-2 mt-1.5 border-t border-slate-800/80 text-[9px] mono">
                 <div class="bg-slate-900/70 rounded px-2 py-1 border border-slate-800">
@@ -2984,6 +2993,116 @@
         }
         window.addEventListener('resize', resizeCanvases);
 
+        <script>
+const PHASE_AUDIO_CONFIG = {
+  // Adjust these indices to match your 15-phase shader timeline (0 to 14)
+  einsteinPhase: 1,  // Phase where Einstein Hat begins
+  cityPhase: 6,      // Phase where City Skyline begins
+  crossfadeSec: 2.5, // Smooth transition time between audio regimes
+  masterVolume: 0.75,
+  tracks: {
+    preEinstein: "./sounds/outputs/morph_881293__oolita__sea-waves-los-escullos_fast_50.0s.wav",
+    einsteinToCity: "./sounds/outputs/morph_209073__lukesharples__blade-slice2_fast_70.0s.wav",
+    cityAndBeyond: "./sounds/outputs/morph_881518__klankbeeld__street-organ-vegetable-market-markt-s-hertogenbosch-nertherlands-1040-am-261121_00071_fast_138.0s.wav",
+  }
+};
+
+class MorphAudioEngine {
+  constructor(config) {
+    this.config = config;
+    this.ctx = null;
+    this.masterGain = null;
+    this.nodes = {}; // { key: { audioEl, source, gain } }
+    this.activeTrack = null;
+    this.enabled = false;
+  }
+
+  init() {
+    if (this.ctx) return;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    this.ctx = new AudioCtx();
+    this.masterGain = this.ctx.createGain();
+    this.masterGain.gain.value = 0;
+    this.masterGain.connect(this.ctx.destination);
+
+    // Use HTMLAudioElement + MediaElementSource so large WAVs stream instead of blocking RAM
+    for (const [key, url] of Object.entries(this.config.tracks)) {
+      const audioEl = new Audio(url);
+      audioEl.loop = true;
+      audioEl.crossOrigin = "anonymous";
+      audioEl.preload = "auto";
+
+      const source = this.ctx.createMediaElementSource(audioEl);
+      const gain = this.ctx.createGain();
+      gain.gain.value = 0;
+
+      source.connect(gain);
+      gain.connect(this.masterGain);
+
+      this.nodes[key] = { audioEl, source, gain };
+    }
+  }
+
+  async toggle(currentPhase = 0) {
+    this.init();
+    if (this.ctx.state === "suspended") {
+      await this.ctx.resume();
+    }
+
+    this.enabled = !this.enabled;
+    const now = this.ctx.currentTime;
+
+    if (this.enabled) {
+      // Start all tracks silently in sync so crossfades are instantaneous
+      Object.values(this.nodes).forEach(({ audioEl }) => {
+        audioEl.play().catch(() => {});
+      });
+      this.masterGain.gain.cancelScheduledValues(now);
+      this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+      this.masterGain.gain.linearRampToValueAtTime(this.config.masterVolume, now + 1.0);
+      this.updatePhase(currentPhase, true);
+    } else {
+      this.masterGain.gain.cancelScheduledValues(now);
+      this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+      this.masterGain.gain.linearRampToValueAtTime(0, now + 0.5);
+    }
+
+    return this.enabled;
+  }
+
+  getTrackForPhase(phase) {
+    if (phase < this.config.einsteinPhase) return "preEinstein";
+    if (phase < this.config.cityPhase) return "einsteinToCity";
+    return "cityAndBeyond";
+  }
+
+  updatePhase(phase, force = false) {
+    if (!this.enabled || !this.ctx) return;
+    const targetTrack = this.getTrackForPhase(phase);
+    if (targetTrack === this.activeTrack && !force) return;
+
+    const now = this.ctx.currentTime;
+    const fade = this.config.crossfadeSec;
+
+    for (const [key, { gain }] of Object.entries(this.nodes)) {
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.linearRampToValueAtTime(key === targetTrack ? 1.0 : 0.0, now + fade);
+    }
+
+    this.activeTrack = targetTrack;
+  }
+}
+
+const morphAudio = new MorphAudioEngine(PHASE_AUDIO_CONFIG);
+const audioBtn = document.getElementById("audio-toggle");
+
+audioBtn.addEventListener("click", async () => {
+  // Pass your current phase variable here (defaults to 0)
+  const isOn = await morphAudio.toggle(window.currentMorphPhase || 0);
+  audioBtn.textContent = isOn ? "🔊 Audio: On" : "🔇 Audio: Off";
+});
+
         // ============================================================================
         // 7. MAIN ANIMATION LOOP & IMMEDIATE BOOT
         // ============================================================================
@@ -3065,5 +3184,6 @@
         initI18n();
         requestAnimationFrame(renderLoop);
     </script>
+
 </body>
 </html>
