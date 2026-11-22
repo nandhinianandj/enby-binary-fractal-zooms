@@ -33,6 +33,10 @@
     "showBottomUIFloating": "▲ Show Bottom UI & Controls",
     "flyBtn": "Fly.io"
   },
+  "audio": {
+    "on":  "🔊 Audio: On",
+    "off": "🔇 Audio: Off"
+  },
   "stages": {
     "stage1Title": "Exact Fractals",
     "stage1Sub": "2D→3D SDF",

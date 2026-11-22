@@ -3,6 +3,8 @@ FROM node:20-alpine
 WORKDIR /app
 COPY package.json server.js index.html morphogenesis_fractals_aperiodicity_natural_order.html ./
 COPY locales/ ./locales/
+# Copy phase-based audio assets so /sounds/outputs/*.wav are served in-container
+COPY sounds/ ./sounds/
 EXPOSE 8080
 ENV NODE_ENV=production
 ENV PORT=8080

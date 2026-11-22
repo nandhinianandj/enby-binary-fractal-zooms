@@ -2659,6 +2659,11 @@
             document.getElementById('stageTitle').textContent = t(`phases.${activePhase.id}.title`, activePhase.title);
             document.getElementById('stageDesc').textContent = t(`phases.${activePhase.id}.desc`, activePhase.desc);
 
+            // Expose current 1-indexed phase id globally so audio engine can read it
+            window.currentMorphPhase = activePhase.id;
+            // Drive crossfade live from render loop (no-op when audio is disabled)
+            if (typeof morphAudio !== 'undefined') morphAudio.updatePhase(activePhase.id);
+
             const scrubber = document.getElementById('zoomScrubber');
             if (scrubber && document.activeElement !== scrubber) {
                 scrubber.value = z.toFixed(1);
@@ -2727,12 +2732,14 @@
             const bottomHud = document.getElementById('bottomHudContainer');
             const floatBtn = document.getElementById('floatingShowUIBtn');
             const zenOverlay = document.getElementById('zenModeOverlay');
+            const audioToggleBtn = document.getElementById('audio-toggle');
 
             if (state.zenMode) {
                 setElementVisible(topBar, false);
                 setElementVisible(bottomHud, false);
                 setElementVisible(floatBtn, false);
                 setElementVisible(zenOverlay, true);
+                if (audioToggleBtn) audioToggleBtn.style.display = 'none';
                 syncCruiseUI();
                 scheduleZenControlAutoHide();
                 if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
@@ -2741,6 +2748,7 @@
             } else {
                 setElementVisible(topBar, true);
                 setElementVisible(zenOverlay, false);
+                if (audioToggleBtn) audioToggleBtn.style.display = '';
                 if (state.zenFadeTimer) clearTimeout(state.zenFadeTimer);
                 if (state.bottomUIHidden) {
                     setElementVisible(bottomHud, false);
@@ -2993,17 +3001,22 @@
         }
         window.addEventListener('resize', resizeCanvases);
 
-        <script>
+        // ============================================================================
+        // 6. PHASE-BASED WEB AUDIO ENGINE  (HTMLAudioElement + GainNode crossfader)
+        // ============================================================================
+
 const PHASE_AUDIO_CONFIG = {
-  // Adjust these indices to match your 15-phase shader timeline (0 to 14)
-  einsteinPhase: 1,  // Phase where Einstein Hat begins
-  cityPhase: 6,      // Phase where City Skyline begins
-  crossfadeSec: 2.5, // Smooth transition time between audio regimes
+  // 1-indexed phase ids matching PHASES[].id above:
+  //   Phase 6 = Einstein Hat 0/1 Cellular Automaton (zStart 180.0)
+  //   Phase 8 = 3D Skyscraper City Skyline          (zStart 375.0)
+  einsteinPhase: 6,   // first phase of Einstein Hat regime
+  cityPhase: 8,       // first phase of City Skyline regime
+  crossfadeSec: 2.5,  // linear crossfade duration (seconds)
   masterVolume: 0.75,
   tracks: {
-    preEinstein: "./sounds/outputs/morph_881293__oolita__sea-waves-los-escullos_fast_50.0s.wav",
-    einsteinToCity: "./sounds/outputs/morph_209073__lukesharples__blade-slice2_fast_70.0s.wav",
-    cityAndBeyond: "./sounds/outputs/morph_881518__klankbeeld__street-organ-vegetable-market-markt-s-hertogenbosch-nertherlands-1040-am-261121_00071_fast_138.0s.wav",
+    preEinstein:    "/sounds/outputs/morph_881293__oolita__sea-waves-los-escullos_fast_50.0s.wav",
+    einsteinToCity: "/sounds/outputs/morph_209073__lukesharples__blade-slice2_fast_70.0s.wav",
+    cityAndBeyond:  "/sounds/outputs/morph_881518__klankbeeld__street-organ-vegetable-market-markt-s-hertogenbosch-nertherlands-1040-am-261121_00071_fast_138.0s.wav",
   }
 };
 
@@ -3098,9 +3111,10 @@ const morphAudio = new MorphAudioEngine(PHASE_AUDIO_CONFIG);
 const audioBtn = document.getElementById("audio-toggle");
 
 audioBtn.addEventListener("click", async () => {
-  // Pass your current phase variable here (defaults to 0)
-  const isOn = await morphAudio.toggle(window.currentMorphPhase || 0);
-  audioBtn.textContent = isOn ? "🔊 Audio: On" : "🔇 Audio: Off";
+  const isOn = await morphAudio.toggle(window.currentMorphPhase || 1);
+  audioBtn.textContent = isOn
+    ? t('audio.on',  '🔊 Audio: On')
+    : t('audio.off', '🔇 Audio: Off');
 });
 
         // ============================================================================
