@@ -133,7 +133,9 @@ async def verify_environment_buttons(page, env_name, target_url, errors):
         errors.append(f"[{env_name}] UI collapse or seed mutation failed")
 
     # 5. Stage Switcher Tabs (3 clicks)
-    stage_tabs = [("#tabStage2", 210), ("#tabStage3", 585), ("#tabStage1", 0)]
+    stage_tabs = [("#tabStage2", 350 if env_name == "Development" else 210),
+                  ("#tabStage3", 715 if env_name == "Development" else 585),
+                  ("#tabStage1", 0)]
     tabs_ok = True
     for tab_id, z_target in stage_tabs:
         tab_elem = await page.wait_for_selector(tab_id)
@@ -153,6 +155,10 @@ async def verify_environment_buttons(page, env_name, target_url, errors):
         ("#stepP9", 515), ("#stepP10", 595), ("#stepP11", 665), ("#stepP12", 735),
         ("#stepP13", 795), ("#stepP14", 860), ("#stepP15", 930), ("#stepP16", 990)
     ]
+    if env_name == "Development":
+        phase_targets = phase_targets[:5] + [("#stepP5b", 225)] + [
+            (button, target + 130) for button, target in phase_targets[5:]
+        ]
     steppers_ok = True
     for step_id, exp_z in phase_targets:
         step_btn = await page.wait_for_selector(step_id)

@@ -1558,6 +1558,30 @@
                 col2D += mix(basePal, vec3(0.92, 0.98, 1.0), 0.65) * edgeMask * 0.95;
                 col2D += vec3(0.35, 0.92, 1.0) * clamp(carveGlow, 0.0, 1.2) * 0.75;
 
+                // River / branching-vein overlay (Phase 1): a small fractal bifurcating
+                // network that foreshadows the vascular / neural / alveolar branching
+                // systems visited in later phases (L-system abs-fold, D ~ 1.6).
+                {
+                    float riverGate = 1.0 - smoothstep(26.0, 34.0, z);
+                    if (riverGate > 0.001) {
+                        vec2 rp = p2 * 1.35 + vec2(0.05, -0.10);
+                        float rw = 0.013;
+                        float river = 0.0;
+                        for (int k = 0; k < 5; k++) {
+                            float kf = float(k);
+                            rp = abs(rp) - vec2(0.30 - kf * 0.028, 0.20 - kf * 0.016);
+                            float ca = cos(0.32 + kf * 0.07); float sa = sin(0.32 + kf * 0.07);
+                            rp = vec2(rp.x * ca - rp.y * sa, rp.x * sa + rp.y * ca);
+                            float seg = abs(rp.y) - rw;
+                            river += smoothstep(0.012, 0.0, seg) * exp(-kf * 0.32);
+                            rw *= 0.72;
+                        }
+                        float riverMask = clamp(river * riverGate, 0.0, 1.0);
+                        vec3 riverCol = mix(vec3(0.10, 0.30, 0.55), vec3(0.40, 0.85, 0.95), 0.5);
+                        col2D += riverCol * riverMask * 0.50;
+                    }
+                }
+
                 if (z < 28.0) return col2D;
 
                 float blend3D = smoothstep(28.0, 44.0, z);
@@ -3437,10 +3461,10 @@
 // label:     human-readable note for tuning — edit me!
 const PHASE_AUDIO_CUES = {
   //  id  What you see                             Track          Seek-to (jump)   Note
-  1:  { track: "bachCello",  cuePoint:  0,    label: "Sierpinski 2D — Bach Prelude, organ (whole 42-bar loop)" },
-  2:  { track: "bachCello",  cuePoint:  6.86, label: "Pyramid 3D — Bach Prelude continues" },
-  3:  { track: "bachCello",  cuePoint: 13.71, label: "Menger Sponge — Bach Prelude, later phrase" },
-  4:  { track: "bachCello",  cuePoint: 20.57, label: "Mandelbulb — Bach Prelude, closing phrase" },
+  1:  { track: "toccataFugue",  cuePoint:  0,    label: "Sierpinski 2D — Toccata & Fugue BWV 565 (Riga Cathedral organ)" },
+  2:  { track: "toccataFugue",  cuePoint:  6.86, label: "Pyramid 3D — Toccata & Fugue BWV 565 continues" },
+  3:  { track: "toccataFugue",  cuePoint: 13.71, label: "Menger Sponge — Toccata & Fugue BWV 565, later phrase" },
+  4:  { track: "toccataFugue",  cuePoint: 20.57, label: "Mandelbulb — Toccata & Fugue BWV 565, closing phrase" },
   5:  { track: "bladeSlice",  cuePoint:  0,    label: "Facet Plane — blade intro CUT HERE" },
   6:  { track: "bladeSlice",  cuePoint: 15.0,  label: "Einstein Hat 0/1 — aperiodic edge" },
   7:  { track: "bladeSlice",  cuePoint: 30.0,  label: "3D Hat Slab — geometric tension" },
@@ -3460,13 +3484,13 @@ const PHASE_AUDIO_CONFIG = {
   masterVolume:  0.75,
   manualIdleSec: 2.0,   // seconds of scroll/pan inactivity before audio fades out
   tracks: {
-    // "bachCello" is a virtual key: it resolves to bachCello05/10/20/40 by zoom
+    // "toccataFugue" is a virtual key: it resolves to toccataFugue05/10/20/40 by zoom
     // speed, each rendered as a bar-aligned seamless organ loop of the Prelude
     // from Bach's Cello Suite No. 1 (BWV 1007).
-    bachCello05: "/sounds/outputs/bach_cello_prelude_organ_slow_144.0s.ogg",
-    bachCello10: "/sounds/outputs/bach_cello_prelude_organ_1x_109.7s.ogg",
-    bachCello20: "/sounds/outputs/bach_cello_prelude_organ_2x_54.9s.ogg",
-    bachCello40: "/sounds/outputs/bach_cello_prelude_organ_4x_27.4s.ogg",
+    toccataFugue05: "/sounds/outputs/toccata_fugue_bwv565_slow_144.0s.ogg",
+    toccataFugue10: "/sounds/outputs/toccata_fugue_bwv565_1x_109.7s.ogg",
+    toccataFugue20: "/sounds/outputs/toccata_fugue_bwv565_2x_54.9s.ogg",
+    toccataFugue40: "/sounds/outputs/toccata_fugue_bwv565_4x_27.4s.ogg",
     seaWaves:    "/sounds/outputs/morph_881293__oolita__sea-waves-los-escullos_fast_50.0s.wav",
     bladeSlice:  "/sounds/outputs/morph_209073__lukesharples__blade-slice2_fast_70.0s.wav",
     streetOrgan: "/sounds/outputs/morph_881518__klankbeeld__street-organ-vegetable-market-markt-s-hertogenbosch-nertherlands-1040-am-261121_00071_fast_138.0s.wav",
@@ -3485,12 +3509,12 @@ class MorphAudioEngine {
     this.wanted      = false;
     this._idleTimer  = null;
     this._lastPhaseId = null;
-    this.speedKey    = "10";   // 0.5x / 1x / 2x / 4x → bachCello05 / 10 / 20 / 40
+    this.speedKey    = "10";   // 0.5x / 1x / 2x / 4x → toccataFugue05 / 10 / 20 / 40 (prefixes of the same recording)
   }
 
   // ── Resolve virtual track names (speed-dependent Bach Prelude variants) ────
   _resolveTrack(name) {
-    return name === "bachCello" ? "bachCello" + this.speedKey : name;
+    return name === "toccataFugue" ? "toccataFugue" + this.speedKey : name;
   }
 
   // ── Zoom speed picks which Bach Prelude loop length plays ───────────────────
@@ -3499,12 +3523,12 @@ class MorphAudioEngine {
     if (key === this.speedKey) return;
     this.speedKey = key;
     if (!this.playing) return;
-    if (!this.activeTrack || !this.activeTrack.startsWith("bachCello")) return;
+    if (!this.activeTrack || !this.activeTrack.startsWith("toccataFugue")) return;
 
     // All loops are bar-aligned, so keep the same absolute musical position
     // when swapping lengths (modulo the new duration).
     const outgoing = this.nodes[this.activeTrack];
-    const incoming = this.nodes[this._resolveTrack("bachCello")];
+    const incoming = this.nodes[this._resolveTrack("toccataFugue")];
     if (outgoing && incoming) {
       const dur = incoming.audioEl.duration;
       const pos = outgoing.audioEl.currentTime || 0;

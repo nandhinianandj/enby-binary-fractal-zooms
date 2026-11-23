@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MORPHOGENESIS // 10³⁵x Deep-Zoom Fractal & Aperiodic Engine</title>
+    <title>MORPHOGENESIS // Continuous Worlds and Binary Models</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -136,6 +136,17 @@
             gap: 12px;
             pointer-events: none;
             transition: all 0.3s ease;
+            max-height: 38vh;
+            flex-wrap: nowrap;
+            flex-direction: row;
+            align-items: flex-end;
+        }
+        #infoCard { width: min(52vw, 620px); max-height: 38vh; overflow: auto; }
+        #rightControlsCard { width: min(38vw, 460px); max-height: 38vh; overflow: auto; }
+        @media (max-width: 700px) {
+            #bottomHudContainer { max-height: 32vh; }
+            #infoCard { width: 54vw; max-height: 32vh; }
+            #rightControlsCard { width: 40vw; max-height: 32vh; }
         }
         #zenModeOverlay {
             position: fixed;
@@ -219,6 +230,7 @@
 
     <!-- Multi-Scale Hierarchical Einstein Hat, Game of Life & 3D Monotile Canvas (Z = 165 .. 582) -->
     <canvas id="hatCanvas"></canvas>
+    <div id="fieldLegend" role="status" style="display:none;position:fixed;top:75px;left:50%;transform:translateX(-50%);z-index:10;background:rgba(5,12,20,.82);border:1px solid #fb923c;border-radius:8px;padding:7px 11px;color:#fed7aa;font:11px 'JetBrains Mono',monospace;pointer-events:none;text-align:center">Orange: illustrative threshold over a continuous field</div>
 
     <!-- Subtle Atmospheric Vignette -->
     <div class="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_center,transparent_58%,rgba(2,6,23,0.78)_100%)] z-10"></div>
@@ -248,7 +260,7 @@
             <div class="flex items-center gap-2.5">
                 <div id="brandStatusDot" class="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_12px_#38bdf8]"></div>
                 <div>
-                    <div class="text-[9px] mono tracking-widest uppercase text-sky-400 font-semibold" data-i18n="app.subtitle">PROCEDURAL WEBGL + EINSTEIN LIFE ENGINE</div>
+                    <div class="text-[9px] mono tracking-widest uppercase text-sky-400 font-semibold" data-i18n="app.subtitle">CONTINUOUS WORLD // DISCRETE MODEL</div>
                     <h1 class="text-xs md:text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
                         <span data-i18n="app.title">MORPHOGENESIS</span>
                         <span id="seedBadge" class="text-[10px] mono font-normal px-1.5 py-0.5 rounded bg-slate-800/90 text-emerald-300 border border-emerald-500/30">#SEED</span>
@@ -263,11 +275,11 @@
             <!-- Live Readouts -->
             <div class="flex items-center gap-3 text-xs mono">
                 <div>
-                    <span class="text-slate-400 block text-[8px] uppercase" data-i18n="readouts.dimension">Hausdorff D</span>
+                    <span id="dimensionLabel" class="text-slate-400 block text-[8px] uppercase">Model D</span>
                     <span id="hudDimension" class="text-amber-300 font-semibold">D ≈ 1.585</span>
                 </div>
                 <div>
-                    <span class="text-slate-400 block text-[8px] uppercase" data-i18n="readouts.magnification">Magnification</span>
+                    <span class="text-slate-400 block text-[8px] uppercase">Journey progress</span>
                     <span id="hudZoom" class="text-sky-300 font-semibold">1.00 × 10⁰×</span>
                 </div>
                 <div>
@@ -291,15 +303,15 @@
                 </div>
             </button>
 
-            <button id="tabStage2" type="button" onclick="jumpToStage(210)" class="glass-pill px-2.5 py-1.5 rounded-xl text-left flex items-center gap-1.5 cursor-pointer">
+            <button id="tabStage2" type="button" onclick="jumpToStage(350)" class="glass-pill px-2.5 py-1.5 rounded-xl text-left flex items-center gap-1.5 cursor-pointer">
                 <span class="w-5 h-5 rounded-md bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-[10px] mono font-bold text-amber-300">II</span>
                 <div class="leading-tight">
-                    <div class="text-[10px] font-semibold text-white" data-i18n="stages.stage2Title">Einstein 0/1 Life & 3D</div>
-                    <div class="text-[8px] mono text-slate-400" data-i18n="stages.stage2Sub">Binary Tyranny (60s)</div>
+                    <div class="text-[10px] font-semibold text-white" data-i18n="stages.stage2Title">Binary tile model</div>
+                    <div class="text-[8px] mono text-slate-400" data-i18n="stages.stage2Sub">Sampling a continuous field</div>
                 </div>
             </button>
 
-            <button id="tabStage3" type="button" onclick="jumpToStage(585)" class="glass-pill px-2.5 py-1.5 rounded-xl text-left flex items-center gap-1.5 cursor-pointer">
+            <button id="tabStage3" type="button" onclick="jumpToStage(715)" class="glass-pill px-2.5 py-1.5 rounded-xl text-left flex items-center gap-1.5 cursor-pointer">
                 <span class="w-5 h-5 rounded-md bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-[10px] mono font-bold text-emerald-300">III</span>
                 <div class="leading-tight">
                     <div class="text-[10px] font-semibold text-white" data-i18n="stages.stage3Title">Organic Continuity</div>
@@ -382,7 +394,7 @@
                 <span id="stageSubTag" class="text-[10px] mono text-slate-400" data-i18n="controls.scrollHint">Scroll / Pinch or Click Any Phase</span>
             </div>
             <h2 id="stageTitle" class="text-sm md:text-base font-bold text-white mb-0.5">
-                Phase 1: 2D Sierpinski Triangle (Step-by-Step Recursion)
+                Phase 1: Koch Snowflake → Sierpinski
             </h2>
             <p id="stageDesc" class="text-[11px] text-slate-300 leading-relaxed mb-2">
                 Begins with a complete equilateral triangle ($N=0$) and carves out the Sierpinski Gasket one recursion step at a time ($N=1 \rightarrow 8, D = \ln 3 / \ln 2 \approx 1.585$) before extruding into a 3D Pyramid, Menger Sponge, and Mandelbulb.
@@ -395,17 +407,18 @@
                 <button type="button" onclick="jumpToStage(95)" id="stepP3" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">3.Menger3D</button>
                 <button type="button" onclick="jumpToStage(135)" id="stepP4" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">4.Mandelbulb</button>
                 <button type="button" onclick="jumpToStage(168)" id="stepP5" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">5.FacetPlane</button>
-                <button type="button" onclick="jumpToStage(220)" id="stepP6" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Einstein Hat 0/1 Conway's Game of Life Cellular Automaton">6.Hat 0/1 Life</button>
-                <button type="button" onclick="jumpToStage(320)" id="stepP7" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Standard 3D Prismatic Extrusion of Einstein Hat Plane">7.3D Hat Slab</button>
-                <button type="button" onclick="jumpToStage(420)" id="stepP8" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Skyscraper City Skyline Extrusion">8.CitySkyline</button>
-                <button type="button" onclick="jumpToStage(515)" id="stepP9" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="True 3D Aperiodic Monotile Polyhedra + 3D Text">9.True3D Hat</button>
-                <button type="button" onclick="jumpToStage(595)" id="stepP10" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">10.CoastChart</button>
-                <button type="button" onclick="jumpToStage(665)" id="stepP11" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">11.BeachTree</button>
-                <button type="button" onclick="jumpToStage(735)" id="stepP12" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">12.Crowd</button>
-                <button type="button" onclick="jumpToStage(795)" id="stepP13" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">13.SingleHead</button>
-                <button type="button" onclick="jumpToStage(860)" id="stepP14" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">14.BrainNet</button>
-                <button type="button" onclick="jumpToStage(930)" id="stepP15" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Bilateral Lung Lobes & Bronchial Airway Tree">15.Lungs</button>
-                <button type="button" onclick="jumpToStage(990)" id="stepP16" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="3D Alveoli Sac Clusters & Blood Oxygenation">16.Alveoli</button>
+                <button type="button" onclick="jumpToStage(225)" id="stepP5b" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="The same seeded coast before classification">5b.Living Coast</button>
+                <button type="button" onclick="jumpToStage(350)" id="stepP6" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Einstein Hat 0/1 Conway's Game of Life Cellular Automaton">6.Hat 0/1 Life</button>
+                <button type="button" onclick="jumpToStage(450)" id="stepP7" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Standard 3D Prismatic Extrusion of Einstein Hat Plane">7.3D Hat Slab</button>
+                <button type="button" onclick="jumpToStage(550)" id="stepP8" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Skyscraper City Skyline Extrusion">8.CitySkyline</button>
+                <button type="button" onclick="jumpToStage(645)" id="stepP9" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="True 3D Aperiodic Monotile Polyhedra + 3D Text">9.True3D Hat</button>
+                <button type="button" onclick="jumpToStage(725)" id="stepP10" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">10.CoastChart</button>
+                <button type="button" onclick="jumpToStage(795)" id="stepP11" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">11.BeachTree</button>
+                <button type="button" onclick="jumpToStage(865)" id="stepP12" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">12.Crowd</button>
+                <button type="button" onclick="jumpToStage(925)" id="stepP13" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">13.SingleHead</button>
+                <button type="button" onclick="jumpToStage(990)" id="stepP14" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">14.BrainNet</button>
+                <button type="button" onclick="jumpToStage(1060)" id="stepP15" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Bilateral Lung Lobes & Bronchial Airway Tree">15.Lungs</button>
+                <button type="button" onclick="jumpToStage(1120)" id="stepP16" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="3D Alveoli Sac Clusters & Blood Oxygenation">16.Alveoli</button>
             </div>
             <div class="grid grid-cols-5 gap-1.5 pt-2 mt-1.5 border-t border-slate-600 text-[9px] mono">
                   <button id="audio-toggle" style="
@@ -433,7 +446,7 @@
                 </div>
                 <div class="bg-slate-900/70 rounded px-2 py-1 border border-slate-800">
                     <span class="text-slate-500 block">HAT TILES</span>
-                    <span id="geneHatRatio" class="text-amber-300 font-medium truncate block">Zero-Gap H7/H8</span>
+                    <span id="geneHatRatio" class="text-amber-300 font-medium truncate block">Seeded tile patch</span>
                 </div>
                 <div class="bg-slate-900/70 rounded px-2 py-1 border border-slate-800">
                     <span class="text-slate-500 block">COAST HURST</span>
@@ -451,14 +464,14 @@
                     <span class="text-amber-300" data-i18n="controls.einsteinHeader">II: EINSTEIN 0/1 LIFE & 3D</span>
                     <span class="text-emerald-300" data-i18n="controls.bioHeader">III: COAST→BEACH CROWD→LUNGS</span>
                 </div>
-                <input id="zoomScrubber" type="range" min="0" max="1025" step="0.1" value="0" oninput="onScrubberInput(this.value)">
+                <input id="zoomScrubber" type="range" min="0" max="1155" step="0.1" value="0" oninput="onScrubberInput(this.value)" aria-label="Journey position">
                 <div class="flex justify-between text-[9px] mono text-slate-500 mt-0.5">
                     <span>Z=0</span>
-                    <span>Z=180 (Hat Life)</span>
-                    <span>Z=277 (3D Slab)</span>
-                    <span>Z=375 (City)</span>
-                    <span>Z=472 (3D Hat)</span>
-                    <span>Z=570 (Bio)</span>
+                    <span>Z=180 (Coast)</span>
+                    <span>Z=310 (Tiles)</span>
+                    <span>Z=505 (City)</span>
+                    <span>Z=603 (3D forms)</span>
+                    <span>Z=700 (Return)</span>
                 </div>
             </div>
 
@@ -473,7 +486,7 @@
                 </div>
                 <div>
                     <div class="flex justify-between mono mb-1">
-                        <span class="text-slate-400" data-i18n="controls.lifeSpeed">Binary 0/1 Life Speed</span>
+                        <span class="text-slate-400" data-i18n="controls.lifeSpeed">Tile rule speed</span>
                         <span id="lblLifeSpeed" class="text-rose-300">2.5 Hz</span>
                     </div>
                     <input id="sliderLifeSpeed" type="range" min="0.0" max="8.0" step="0.5" value="2.5" oninput="updateLifeSpeed(this.value)">
@@ -483,10 +496,10 @@
             <!-- Quick Toggles for Binary Life, Randomize 0/1, 3D Text & Color Drift -->
             <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1 border-t border-slate-800/80 text-[10px] mono">
                 <button type="button" onclick="randomizeBinaryLife()" class="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/50 text-rose-200 transition cursor-pointer" data-i18n="controls.randomizeLife">
-                    ⚡ Randomize 0/1 Life Seed
+                    ⚡ Reseed tile states
                 </button>
                 <button id="btnToggleLife" type="button" onclick="toggleBinaryLifeRule()" class="px-2 py-1 rounded bg-amber-500/20 border border-amber-400/50 text-amber-200 transition cursor-pointer" data-i18n="controls.lifeOn">
-                    Conway 0/1 Life: ON
+                    Tile rule: ON
                 </button>
                 <button id="btnToggleDrift" type="button" onclick="toggleColorDrift()" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 transition cursor-pointer" data-i18n="controls.colorsStatic">
                     Colors: Static
@@ -531,7 +544,7 @@
         let I18N_DATA = {
         "app": {
                 "title": "MORPHOGENESIS",
-                "subtitle": "PROCEDURAL WEBGL + EINSTEIN LIFE ENGINE"
+                "subtitle": "CONTINUOUS WORLD // DISCRETE MODEL"
         },
         "readouts": {
                 "dimension": "Hausdorff D",
@@ -560,8 +573,8 @@
         "stages": {
                 "stage1Title": "Exact Fractals",
                 "stage1Sub": "2D\u21923D SDF",
-                "stage2Title": "Einstein 0/1 Life & 3D",
-                "stage2Sub": "Binary Tyranny (60s)",
+                "stage2Title": "Binary tile model",
+                "stage2Sub": "Sampling a continuous field",
                 "stage3Title": "Organic Continuity",
                 "stage3Sub": "Coast\u2192Beach Crowd\u2192Lungs"
         },
@@ -581,10 +594,10 @@
                 "einsteinHeader": "II: EINSTEIN 0/1 LIFE & 3D",
                 "bioHeader": "III: COAST\u2192BEACH CROWD\u2192LUNGS",
                 "complexity": "Complexity / Octave",
-                "lifeSpeed": "Binary 0/1 Life Speed",
+                "lifeSpeed": "Tile rule speed",
                 "randomizeLife": "\u26a1 Randomize 0/1 Life Seed",
-                "lifeOn": "Conway 0/1 Life: ON",
-                "lifeOff": "Conway 0/1 Life: OFF",
+                "lifeOn": "Tile rule: ON",
+                "lifeOff": "Tile rule: OFF",
                 "colorsStatic": "Colors: Static",
                 "colorsDrift": "Colors: Dynamic Drift",
                 "hideUI": "\u25bc Hide UI"
@@ -595,7 +608,7 @@
                 "lifeTick": "0/1 LIFE TICK",
                 "hatTiles": "HAT TILES",
                 "coastHurst": "COAST HURST",
-                "zeroGap": "Zero-Gap H7/H8"
+                "zeroGap": "Seeded tile patch"
         },
         "flyModal": {
                 "tag": "CLOUD DEPLOYMENT KIT",
@@ -637,7 +650,7 @@
                         "short": "5.FacetPlane"
                 },
                 "6": {
-                        "tag": "STAGE II // APERIODIC CONWAY GAME OF LIFE",
+                        "tag": "STAGE II // LIFE-INSPIRED TILE RULE",
                         "title": "Phase 6: Einstein Hat 0/1 Cellular Automaton",
                         "desc": "Exact edge-to-edge 13-sided Einstein Hat monotiles interlock with zero gaps, switching between binary 0 and 1 states via an aperiodic Conway's Game of Life rule.",
                         "short": "6.Hat 0/1 Life"
@@ -645,7 +658,7 @@
                 "7": {
                         "tag": "STAGE II // STANDARD 3D HAT EXTRUSION",
                         "title": "Phase 7: Standard 3D Prismatic Einstein Hat Extrusion",
-                        "desc": "The gap-free 2D Einstein Hat plane extrudes directly along the Z-axis into a standard 3D prismatic slab landscape of 0 and 1 columns.",
+                        "desc": "The tile patch rises into illustrative 3D columns for the two classified states.",
                         "short": "7.3D Hat Slab"
                 },
                 "8": {
@@ -743,18 +756,11 @@
                 if (val && val !== key) el.title = val;
             });
 
-            // Sync phase titles and descriptions in PHASES array
-            if (Array.isArray(PHASES)) {
-                for (let i = 0; i < PHASES.length; i++) {
-                    const p = PHASES[i];
-                    p.tag = t(`phases.${p.id}.tag`, p.tag);
-                    p.title = t(`phases.${p.id}.title`, p.title);
-                    p.desc = t(`phases.${p.id}.desc`, p.desc);
-                }
-            }
+            // Dev phase copy is local; shared locale strings also serve production.
 
             // Update breadcrumbs
             for (let i = 1; i <= 16; i++) {
+                if ([1, 6, 7, 9].includes(i)) continue;
                 const btn = document.getElementById('stepP' + i);
                 if (btn) {
                     const shortVal = t(`phases.${i}.short`);
@@ -776,6 +782,18 @@
 
             if (typeof updateHUDReadouts === 'function') updateHUDReadouts();
             if (typeof syncCruiseUI === 'function') syncCruiseUI();
+            // Keep dev copy independent of the production locale file.
+            document.querySelector('[data-i18n="app.subtitle"]').textContent = 'CONTINUOUS WORLD // DISCRETE MODEL';
+            document.querySelector('[data-i18n="stages.stage2Title"]').textContent = 'Binary tile model';
+            document.querySelector('[data-i18n="stages.stage2Sub"]').textContent = 'Sampling a continuous field';
+            document.querySelector('[data-i18n="controls.lifeSpeed"]').textContent = 'Tile rule speed';
+            document.querySelector('[data-i18n="controls.randomizeLife"]').textContent = '⚡ Reseed tile states';
+            document.querySelector('[data-i18n="controls.lifeOn"]').textContent = 'Tile rule: ON';
+            document.getElementById('geneHatRatio').textContent = 'Seeded tile patch';
+            for (const phase of PHASES) {
+                const step = document.getElementById('stepP' + phase.id);
+                if (step) step.title = phase.title;
+            }
         }
       
 
@@ -811,8 +829,17 @@
             "Ultraviolet Singularity"
         ];
 
-        const TOTAL_Z = 1025.0; // 16 Phases across Z = 0..1025 (6.5 Z/s = 157.7s at 1x)
+        const TOTAL_Z = 1155.0; // 16 numbered phases plus coastal prelude, 177.7s at 1x
         const BASE_Z_RATE = 6.5;
+        const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const PRELUDE_START = 180, HAT_START = 310, RETURN_START = 700;
+        const sceneZ = z => z >= HAT_START ? z - 130 : z;
+        const smooth01 = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
+        // Shared illustrative field: the exact same expression is used in GLSL.
+        function boundaryField(x, y, seed) {
+            return x - 0.12 * Math.sin(3 * y + seed) - 0.04 * Math.sin(8 * y + seed * 0.4);
+        }
+        const boundarySeed = () => (state.seed % 10000) * 0.001;
 
         const state = {
             seed: 1337420,
@@ -1164,7 +1191,9 @@
                     return [cx + dx * c - dy * s, cy + dx * s + dy * c];
                 });
 
-                const bit = h.isReflected ? 1 : (rng.next() < 0.42 ? 1 : 0);
+                // Classify the same illustrative continuous field drawn over the coast.
+                const fieldSeed = (seed % 10000) * 0.001;
+                const bit = boundaryField(cx / 18.5, cy / 18.5, fieldSeed) >= 0 ? 1 : 0;
 
                 tiles.push({
                     id: tiles.length,
@@ -1273,7 +1302,7 @@
             state.lifeEnabled = !state.lifeEnabled;
             const btn = document.getElementById('btnToggleLife');
             if (btn) {
-                btn.textContent = 'Conway 0/1 Life: ' + (state.lifeEnabled ? 'ON' : 'PAUSED');
+                btn.textContent = 'Tile rule: ' + (state.lifeEnabled ? 'ON' : 'PAUSED');
                 btn.className = state.lifeEnabled
                     ? 'px-2 py-1 rounded bg-amber-500/20 border border-amber-400/50 text-amber-200 transition cursor-pointer'
                     : 'px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-400 transition cursor-pointer';
@@ -1319,8 +1348,16 @@
             uniform vec2 uShoreAnchor;
             uniform float uColorDrift;
             uniform float uBinaryGlitch;
+            uniform float uBoundarySeed;
+            uniform float uPrelude;
 
             #define PI 3.14159265359
+
+            // Paired with boundaryField() in JS. Coordinates are screen-centred UV.
+            float referenceField(vec2 p) {
+                return p.x - 0.12 * sin(3.0 * p.y + uBoundarySeed)
+                           - 0.04 * sin(8.0 * p.y + uBoundarySeed * 0.4);
+            }
 
             float hash21(vec2 p) {
                 p = fract(p * vec2(234.34, 435.345));
@@ -1612,6 +1649,30 @@
                 vec3 col2D = mix(bgCol, fillCol, insideMask);
                 col2D += mix(basePal, vec3(0.92, 0.98, 1.0), 0.65) * edgeMask * 0.95;
                 col2D += vec3(0.35, 0.92, 1.0) * clamp(carveGlow, 0.0, 1.2) * 0.75;
+
+                // River / branching-vein overlay (Phase 1): a small fractal bifurcating
+                // network that foreshadows the vascular / neural / alveolar branching
+                // systems visited in later phases (L-system abs-fold, D ~ 1.6).
+                {
+                    float riverGate = 1.0 - smoothstep(26.0, 34.0, z);
+                    if (riverGate > 0.001) {
+                        vec2 rp = p2 * 1.35 + vec2(0.05, -0.10);
+                        float rw = 0.013;
+                        float river = 0.0;
+                        for (int k = 0; k < 5; k++) {
+                            float kf = float(k);
+                            rp = abs(rp) - vec2(0.30 - kf * 0.028, 0.20 - kf * 0.016);
+                            float ca = cos(0.32 + kf * 0.07); float sa = sin(0.32 + kf * 0.07);
+                            rp = vec2(rp.x * ca - rp.y * sa, rp.x * sa + rp.y * ca);
+                            float seg = abs(rp.y) - rw;
+                            river += smoothstep(0.012, 0.0, seg) * exp(-kf * 0.32);
+                            rw *= 0.72;
+                        }
+                        float riverMask = clamp(river * riverGate, 0.0, 1.0);
+                        vec3 riverCol = mix(vec3(0.10, 0.30, 0.55), vec3(0.40, 0.85, 0.95), 0.5);
+                        col2D += riverCol * riverMask * 0.50;
+                    }
+                }
 
                 if (z < 28.0) return col2D;                
 
@@ -2555,6 +2616,13 @@
                         colCoast = mix(colCoast, vec3(0.80, 0.95, 1.0), iso2 * chartFade * 0.25);
                     }
 
+                    // A reference contour of the illustrative field, distinct from the
+                    // physical shoreline and retained across the two coastal visits.
+                    float referenceLine = 1.0 - smoothstep(0.0, 0.008, abs(referenceField(uv)));
+                    float fieldTint = smoothstep(-0.14, 0.14, referenceField(uv));
+                    colCoast = mix(colCoast, vec3(0.10, 0.31, 0.39), fieldTint * chartFade * 0.13);
+                    colCoast = mix(colCoast, vec3(1.0, 0.38, 0.13), referenceLine * chartFade * 0.9);
+
                     // ── Koch snowflake construction overlay (Phase 10, early aerial z<600) ──
                     // Shows iterative Koch construction: D = ln4/ln3 ≈ 1.2619 ≈ British coastline D
                     if (z < 602.0 && chartFade > 0.3) {
@@ -2642,7 +2710,18 @@
                 float z = uZoomZ;
 
                 vec3 col = vec3(0.03, 0.04, 0.07);
-                if (z < 192.0) {
+                if (uPrelude > 0.5) {
+                    float progress = z - 180.0;
+                    // Descend to the beach and crowd, then return to an aerial view
+                    // before the field is sampled into binary tiles.
+                    float coastZ = progress < 95.0
+                        ? 570.0 + progress * (140.0 / 95.0)
+                        : mix(710.0, 570.0, smoothstep(95.0, 130.0, progress));
+                    col = renderStage3(uv, coastZ);
+                    if (z < 193.0) {
+                        col = mix(renderStage1(uv, 179.9), col, smoothstep(180.0, 193.0, z));
+                    }
+                } else if (z < 192.0) {
                     col = renderStage1(uv, z);
                 } else if (z > 550.0) {
                     col = renderStage3(uv, z);
@@ -2653,7 +2732,14 @@
                     col += vec3(scan, -scan * 0.5, 0.0);
                 }
 
-                if (z >= 170.0 && z < 192.0) {
+                if (uPrelude < 0.5 && z >= 180.0 && z < 205.0) {
+                    col = mix(renderStage3(uv, 570.0), col, smoothstep(180.0, 205.0, z));
+                }
+                if (uPrelude < 0.5 && z >= 530.0 && z < 570.0) {
+                    col = mix(col, renderStage3(uv, 570.0), smoothstep(530.0, 570.0, z));
+                }
+
+                if (z >= 170.0 && z < 180.0) {
                     float w = smoothstep(170.0, 190.0, z);
                     col = mix(col, vec3(0.05, 0.03, 0.06), w);
                 }
@@ -2697,7 +2783,9 @@
             uHurst: gl.getUniformLocation(prog, 'uHurst'),
             uShoreAnchor: gl.getUniformLocation(prog, 'uShoreAnchor'),
             uColorDrift: gl.getUniformLocation(prog, 'uColorDrift'),
-            uBinaryGlitch: gl.getUniformLocation(prog, 'uBinaryGlitch')
+            uBinaryGlitch: gl.getUniformLocation(prog, 'uBinaryGlitch'),
+            uBoundarySeed: gl.getUniformLocation(prog, 'uBoundarySeed'),
+            uPrelude: gl.getUniformLocation(prog, 'uPrelude')
         };
 
         // ============================================================================
@@ -2708,6 +2796,7 @@
             const w = hatCanvas.width;
             const h = hatCanvas.height;
             hatCtx.clearRect(0, 0, w, h);
+            if (z < 0) return;
 
             
             if (z < 28.0 && !state.zenMode) {
@@ -2737,7 +2826,8 @@
             }
             if (z < 168.0 || z > 582.0) return;
 
-            if (state.lifeEnabled && state.lifeSpeedHz > 0 && z >= 175.0 && z <= 555.0) {
+            // Hold the sampled field long enough to compare it with its source contour.
+            if (state.lifeEnabled && state.lifeSpeedHz > 0 && z >= 205.0 && z <= 555.0) {
                 const intervalMs = 1000.0 / state.lifeSpeedHz;
                 if (now - state.lastLifeStepTime >= intervalMs) {
                     stepEinsteinGameOfLife();
@@ -2768,7 +2858,7 @@
             const zoomFactor = Math.pow(1.68, localProgress) * (minDim / 18.5);
 
             const tiltY = 1.0 - 0.42 * wStd3D - 0.12 * wCity + 0.08 * wTrue3D;
-            const rotAzimuth = (z - 180.0) * 0.0042 + state.panX * 0.6;
+            const rotAzimuth = Math.max(0, z - 180.0) * 0.0042 + state.panX * 0.6;
             const cosA = Math.cos(rotAzimuth), sinA = Math.sin(rotAzimuth);
 
             const cxScreen = w * 0.5;
@@ -2966,19 +3056,19 @@
                 let bannerTitle = '';
                 let bannerSub = '';
                 if (z < 277.5) {
-                    bannerTitle = `APERIODIC CONWAY'S GAME OF LIFE // BINARY 0 & 1 TYRANNY (GEN #${state.lifeGenCount})`;
-                    bannerSub = `GAP-FREE 13-SIDED EINSTEIN HAT TESSELLATION // CONTINUITY FRACTURED INTO DISCRETE 0/1 STATES`;
+                    bannerTitle = `LIFE-INSPIRED TILE RULE // TWO STATES (GEN #${state.lifeGenCount})`;
+                    bannerSub = `ILLUSTRATIVE THRESHOLD APPLIED TO A CONTINUOUS FIELD`;
                 } else if (z < 375.0) {
-                    bannerTitle = `STANDARD 3D EINSTEIN HAT EXTRUSION // PRISMATIC APERIODIC SLABS`;
+                    bannerTitle = `EXTRUDED TILE VIEW // TWO STATES`;
                     bannerSub = `2D EINSTEIN HAT PLANE EXTRUDED ALONG Z-AXIS INTO INTERLOCKING 3D COLUMNS`;
                 } else if (z < 472.5) {
                     bannerTitle = `APERIODIC SKYSCRAPER CITY SKYLINE // BINARY URBAN GRID`;
                     bannerSub = `0 & 1 MONOTILES EXTRUDED INTO HIGH-RISE ARCHITECTURAL TOWERS`;
                 } else {
                     bannerTitle = wDissolveContinuity > 0.4
-                        ? `BINARY 0/1 DISSOLVING BACK INTO BIOLOGICAL CONTINUITY (0,1 → ≈,∞)`
-                        : `TRUE 3D EINSTEIN MONOTILE // TWISTED BIPYRAMID & SOCOLAR-TAYLOR POLYHEDRA`;
-                    bannerSub = `ZERO 3D TRANSLATIONAL REPETITION // FROM DISCRETE BITS BACK TO CONTINUOUS NATURE`;
+                        ? `BINARY MODEL RECEDING INTO THE COAST (0,1 → ≈,∞)`
+                        : `3D-INSPIRED TILE FORMS`;
+                    bannerSub = `THE SAME COAST RETURNS BENEATH THE MODEL`;
                 }
 
                 const textX = w * 0.5;
@@ -3007,22 +3097,23 @@
         // 5. 16-PHASE TELEMETRY, STEPPER & UI CONTROLLERS
         // ============================================================================
         const PHASES = [
-            { id: 1, zStart: 0.0,   zEnd: 35.0,   dim: 'D ≈ 1.585', tag: 'STAGE I // Koch Snowflake STEP-BY-STEP 2D SIERPINSKI', title: 'Phase 1: Full Equilateral Triangle → Step-by-Step Sierpinski', desc: 'Starts with a complete equilateral triangle (N=0) and carves out the Sierpinski Gasket one recursion step at a time (N=1→8, D ≈ 1.585).' },
-            { id: 2, zStart: 35.0,  zEnd: 75.0,   dim: 'D = 2.000', tag: 'STAGE I // 3D TETRAHEDRAL EXTRUSION', title: 'Phase 2: 3D Sierpinski Pyramid', desc: 'The 2D gasket tilts and extrudes into a raymarched 3D Sierpinski Tetrahedron with four-fold recursive cavities.' },
-            { id: 3, zStart: 75.0,  zEnd: 115.0,  dim: 'D ≈ 2.727', tag: 'STAGE I // ORTHOGONAL 3D SPONGE', title: 'Phase 3: 3D Menger Sponge', desc: 'Tetrahedral folds morph into the orthogonal cubic cross-tunnels of a 3D Menger Sponge (D = ln 20 / ln 3 ≈ 2.727).' },
-            { id: 4, zStart: 115.0, zEnd: 155.0,  dim: 'D ≈ 2.940', tag: 'STAGE I // SPHERICAL POWER-BULB', title: 'Phase 4: 3D Mandelbulb', desc: 'Cubic tunnels warp into spherical-coordinate 3D Mandelbulb filaments before approaching a flat terrace edge.' },
-            { id: 5, zStart: 155.0, zEnd: 180.0,  dim: 'D = 2.000', tag: 'STAGE I → II // FACET PLANE BRIDGE', title: 'Phase 5: Fractal Terrace Facet Plane', desc: 'Camera lands on a single flat terrace facet etched with polykite seams that lock into the Einstein Hat monotile.' },
-            { id: 6, zStart: 180.0, zEnd: 277.5,  dim: 'D = 2.000 (0/1)', tag: 'STAGE II // APERIODIC CONWAY GAME OF LIFE', title: 'Phase 6: Einstein Hat 0/1 Cellular Automaton', desc: 'Exact edge-to-edge 13-sided Einstein Hat monotiles interlock with zero gaps, switching between binary 0 and 1 states via an aperiodic Conway\'s Game of Life rule.' },
-            { id: 7, zStart: 277.5, zEnd: 375.0,  dim: 'D = 2.500 (Slab)', tag: 'STAGE II // STANDARD 3D HAT EXTRUSION', title: 'Phase 7: Standard 3D Prismatic Einstein Hat Extrusion', desc: 'The gap-free 2D Einstein Hat plane extrudes directly along the Z-axis into a standard 3D prismatic slab landscape of 0 and 1 columns.' },
-            { id: 8, zStart: 375.0, zEnd: 472.5,  dim: 'D ≈ 2.680 (City)', tag: 'STAGE II // APERIODIC URBAN SKYLINE', title: 'Phase 8: 3D Skyscraper City Skyline', desc: 'The extruded Einstein Hat prisms rise into an oblique 3D high-rise skyscraper city skyline with illuminated curtain-wall windows.' },
-            { id: 9, zStart: 472.5, zEnd: 570.0,  dim: 'D = 3.000 (3D Hat)', tag: 'STAGE II → III // TRUE 3D EINSTEIN MONOTILE', title: 'Phase 9: True 3D Aperiodic Monotile & 3D Text', desc: 'True 3D aperiodic polyhedra (Schmitt–Conway–Danzer twisted bipyramids & 3D Einstein text) where harsh 0/1 bits dissolve back into continuous nature (≈, ∞).' },
-            { id: 10, zStart: 570.0, zEnd: 630.0, dim: 'D ≈ 1.280', tag: 'STAGE III // BIOLOGICAL & NATURAL CONTINUITY', title: 'Phase 10: Coastline & Bathymetric Charts', desc: 'Binary boundaries melt into continuous orbital coastlines overlaid with hydrographic and bathymetric isolines.' },
-            { id: 11, zStart: 630.0, zEnd: 710.0, dim: 'D ≈ 1.640', tag: 'STAGE III // SHORELINE & BEACH CROWDS', title: 'Phase 11: Coastal Shoreline & Beach Crowd Gathering', desc: 'The camera descends smoothly from the coastal surf and breaker foam directly onto the sunlit sandy beach where vibrant crowds are standing by the water\'s edge.' },
-            { id: 12, zStart: 710.0, zEnd: 770.0, dim: 'D ≈ 1.880', tag: 'STAGE III // CROWD ON THE BEACH', title: 'Phase 12: Beach Crowd to Central Hero', desc: 'Gliding among the crowds standing on the golden beach sand, casting soft shadows under the sunlight, locking smoothly onto the central hero individual.' },
-            { id: 13, zStart: 770.0, zEnd: 830.0, dim: 'D ≈ 2.150', tag: 'STAGE III // INDIVIDUAL CRANIAL CROWN', title: 'Phase 13: Single Human Head & Cortical Reveal', desc: 'Seamless 1:1 lock onto the central person\'s head and Fibonacci hair whorl, turning translucent to reveal folded cerebral cortex gyri.' },
-            { id: 14, zStart: 830.0, zEnd: 900.0, dim: 'D ≈ 2.650', tag: 'STAGE III // CEREBRAL CONNECTOME', title: 'Phase 14: Cerebral Neural & Synaptic Network', desc: 'Inside the brain\'s continuous web of pyramidal neurons, branching dendrites, and traveling action-potential flashes.' },
-            { id: 15, zStart: 900.0, zEnd: 965.0, dim: 'D ≈ 2.780', tag: 'STAGE III // RESPIRATORY LUNGS & BRONCHI', title: 'Phase 15: Dual Lung Lobes & Bronchial Airway Tree', desc: 'Anatomical bilateral lung lobes expanding with tidal respiration, ribbed cartilaginous trachea, branching fractal bronchi (Murray\'s Law), and oxygen airflow streams.' },
-            { id: 16, zStart: 965.0, zEnd: 1025.0, dim: 'D ≈ 2.970', tag: 'STAGE III // 3D PULMONARY ALVEOLI & GAS EXCHANGE', title: 'Phase 16: Microscopic 3D Alveoli Sac Clusters & Blood Oxygenation', desc: 'True 3D bulbous grape clusters of inflating alveoli sacs (acini) wrapped in capillary mesh, with red blood cells converting from deoxygenated purple to arterial scarlet as O₂ diffuses.' }
+            { id: 1, zStart: 0.0,   zEnd: 35.0,   dim: 'Model D varies', tag: 'STAGE I // Koch Snowflake STEP-BY-STEP 2D SIERPINSKI', title: 'Phase 1: Koch Snowflake → Sierpinski Triangle', desc: 'A triangle grows Koch edges (N=0→5, model D=ln4/ln3), then becomes a Sierpinski gasket (N=0→8, model D=ln3/ln2).' },
+            { id: 2, zStart: 35.0,  zEnd: 75.0,   dim: 'Illustrative scene', tag: 'STAGE I // 3D TETRAHEDRAL EXTRUSION', title: 'Phase 2: 3D Sierpinski Pyramid', desc: 'The 2D gasket tilts and extrudes into a raymarched 3D Sierpinski Tetrahedron with four-fold recursive cavities.' },
+            { id: 3, zStart: 75.0,  zEnd: 115.0,  dim: 'Illustrative scene', tag: 'STAGE I // ORTHOGONAL 3D SPONGE', title: 'Phase 3: 3D Menger Sponge', desc: 'Tetrahedral folds morph into the orthogonal cubic cross-tunnels of a 3D Menger Sponge (D = ln 20 / ln 3 ≈ 2.727).' },
+            { id: 4, zStart: 115.0, zEnd: 155.0,  dim: 'Illustrative scene', tag: 'STAGE I // SPHERICAL POWER-BULB', title: 'Phase 4: 3D Mandelbulb', desc: 'Cubic tunnels warp into spherical-coordinate 3D Mandelbulb filaments before approaching a flat terrace edge.' },
+            { id: 5, zStart: 155.0, zEnd: 180.0,  dim: 'Illustrative scene', tag: 'STAGE I → II // FACET PLANE BRIDGE', title: 'Phase 5: Fractal Terrace Facet Plane', desc: 'Camera lands on a single flat terrace facet etched with polykite seams that lock into the Einstein Hat monotile.' },
+            { id: "5b", zStart: 180, zEnd: 310, dim: "Illustrative field", tag: "COASTAL PRELUDE // BEFORE CLASSIFICATION", title: "The living coast", desc: "A seeded shoreline, treeline and gathering of people appear before the field is classified into two tile states." },
+            { id: 6, zStart: 310.0, zEnd: 407.5,  dim: 'Illustrative scene', tag: 'STAGE II // LIFE-INSPIRED TILE RULE', title: 'Phase 6: Coastal Field → Binary Tile Model', desc: 'A Hat-inspired tile patch samples the illustrative coastal field into two states; a Life-inspired neighbor rule then evolves them.' },
+            { id: 7, zStart: 407.5, zEnd: 505.0,  dim: 'Illustrative scene', tag: 'STAGE II // STANDARD 3D HAT EXTRUSION', title: 'Phase 7: Standard 3D Prismatic Einstein Hat Extrusion', desc: 'The tile patch rises into illustrative 3D columns for the two classified states.' },
+            { id: 8, zStart: 505.0, zEnd: 602.5,  dim: 'Illustrative scene', tag: 'STAGE II // APERIODIC URBAN SKYLINE', title: 'Phase 8: 3D Skyscraper City Skyline', desc: 'The extruded Einstein Hat prisms rise into an oblique 3D high-rise skyscraper city skyline with illuminated curtain-wall windows.' },
+            { id: 9, zStart: 602.5, zEnd: 700.0,  dim: 'Illustrative scene', tag: 'STAGE II → III // RETURN TO THE COAST', title: 'Phase 9: 3D-Inspired Tile Forms & Return', desc: 'Extruded tile forms recede while the same seeded coast and its reference boundary return.' },
+            { id: 10, zStart: 700.0, zEnd: 760.0, dim: 'Illustrative scene', tag: 'STAGE III // BIOLOGICAL & NATURAL CONTINUITY', title: 'Phase 10: Coastline & Bathymetric Charts', desc: 'The continuous coastal field returns beneath the tile edges; the camera heads toward the same beach and crowd.' },
+            { id: 11, zStart: 760.0, zEnd: 840.0, dim: 'Illustrative scene', tag: 'STAGE III // SHORELINE & BEACH CROWDS', title: 'Phase 11: Coastal Shoreline & Beach Crowd Gathering', desc: 'The camera descends smoothly from the coastal surf and breaker foam directly onto the sunlit sandy beach where vibrant crowds are standing by the water\'s edge.' },
+            { id: 12, zStart: 840.0, zEnd: 900.0, dim: 'Illustrative scene', tag: 'STAGE III // CROWD ON THE BEACH', title: 'Phase 12: Beach Crowd to Central Hero', desc: 'Gliding among the crowds standing on the golden beach sand, casting soft shadows under the sunlight, locking smoothly onto the central hero individual.' },
+            { id: 13, zStart: 900.0, zEnd: 960.0, dim: 'Illustrative scene', tag: 'STAGE III // INDIVIDUAL CRANIAL CROWN', title: 'Phase 13: Single Human Head & Cortical Reveal', desc: 'Seamless 1:1 lock onto the central person\'s head and Fibonacci hair whorl, turning translucent to reveal folded cerebral cortex gyri.' },
+            { id: 14, zStart: 960.0, zEnd: 1030.0, dim: 'Illustrative scene', tag: 'STAGE III // CEREBRAL CONNECTOME', title: 'Phase 14: Cerebral Neural & Synaptic Network', desc: 'Inside the brain\'s continuous web of pyramidal neurons, branching dendrites, and traveling action-potential flashes.' },
+            { id: 15, zStart: 1030.0, zEnd: 1095.0, dim: 'Illustrative scene', tag: 'STAGE III // RESPIRATORY LUNGS & BRONCHI', title: 'Phase 15: Dual Lung Lobes & Bronchial Airway Tree', desc: 'Anatomical bilateral lung lobes expanding with tidal respiration, ribbed cartilaginous trachea, branching fractal bronchi (Murray\'s Law), and oxygen airflow streams.' },
+            { id: 16, zStart: 1095.0, zEnd: 1155.0, dim: 'Illustrative scene', tag: 'STAGE III // 3D PULMONARY ALVEOLI & GAS EXCHANGE', title: 'Phase 16: Microscopic 3D Alveoli Sac Clusters & Blood Oxygenation', desc: 'True 3D bulbous grape clusters of inflating alveoli sacs (acini) wrapped in capillary mesh, with red blood cells converting from deoxygenated purple to arterial scarlet as O₂ diffuses.' }
         ];
 
         function formatMMSS(sec) {
@@ -3036,43 +3127,42 @@
             const z = state.zoomZ;
             let activePhase = PHASES[0];
             for (let i = 0; i < PHASES.length; i++) {
-                if (z >= PHASES[i].zStart && z <= PHASES[i].zEnd) {
+                if (z >= PHASES[i].zStart && (z < PHASES[i].zEnd || i === PHASES.length - 1)) {
                     activePhase = PHASES[i];
                     break;
                 }
             }
 
-            const magExp = (z / TOTAL_Z) * 35.0;
-            const expInt = Math.floor(magExp);
-            const mantissa = Math.pow(10, magExp - expInt).toFixed(2);
 
-            document.getElementById('hudDimension').textContent = activePhase.dim;
-            document.getElementById('hudZoom').textContent = `${mantissa} × 10^${expInt}×`;
+            document.getElementById('hudDimension').textContent = activePhase.id === 1
+                ? (sceneZ(z) < 15 ? 'Koch ln4/ln3' : 'Sierpinski ln3/ln2') : activePhase.dim;
+            document.getElementById('dimensionLabel').textContent = activePhase.id === 1 ? 'Model D' : 'Scene type';
+            document.getElementById('hudZoom').textContent = `${(100 * z / TOTAL_Z).toFixed(1)}%`;
             document.getElementById('hudDepthZ').textContent = `${z.toFixed(1)} / ${TOTAL_Z}`;
 
             const elapsedSec = z / BASE_Z_RATE;
             const totalSec = TOTAL_Z / BASE_Z_RATE;
             document.getElementById('hudRuntime').textContent = `${formatMMSS(elapsedSec)} / ${formatMMSS(totalSec)}`;
 
-            document.getElementById('stageTag').textContent = t(`phases.${activePhase.id}.tag`, activePhase.tag);
-            document.getElementById('stageTitle').textContent = t(`phases.${activePhase.id}.title`, activePhase.title);
-            document.getElementById('stageDesc').textContent = t(`phases.${activePhase.id}.desc`, activePhase.desc);
+            document.getElementById('stageTag').textContent = activePhase.tag;
+            document.getElementById('stageTitle').textContent = activePhase.title;
+            document.getElementById('stageDesc').textContent = activePhase.desc;
 
             // Expose current 1-indexed phase id globally so audio engine can read it
-            window.currentMorphPhase = activePhase.id;
+            window.currentMorphPhase = activePhase.id === "5b" ? 10 : activePhase.id;
             // Drive crossfade live from render loop (no-op when audio is disabled)
-            if (typeof morphAudio !== 'undefined') morphAudio.updatePhase(activePhase.id);
+            if (typeof morphAudio !== 'undefined') morphAudio.updatePhase(activePhase.id === "5b" ? 10 : activePhase.id);
 
             const scrubber = document.getElementById('zoomScrubber');
             if (scrubber && document.activeElement !== scrubber) {
                 scrubber.value = z.toFixed(1);
             }
 
-            document.getElementById('tabStage1').classList.toggle('active', z < 180.0);
-            document.getElementById('tabStage2').classList.toggle('active', z >= 180.0 && z < 570.0);
-            document.getElementById('tabStage3').classList.toggle('active', z >= 570.0);
+            document.getElementById('tabStage1').classList.toggle('active', z < HAT_START);
+            document.getElementById('tabStage2').classList.toggle('active', z >= HAT_START && z < RETURN_START);
+            document.getElementById('tabStage3').classList.toggle('active', z >= RETURN_START);
 
-            for (let i = 1; i <= 16; i++) {
+            for (const i of [1,2,3,4,5,'5b',6,7,8,9,10,11,12,13,14,15,16]) {
                 const btn = document.getElementById('stepP' + i);
                 if (!btn) continue;
                 if (i === activePhase.id) {
@@ -3171,8 +3261,8 @@
         function jumpToStage(targetZ) {
             state.targetZoomZ = Math.max(0, Math.min(TOTAL_Z, parseFloat(targetZ)));
             // Seek audio to the correct cue point for the destination phase
-            const destPhase = PHASES.find(p => targetZ >= p.zStart && targetZ <= p.zEnd) || PHASES[0];
-            morphAudio.seekToPhase(destPhase.id);
+            const destPhase = PHASES.find(p => targetZ >= p.zStart && (targetZ < p.zEnd || targetZ === TOTAL_Z)) || PHASES[0];
+            morphAudio.seekToPhase(destPhase.id === "5b" ? 10 : destPhase.id);
         }
 
         function onScrubberInput(val) {
@@ -3180,8 +3270,8 @@
             state.zoomZ = state.targetZoomZ;
             updateHUDReadouts();
             // Seek audio on scrub
-            const destPhase = PHASES.find(p => state.zoomZ >= p.zStart && state.zoomZ <= p.zEnd) || PHASES[0];
-            morphAudio.seekToPhase(destPhase.id);
+            const destPhase = PHASES.find(p => state.zoomZ >= p.zStart && (state.zoomZ < p.zEnd || state.zoomZ === TOTAL_Z)) || PHASES[0];
+            morphAudio.seekToPhase(destPhase.id === "5b" ? 10 : destPhase.id);
         }
 
         function toggleCruise() {
@@ -3505,10 +3595,10 @@
 // label:     human-readable note for tuning — edit me!
 const PHASE_AUDIO_CUES = {
   //  id  What you see                             Track          Seek-to (jump)   Note
-  1:  { track: "bachCello",  cuePoint:  0,    label: "Sierpinski 2D — Bach Prelude, organ (whole 42-bar loop)" },
-  2:  { track: "bachCello",  cuePoint:  6.86, label: "Pyramid 3D — Bach Prelude continues" },
-  3:  { track: "bachCello",  cuePoint: 13.71, label: "Menger Sponge — Bach Prelude, later phrase" },
-  4:  { track: "bachCello",  cuePoint: 20.57, label: "Mandelbulb — Bach Prelude, closing phrase" },
+  1:  { track: "toccataFugue",  cuePoint:  0,    label: "Sierpinski 2D — Toccata & Fugue BWV 565 (Riga Cathedral organ)" },
+  2:  { track: "toccataFugue",  cuePoint:  6.86, label: "Pyramid 3D — Toccata & Fugue BWV 565 continues" },
+  3:  { track: "toccataFugue",  cuePoint: 13.71, label: "Menger Sponge — Toccata & Fugue BWV 565, later phrase" },
+  4:  { track: "toccataFugue",  cuePoint: 20.57, label: "Mandelbulb — Toccata & Fugue BWV 565, closing phrase" },
   5:  { track: "bladeSlice",  cuePoint:  0,    label: "Facet Plane — blade intro CUT HERE" },
   6:  { track: "bladeSlice",  cuePoint: 15.0,  label: "Einstein Hat 0/1 — aperiodic edge" },
   7:  { track: "bladeSlice",  cuePoint: 30.0,  label: "3D Hat Slab — geometric tension" },
@@ -3528,13 +3618,13 @@ const PHASE_AUDIO_CONFIG = {
   masterVolume:  0.75,
   manualIdleSec: 2.0,   // seconds of scroll/pan inactivity before audio fades out
   tracks: {
-    // "bachCello" is a virtual key: it resolves to bachCello05/10/20/40 by zoom
+    // "toccataFugue" is a virtual key: it resolves to toccataFugue05/10/20/40 by zoom
     // speed, each rendered as a bar-aligned seamless organ loop of the Prelude
     // from Bach's Cello Suite No. 1 (BWV 1007).
-    bachCello05: "/sounds/outputs/bach_cello_prelude_organ_slow_144.0s.ogg",
-    bachCello10: "/sounds/outputs/bach_cello_prelude_organ_1x_109.7s.ogg",
-    bachCello20: "/sounds/outputs/bach_cello_prelude_organ_2x_54.9s.ogg",
-    bachCello40: "/sounds/outputs/bach_cello_prelude_organ_4x_27.4s.ogg",
+    toccataFugue05: "/sounds/outputs/toccata_fugue_bwv565_slow_144.0s.ogg",
+    toccataFugue10: "/sounds/outputs/toccata_fugue_bwv565_1x_109.7s.ogg",
+    toccataFugue20: "/sounds/outputs/toccata_fugue_bwv565_2x_54.9s.ogg",
+    toccataFugue40: "/sounds/outputs/toccata_fugue_bwv565_4x_27.4s.ogg",
     seaWaves:    "/sounds/outputs/morph_881293__oolita__sea-waves-los-escullos_fast_50.0s.wav",
     bladeSlice:  "/sounds/outputs/morph_209073__lukesharples__blade-slice2_fast_70.0s.wav",
     streetOrgan: "/sounds/outputs/morph_881518__klankbeeld__street-organ-vegetable-market-markt-s-hertogenbosch-nertherlands-1040-am-261121_00071_fast_138.0s.wav",
@@ -3553,12 +3643,12 @@ class MorphAudioEngine {
     this.wanted      = false;
     this._idleTimer  = null;
     this._lastPhaseId = null;
-    this.speedKey    = "10";   // 0.5x / 1x / 2x / 4x → bachCello05 / 10 / 20 / 40
+    this.speedKey    = "10";   // 0.5x / 1x / 2x / 4x → toccataFugue05 / 10 / 20 / 40 (prefixes of the same recording)
   }
 
   // ── Resolve virtual track names (speed-dependent Bach Prelude variants) ────
   _resolveTrack(name) {
-    return name === "bachCello" ? "bachCello" + this.speedKey : name;
+    return name === "toccataFugue" ? "toccataFugue" + this.speedKey : name;
   }
 
   // ── Zoom speed picks which Bach Prelude loop length plays ───────────────────
@@ -3567,12 +3657,12 @@ class MorphAudioEngine {
     if (key === this.speedKey) return;
     this.speedKey = key;
     if (!this.playing) return;
-    if (!this.activeTrack || !this.activeTrack.startsWith("bachCello")) return;
+    if (!this.activeTrack || !this.activeTrack.startsWith("toccataFugue")) return;
 
     // All loops are bar-aligned, so keep the same absolute musical position
     // when swapping lengths (modulo the new duration).
     const outgoing = this.nodes[this.activeTrack];
-    const incoming = this.nodes[this._resolveTrack("bachCello")];
+    const incoming = this.nodes[this._resolveTrack("toccataFugue")];
     if (outgoing && incoming) {
       const dur = incoming.audioEl.duration;
       const pos = outgoing.audioEl.currentTime || 0;
@@ -3737,16 +3827,16 @@ audioBtn.addEventListener("click", () => {
 
             gl.useProgram(prog);
             gl.uniform2f(uLocs.uRes, glCanvas.width, glCanvas.height);
-            gl.uniform1f(uLocs.uZoomZ, state.zoomZ);
+            gl.uniform1f(uLocs.uZoomZ, sceneZ(state.zoomZ));
             // Phase 8 City Skyline: zoom-out + pan camera transition
             let phase8PanX = 0.0, phase8PanY = 0.0;
-            if (state.zoomZ >= 375.0 && state.zoomZ <= 472.5) {
-                const p = (state.zoomZ - 375.0) / (472.5 - 375.0);
+            if (state.zoomZ >= 505.0 && state.zoomZ <= 602.5) {
+                const p = (state.zoomZ - 505.0) / (602.5 - 505.0);
                 phase8PanX = state.phase8ZoomOut.startPanX + (state.phase8ZoomOut.endPanX - state.phase8ZoomOut.startPanX) * p;
                 phase8PanY = state.phase8ZoomOut.startPanY + (state.phase8ZoomOut.endPanY - state.phase8ZoomOut.startPanY) * p;
             }
             gl.uniform2f(uLocs.uPan, state.panX + phase8PanX, state.panY + phase8PanY);
-            gl.uniform1f(uLocs.uTime, (now - state.startTime) * 0.001);
+            gl.uniform1f(uLocs.uTime, REDUCED_MOTION ? 0 : (now - state.startTime) * 0.001);
             gl.uniform1f(uLocs.uSeed, (state.seed % 10000) * 0.1);
             gl.uniform1i(uLocs.uPalette, state.paletteIdx);
             gl.uniform1f(uLocs.uComplexity, state.complexity);
@@ -3754,11 +3844,20 @@ audioBtn.addEventListener("click", () => {
             gl.uniform1f(uLocs.uHurst, state.hurstH);
             gl.uniform2f(uLocs.uShoreAnchor, state.shoreAnchorX, state.shoreAnchorY);
             gl.uniform1f(uLocs.uColorDrift, state.colorDrift ? 1.0 : 0.0);
-            gl.uniform1f(uLocs.uBinaryGlitch, state.binaryDiscomfortGlitch);
+            gl.uniform1f(uLocs.uBinaryGlitch, REDUCED_MOTION ? 0 : state.binaryDiscomfortGlitch);
+            gl.uniform1f(uLocs.uBoundarySeed, boundarySeed());
+            gl.uniform1f(uLocs.uPrelude, state.zoomZ >= PRELUDE_START && state.zoomZ < HAT_START ? 1 : 0);
 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-            renderStage2EinsteinCanvas(state.zoomZ, now);
+            const showLegend = (state.zoomZ >= 180 && state.zoomZ < 335) ||
+                               (state.zoomZ >= 660 && state.zoomZ < 745);
+            document.getElementById('fieldLegend').style.display = showLegend && !state.zenMode ? 'block' : 'none';
+
+            const tileZ = state.zoomZ < HAT_START
+                ? (state.zoomZ < 300 ? -1 : state.zoomZ - 132)
+                : sceneZ(state.zoomZ);
+            renderStage2EinsteinCanvas(tileZ, now);
 
             updateHUDReadouts();
         requestAnimationFrame(renderLoop);
