@@ -84,6 +84,8 @@
             width: 100vw;
             height: 100vh;
             display: block;
+            /* Keep the browser from consuming pinch / drag gestures for page zoom */
+            touch-action: none;
         }
         #glCanvas {
             z-index: 1;
@@ -1821,26 +1823,37 @@
                 if (cortexReveal > 0.01) {
                     vec2 hp = crowdUV / 0.165;
                     float r = length(hp);
-                    float mask = smoothstep(1.05, 0.75, r);
+                    float mask = smoothstep(1.02, 0.74, r);
                     // Multi-resolution sulcal pattern (cortical D ≈ 2.73–2.79): broad primary
                     // folds (H=0.3), secondary gyri (H=0.5) and fine tertiary dimpling (H=0.7).
-                    float sulcalDepth = fbm(hp * 3.0, 0.3) * 0.5
-                                      + fbm(hp * 8.0, 0.5) * 0.3
-                                      + fbm(hp * 22.0, 0.7) * 0.2;
-                    float gyri = smoothstep(0.43, 0.55, sulcalDepth);
-                    // Primary sulci (longitudinal fissure + Sylvian lateral sulcus) are wider/deeper
-                    float fissure = smoothstep(0.045, 0.0, abs(hp.x));
-                    float sylvian = smoothstep(0.035, 0.0, abs(hp.y - 0.12 + hp.x * 0.30));
-                    float primarySulci = max(fissure, sylvian * 0.85);
-                    // Crown = warm, well-perfused pink-red; sulcal floor = paler grey-beige
-                    vec3 crownCol = vec3(0.90, 0.42, 0.47);
-                    vec3 floorCol = vec3(0.58, 0.50, 0.47);
-                    vec3 cortexCol = mix(floorCol, crownCol, gyri);
-                    cortexCol *= (1.0 - 0.60 * primarySulci);
-                    // Pial vessels: thin red threads coursing over the gyral crowns
-                    float pial = smoothstep(0.014, 0.0, abs(fbm(hp * 5.0 + 2.3, 0.55) - 0.5));
-                    cortexCol = mix(cortexCol, vec3(0.72, 0.10, 0.14), pial * gyri * 0.55);
-                    cortexCol += vec3(0.12) * pow(gyri, 4.0);
+                    float sulcalDepth = fbm(hp * 3.0, 0.3) * 0.50
+                                      + fbm(hp * 8.0, 0.5) * 0.30
+                                      + fbm(hp * 22.0, 0.7) * 0.20;
+                    // Primary sulci: longitudinal fissure + Sylvian lateral sulcus
+                    float fissure = smoothstep(0.050, 0.0, abs(hp.x));
+                    float sylvian = smoothstep(0.040, 0.0, abs(hp.y - 0.12 + hp.x * 0.30));
+                    float primarySulci = max(fissure, sylvian * 0.90);
+                    // Surface relief from the mid-frequency band → lit gyral crowns, shaded walls
+                    float reliefX = fbm((hp + vec2(0.035, 0.0)) * 8.0, 0.5) - fbm(hp * 8.0, 0.5);
+                    float reliefY = fbm((hp + vec2(0.0, 0.035)) * 8.0, 0.5) - fbm(hp * 8.0, 0.5);
+                    float relief  = clamp(0.52 - (reliefX * 2.0 + reliefY * 1.2) * 9.0, 0.0, 1.0);
+                    float gyri = smoothstep(0.40, 0.56, sulcalDepth + relief * 0.10);
+                    // Wet pia-arachnoid over desaturated pink-grey cortex; sulcal floors dark
+                    vec3 piaCol    = vec3(0.74, 0.60, 0.58);
+                    vec3 crownCol  = vec3(0.78, 0.46, 0.44);
+                    vec3 sulcusCol = vec3(0.30, 0.13, 0.14);
+                    vec3 cortexCol = mix(piaCol, crownCol, gyri * 0.75);
+                    cortexCol = mix(cortexCol, sulcusCol, (1.0 - gyri) * 0.65);
+                    cortexCol *= (1.0 - 0.55 * primarySulci);
+                    cortexCol *= 0.80 + 0.30 * relief;
+                    // Pia-arachnoid microvessels: fine dark-maroon threads over the crowns
+                    float pial = smoothstep(0.020, 0.0, abs(fbm(hp * 6.5 + 2.3, 0.5) - 0.5));
+                    cortexCol = mix(cortexCol, vec3(0.36, 0.05, 0.07), pial * gyri * 0.45);
+                    // Broad wet-membrane sheen (no neon rim)
+                    float wetSheen = smoothstep(0.55, 0.95, gyri) * (0.5 + 0.5 * relief);
+                    cortexCol += vec3(0.22, 0.16, 0.14) * wetSheen;
+                    // Darken toward the skull aperture so the brain sits inside the head
+                    cortexCol *= 0.55 + 0.45 * smoothstep(1.02, 0.70, r);
                     col = mix(col, cortexCol, cortexReveal * mask);
                 }
 
@@ -1849,63 +1862,76 @@
                 // Three neuron populations: pyramidal (apical dendrite), stellate, basket
                 float wBrain = smoothstep(822.0, 842.0, z);
                 if (wBrain > 0.01) {
-                    // Zoom smoothly as we go deeper into the neuropil
-                    float nScale = exp2(-mod((z - 830.0) * 0.07, 2.8)) * 5.2;
+                    // Smooth, non-repeating descent into the neuropil
+                    float nScale = 5.2 * exp2(-1.9 * clamp((z - 822.0) / 78.0, 0.0, 1.0));
                     vec2 np = uv * nScale;
+                    // Very slow tissue drift so the field never reads as a static texture
+                    np += vec2(sin(uTime * 0.05), cos(uTime * 0.04)) * 0.10;
 
-                    // ── IFS Dendrite Branching (abs-fold iterated function system) ──────
-                    // Each iteration halves the scale & mirrors: creates true binary tree geometry
-                    // This generates D ≈ 1.5–1.7 branching structure (matches measured dendritic D)
+                    // ── Background neuropil: warm, out-of-focus tissue ──────────────────
+                    float gRain = vnoise(np * 2.2 + uSeed);
+                    float grain = vnoise(np * 26.0);
+                    vec3 brainBg = mix(vec3(0.11, 0.055, 0.045), vec3(0.20, 0.11, 0.085), gRain);
+                    brainBg *= 0.88 + 0.24 * grain;
+
+                    // ── Dendritic arbor (IFS abs-fold, D ≈ 1.6) ─────────────────────────
                     float dendrite  = 0.0;
-                    float axonMask  = 0.0;
-                    vec2 dp = np;
-                    float dw = 0.018; // initial branch half-width
+                    float dendLight = 0.0;
+                    // Domain warp breaks the mechanically regular fold symmetry
+                    vec2 dp = np + (vec2(vnoise(np * 1.7), vnoise(np * 1.7 + 5.3)) - 0.5) * 0.45;
+                    float dw = 0.020;
 
                     for (int k = 0; k < 6; k++) {
                         float kf = float(k);
-                        // Fold symmetry: mirror about x and y to create bilateral branching
-                        dp = abs(dp) - vec2(0.38 - kf * 0.03, 0.22 - kf * 0.015);
-                        // Rotate 25° each generation (mimics dendritic tapering angle)
-                        float ca = cos(0.436); float sa = sin(0.436);
+                        dp = abs(dp) - vec2(0.40 - kf * 0.026, 0.24 - kf * 0.014);
+                        float ca = cos(0.40 + kf * 0.05); float sa = sin(0.40 + kf * 0.05);
                         dp = vec2(dp.x * ca - dp.y * sa, dp.x * sa + dp.y * ca);
-                        // SDF: distance to current branch segment (oriented capsule)
                         float seg = abs(dp.y) - dw;
-                        float fade = exp(-kf * 0.38);
-                        dendrite += smoothstep(0.004, 0.0, seg) * fade;
-                        // Action potential pulse travelling distally (brighter on even gens)
-                        float pulse = 0.5 + 0.5 * sin(dp.x * 12.0 - uTime * 5.5 + kf * 1.4);
-                        axonMask += smoothstep(0.004, 0.0, seg) * fade * pulse;
-                        dw *= 0.72; // taper: thinner at each branching order
+                        float fade = exp(-kf * 0.30);
+                        float m = smoothstep(0.006, 0.000, seg) * fade;
+                        dendrite += m;
+                        // Soft rim light on one side of each branch (reads as a cylinder)
+                        dendLight += smoothstep(0.010, 0.001, seg + dw * 0.55) * fade * 0.45;
+                        // Sparse action potentials: short warm sparks, not a sine wash
+                        float sparkCell = hash21(floor(dp * 2.3) + kf * 1.7);
+                        float spark = pow(max(0.0, sin(dp.x * 3.2 - uTime * 2.4 + sparkCell * 6.28)), 18.0);
+                        dendLight += m * spark * 0.9;
+                        dw *= 0.74;
                     }
+                    vec3 dendCol = mix(vec3(0.26, 0.15, 0.13), vec3(0.64, 0.46, 0.37),
+                                       clamp(dendLight, 0.0, 1.0));
 
-                    // ── Soma (cell body) — small bright dots at branch origins ────────────
-                    vec2 sg = fract(np * 0.42 + vec2(uSeed * 0.1, 0.0)) - 0.5;
-                    float soma = smoothstep(0.14, 0.04, length(sg));
+                    // ── Somata: pale amber cell bodies with darker nuclei ───────────────
+                    vec2 sg = fract(np * 0.30 + vec2(uSeed * 0.1, 0.0)) - 0.5;
+                    float somaR = 0.085 + 0.030 * hash21(floor(np * 0.30));
+                    float soma = smoothstep(somaR, somaR * 0.55, length(sg));
+                    float nucleus = smoothstep(somaR * 0.55, somaR * 0.20, length(sg + vec2(0.012, 0.010)));
 
-                    // ── Myelin sheath — bright white segments with dark nodes of Ranvier ──
-                    // Long axons run roughly vertically (cortical columns)
-                    float axonY  = abs(fract(np.x * 0.28) - 0.5) - 0.009;
-                    float myelin = smoothstep(0.003, 0.0, axonY);
-                    // Nodes of Ranvier: periodic gaps every ~1mm (scaled)
-                    float ranvier = step(0.5, fract(np.y * 0.55 + 0.25));
+                    // ── Myelinated axons: wavy bundles, quiet ivory (no blue grid) ────
+                    float axonWarp = vnoise(np * 0.9 + 9.1) - 0.5;
+                    float dAxon = abs(fract(np.x * 0.16 + axonWarp * 0.55) - 0.5) - 0.012;
+                    float myelin = smoothstep(0.006, 0.0, dAxon);
+                    // Nodes of Ranvier: irregular gaps, not a uniform comb
+                    float ranvier = smoothstep(0.35, 0.65, fract(np.y * 0.16 + vnoise(np * 0.6) * 0.8));
                     myelin *= ranvier;
 
-                    // ── Synaptic bouton flash ─────────────────────────────────────────────
-                    float bouton = smoothstep(0.08, 0.0, length(fract(np * 0.95 + uSeed * 0.07) - 0.5));
-                    float synapticFire = pow(0.5 + 0.5 * sin(length(np) * 8.0 - uTime * 6.5), 6.0);
-
-                    vec3 brainBg  = vec3(0.02, 0.04, 0.10);
-                    vec3 dendCol  = mix(vec3(0.08, 0.38, 0.72), vec3(0.35, 0.80, 1.00), axonMask);
-                    vec3 somaCol  = vec3(0.98, 0.78, 0.35);
-                    vec3 myelCol  = vec3(0.90, 0.95, 1.00);
-                    vec3 boutCol  = vec3(0.98, 0.95, 0.30) * synapticFire;
+                    // ── Synaptic boutons: sparse warm twinkles ──────────────────────────
+                    vec2 bCell = floor(np * 1.15);
+                    vec2 bF = fract(np * 1.15) - 0.5;
+                    vec2 bRnd = hash22(bCell + uSeed * 0.07);
+                    float bouton = smoothstep(0.10, 0.0, length(bF - (bRnd - 0.5) * 0.25));
+                    bouton *= pow(0.5 + 0.5 * sin(uTime * 2.2 + bRnd.x * 6.28), 12.0);
 
                     vec3 brainCol = brainBg;
-                    brainCol = mix(brainCol, dendCol,  clamp(dendrite * 0.90, 0.0, 1.0));
-                    brainCol = mix(brainCol, somaCol,  soma  * 1.2);
-                    brainCol = mix(brainCol, myelCol,  myelin * 0.80);
-                    brainCol += boutCol * bouton * 0.95;
+                    brainCol = mix(brainCol, vec3(0.30, 0.20, 0.16), clamp(dendrite * 0.85, 0.0, 1.0));
+                    brainCol = mix(brainCol, dendCol, clamp(dendrite * dendLight, 0.0, 1.0) * 0.80);
+                    brainCol = mix(brainCol, vec3(0.86, 0.72, 0.52), soma * 0.90);
+                    brainCol = mix(brainCol, vec3(0.30, 0.19, 0.13), nucleus * 0.55);
+                    brainCol = mix(brainCol, vec3(0.84, 0.80, 0.72), myelin * 0.35);
+                    brainCol += vec3(1.0, 0.72, 0.30) * bouton * 0.55;
 
+                    // Optical falloff into tissue depth + gentle vignette
+                    brainCol *= 0.85 + 0.15 * smoothstep(1.2, 0.2, length(uv));
                     col = mix(col, brainCol, wBrain);
                 }
 
@@ -1915,7 +1941,9 @@
             // Phase 15: Anatomical Dual Lung Lobes, Bronchial Airway Tree & Respiration Dynamics
             vec3 renderBronchialLungs(vec2 uv, float z) {
                 float tLungs = clamp((z - 900.0) / 65.0, 0.0, 1.0);
-                float zoomScale = exp2(-tLungs * 3.8);
+                // Gentler descent than the old 3.8 stops, so the lung view holds long
+                // enough to read before the camera reaches the hilum.
+                float zoomScale = exp2(-tLungs * 2.2);
                 vec2 p = uv * zoomScale;
 
                 // Rhythmic respiration tidal breathing cycle (~3.9s period)
@@ -1924,17 +1952,24 @@
                 float breathExpansion = 1.0 + 0.12 * breath;
                 vec2 bp = p / breathExpansion;
 
-                // Deep warm thoracic cavity background
-                vec3 col = vec3(0.04, 0.02, 0.03);
+                // Deep warm thoracic cavity: mediastinal shadow behind the lungs
+                vec3 col = mix(vec3(0.17, 0.10, 0.10), vec3(0.05, 0.025, 0.03),
+                               smoothstep(-0.55, 0.55, bp.y));
+                // Faint rib arcs catching the light on the chest wall
+                float ribArc = sin(bp.y * 15.0 + 0.55 * cos(bp.x * 4.0));
+                col += vec3(0.045, 0.030, 0.026) * smoothstep(0.55, 1.0, ribArc) * 0.35;
 
                 // 1. Bilateral Lung Parenchyma (Left & Right Lung Lobes)
+                float lungIn = 0.0;   // union of both lung masks, used to clip airways/vessels
                 for (int sIdx = 0; sIdx < 2; sIdx++) {
                     float s = (sIdx == 0) ? -1.0 : 1.0;
                     vec2 lungCenter = vec2(s * 0.36, -0.06 + 0.03 * breath);
                     vec2 lp = bp - lungCenter;
 
-                    // Asymmetric organic lung contour (3 lobes on right, 2 on left)
-                    float lobeD = length(lp * vec2(1.22, 0.88)) + 0.06 * sin(lp.y * 7.0 + s * 1.5);
+                    // Asymmetric organic lung contour (3 lobes on right, 2 on left),
+                    // with low-frequency wobble so the outline is not an ellipse
+                    float lobeD = length(lp * vec2(1.20, 0.86)) + 0.045 * sin(lp.y * 6.0 + s * 1.5)
+                                + (fbm(lp * 5.0 + s * 3.1, 0.60) - 0.5) * 0.06;
                     if (s < 0.0) {
                         // Cardiac notch for heart impression on left lung
                         float cNotch = exp(-length(bp - vec2(-0.11, -0.14)) * 12.0);
@@ -1942,18 +1977,29 @@
                     }
 
                     float lungMask = smoothstep(0.46, 0.38, lobeD);
+                    lungIn = max(lungIn, lungMask);
                     if (lungMask > 0.001) {
-                        // Spongy lung parenchyma tissue with microvascular network
-                        float sponge = vnoise(lp * 42.0) * 0.6 + vnoise(lp * 95.0 + uTime * 0.1) * 0.4;
-                        vec3 tissueCol = mix(vec3(0.48, 0.12, 0.18), vec3(0.86, 0.38, 0.44), sponge);
+                        // Spongy lung parenchyma: coarse lobules, fine acinar grain,
+                        // and a darker subpleural band where the tissue is compressed.
+                        float sponge = vnoise(lp * 38.0) * 0.45
+                                     + vnoise(lp * 92.0 + uTime * 0.08) * 0.30
+                                     + fbm(lp * 180.0, 0.85) * 0.25;
+                        vec3 tissueCol = mix(vec3(0.34, 0.10, 0.13), vec3(0.72, 0.30, 0.34), sponge);
+                        float subPleural = smoothstep(0.26, 0.44, lobeD) * (1.0 - smoothstep(0.44, 0.47, lobeD));
+                        tissueCol *= 1.0 - 0.30 * subPleural;
+                        // Thin glistening pleural edge (single soft highlight, no halo)
+                        tissueCol += vec3(0.40, 0.25, 0.26) * smoothstep(0.435, 0.465, lobeD) * 0.55;
 
-                        // Sub-surface scattering depth glow & pleural boundary highlight
-                        float pleuraRim = smoothstep(0.36, 0.45, lobeD) * (1.0 - smoothstep(0.45, 0.48, lobeD));
-                        tissueCol += vec3(0.96, 0.72, 0.78) * pleuraRim * 1.3;
+                        // Interlobar fissures: shadowed crease with a faint lit lip
+                        float fisLine = lp.y - (0.08 - s * 0.04) + lp.x * 0.25;
+                        float fissure = smoothstep(0.012, 0.0, abs(fisLine));
+                        float fisShadow = smoothstep(0.030, 0.0, abs(fisLine + 0.014));
+                        tissueCol *= (1.0 - fisShadow * 0.45);
+                        tissueCol += vec3(0.30, 0.18, 0.19) * fissure * 0.60;
 
-                        // Interlobar fissures separating pulmonary lobes
-                        float fissure = smoothstep(0.015, 0.0, abs(lp.y - (0.08 - s * 0.04) + lp.x * 0.25));
-                        tissueCol *= (1.0 - fissure * 0.55);
+                        // Fine distal airways / microvessels marbling the parenchyma
+                        float mottle = smoothstep(0.050, 0.0, abs(fbm(lp * 24.0 + s * 4.0, 0.55) - 0.5));
+                        tissueCol = mix(tissueCol, vec3(0.42, 0.14, 0.16), mottle * 0.25);
 
                         col = mix(col, tissueCol, lungMask);
                     }
@@ -1972,11 +2018,13 @@
                         float ringPhase = cos(trY * 110.0);
                         float cRing = smoothstep(0.1, 0.7, ringPhase) * (1.0 - dTr / trR);
 
-                        vec3 airwayWallCol = mix(vec3(0.72, 0.62, 0.68), vec3(0.92, 0.88, 0.94), cRing) * trLight;
-                        airwayWallCol = mix(airwayWallCol, vec3(0.55, 0.22, 0.28), smoothstep(0.3, -0.4, ringPhase) * 0.5);
+                        float dl = dTr / trR;
+                        vec3 airwayWallCol = mix(vec3(0.60, 0.30, 0.34), vec3(0.78, 0.52, 0.54), cRing) * trLight;
+                        airwayWallCol *= 0.45 + 0.55 * smoothstep(0.30, 1.0, dl); // shaded lumen
+                        airwayWallCol = mix(airwayWallCol, vec3(0.78, 0.70, 0.72), cRing * 0.25);
 
                         float spec = pow(max(0.0, trNormZ * 0.9 + 0.1), 16.0);
-                        airwayWallCol += vec3(0.8, 0.9, 1.0) * spec * 0.6;
+                        airwayWallCol += vec3(0.50, 0.42, 0.44) * spec * 0.25;
 
                         col = mix(col, airwayWallCol, smoothstep(trR, trR - 0.006, dTr));
                     }
@@ -1996,68 +2044,84 @@
                         float brLight = 0.35 + 0.65 * brNormZ;
                         float brRings = cos(proj * 140.0);
                         float brRingHi = smoothstep(0.1, 0.7, brRings) * (1.0 - dBr / brR);
-                        vec3 brCol = mix(vec3(0.70, 0.58, 0.65), vec3(0.90, 0.85, 0.92), brRingHi) * brLight;
+                        vec3 brCol = mix(vec3(0.56, 0.34, 0.38), vec3(0.74, 0.55, 0.57), brRingHi) * brLight;
                         col = mix(col, brCol, smoothstep(brR, brR - 0.005, dBr));
                     }
                 }
 
-                // 4. Fractal Bronchial Tree & Vasculature
-                //    Murray's Law: r³_parent = r³_child1 + r³_child2  →  ratio = 2^(-1/3) ≈ 0.794 per bifurcation
-                //    Weibel model: ~23 generations; we render 7 (generations 5-11, mid-lung territory)
-                //    Branching angles: major daughter ~35°, minor daughter ~25° (Horsfield asymmetry)
-                vec2 treeP = p * 1.8;
-                float branchAccum = 0.0;
-                float artAccum   = 0.0;
-                float veinAccum  = 0.0;
-                vec2 tp    = treeP;
-                float tubeW = 0.058; // initial radius (lobar bronchi scale)
+                // 4. Bilateral bronchial arbor rooted at the carina.
+                //    Continuous tree geometry instead of a folded repeating cell field, so no
+                //    disconnected tube fragments float in the mediastinum. Murray's Law taper
+                //    (r_child = r_parent · 2^(-1/3) ≈ 0.794) and alternating 35°/25° branch
+                //    angles, with a pulmonary artery and vein paired on either side.
+                float bronSDF = 1e9;
+                float artSDF  = 1e9;
+                float veinSDF = 1e9;
+                float bronGen = 0.0;
 
-                for (int i = 0; i < 7; i++) {
-                    float fi = float(i);
-                    // Asymmetric branching: alternate left/right rotation angles (35°/25° Horsfield)
-                    float majAngle = 0.610;  // 35° in radians
-                    float minAngle = 0.436;  // 25° in radians
-                    float cM = cos(majAngle); float sM = sin(majAngle);
-                    float cm = cos(minAngle); float sm = sin(minAngle);
+                for (int side = 0; side < 2; side++) {
+                    float s = (side == 0) ? -1.0 : 1.0;
+                    vec2 hilum = vec2(s * 0.145, 0.12);
 
-                    // Fold into two alternating branch directions
-                    vec2 tp2 = abs(tp * 1.60) - vec2(0.22, 0.14);
-                    // Apply alternating rotation: even gens use major angle, odd use minor
-                    if (mod(fi, 2.0) < 1.0) {
-                        tp2 = vec2(tp2.x * cM - tp2.y * sM, tp2.x * sM + tp2.y * cM);
-                    } else {
-                        tp2 = vec2(tp2.x * cm - tp2.y * sm, tp2.x * sm + tp2.y * cm);
+                    // Main bronchus: carina → hilum
+                    vec2 mpa = p - vec2(0.0, 0.18);
+                    vec2 mba = hilum - vec2(0.0, 0.18);
+                    float mt = clamp(dot(mpa, mba) / max(dot(mba, mba), 1e-5), 0.0, 1.0);
+                    float dMain = length(mpa - mba * mt) - 0.046;
+                    if (dMain < bronSDF) { bronSDF = dMain; bronGen = 0.0; }
+
+                    // Five lobar/segmental branches fanning down and outward per side
+                    for (int b = 0; b < 5; b++) {
+                        float fb = float(b);
+                        float ang = 0.30 + fb * 0.32 + 0.10 * hash21(vec2(s, fb));
+                        vec2 d = vec2(s * cos(ang), -sin(ang));
+                        vec2 pos = hilum;
+                        float len = 0.25 - fb * 0.018;
+                        float rad = 0.028;
+
+                        for (int g = 0; g < 4; g++) {
+                            vec2 nxt = pos + d * len;
+                            vec2 pa2 = p - pos;
+                            vec2 ba2 = nxt - pos;
+                            float t2 = clamp(dot(pa2, ba2) / max(dot(ba2, ba2), 1e-5), 0.0, 1.0);
+                            vec2 perp2 = pa2 - ba2 * t2;
+                            float dd = length(perp2) - rad;
+
+                            if (dd < bronSDF) { bronSDF = dd; bronGen = 1.0 + float(g); }
+
+                            // Vessels run alongside the airway, on opposite sides
+                            vec2 nrm = normalize(vec2(-ba2.y, ba2.x) + vec2(1e-5, 0.0));
+                            float vOff = rad * 1.5;
+                            artSDF  = min(artSDF,  length(perp2 - nrm * vOff) - rad * 0.40);
+                            veinSDF = min(veinSDF, length(perp2 + nrm * vOff) - rad * 0.40);
+
+                            pos = nxt;
+                            float turn = (mod(fb + float(g), 2.0) < 1.0 ? 0.30 : 0.19) * s;
+                            float ca = cos(turn), sa = sin(turn);
+                            d = vec2(d.x * ca - d.y * sa, d.x * sa + d.y * ca);
+                            len *= 0.74;
+                            rad *= 0.794; // Murray's Law
+                        }
                     }
-                    tp = tp2;
-
-                    vec2 cell = fract(tp * 1.3) - 0.5;
-                    // Tube SDF: oriented segment in the branching direction
-                    float dSeg = abs(cell.x * 0.88 + cell.y * 0.47) - tubeW;
-                    float fade = exp(-fi * 0.32); // less aggressive fade — deeper gens still visible
-                    float segMask = smoothstep(0.006, 0.0, dSeg) * fade;
-                    branchAccum += segMask;
-
-                    // Paired pulmonary artery (deoxygenated, blue-violet) rides alongside airway
-                    float dArt  = abs(cell.x * 0.88 + cell.y * 0.47 + tubeW * 0.95) - tubeW * 0.52;
-                    artAccum  += smoothstep(0.005, 0.0, dArt) * fade;
-
-                    // Paired pulmonary vein (oxygenated, red) on opposite side
-                    float dVein = abs(cell.x * 0.88 + cell.y * 0.47 - tubeW * 0.95) - tubeW * 0.52;
-                    veinAccum += smoothstep(0.005, 0.0, dVein) * fade;
-
-                    // Murray's Law radius reduction: r_child = r_parent * 2^(-1/3) ≈ 0.794
-                    tubeW *= 0.794;
                 }
 
-                // Cartilage-ringed bronchial wall colour (pearl-pink connective tissue)
-                vec3 branchCol = vec3(0.86, 0.78, 0.84);
-                // Visible cartilage rings on larger bronchi (first 3 generations)
-                float bronchRing = smoothstep(0.012, 0.0, mod(length(tp) * 0.18, 0.045) - 0.022);
-                branchCol = mix(branchCol, vec3(0.96, 0.92, 0.95), bronchRing * 0.5);
+                // Everything is clipped to the lung fields: nothing may float in the
+                // mediastinum or over the chest wall.
+                float lungGate = smoothstep(0.0, 0.10, lungIn);
+                float bronchial = smoothstep(0.006, 0.0, bronSDF) * lungGate;
+                float artery    = smoothstep(0.005, 0.0, artSDF)  * lungGate;
+                float vein      = smoothstep(0.005, 0.0, veinSDF) * lungGate;
 
-                col = mix(col, branchCol,         clamp(branchAccum * 0.90, 0.0, 1.0));
-                col = mix(col, vec3(0.18, 0.22, 0.90), clamp(artAccum  * 0.80, 0.0, 1.0));
-                col = mix(col, vec3(0.95, 0.10, 0.15), clamp(veinAccum * 0.80, 0.0, 1.0));
+                // Airway wall: pink connective tissue, paler with each generation;
+                // cartilage banding only on the proximal generations.
+                float bronTone = smoothstep(0.0, 4.0, bronGen);
+                vec3 bronCol = mix(vec3(0.72, 0.52, 0.52), vec3(0.82, 0.68, 0.66), bronTone);
+                float band = 0.5 + 0.5 * sin((p.x + p.y) * 95.0 + bronGen * 2.0);
+                bronCol *= 0.90 + 0.10 * band * smoothstep(2.0, 0.0, bronGen);
+
+                col = mix(col, bronCol,                 bronchial * 0.82);
+                col = mix(col, vec3(0.24, 0.26, 0.50),  artery * 0.52);
+                col = mix(col, vec3(0.55, 0.14, 0.17),  vein * 0.52);
 
                 // 5. Dynamic Inhaled Airflow & Oxygen Gas Wisps (How Lungs Work!)
                 float airVelocity = 6.5;
@@ -2067,12 +2131,12 @@
                 float inhaleIntensity = smoothstep(-0.2, 0.8, sin(breathPhase));
 
                 if (abs(trX) < trR && trY >= 0.18 && trY <= 0.58) {
-                    vec3 airFlowCol = mix(vec3(0.35, 0.85, 1.0), vec3(0.95, 1.0, 1.0), airStream);
-                    col += airFlowCol * airStream * inhaleIntensity * 0.95;
+                    vec3 airFlowCol = mix(vec3(0.45, 0.62, 0.68), vec3(0.80, 0.86, 0.86), airStream);
+                    col += airFlowCol * airStream * inhaleIntensity * 0.22;
                 }
                 float o2Part = vnoise(p * 28.0 + vec2(0.0, uTime * 4.0));
-                float o2Glow = pow(smoothstep(0.65, 0.92, o2Part), 3.0);
-                col += vec3(0.30, 0.85, 1.0) * o2Glow * inhaleIntensity * 0.75;
+                float o2Glow = pow(smoothstep(0.72, 0.95, o2Part), 4.0);
+                col += vec3(0.30, 0.62, 0.68) * o2Glow * inhaleIntensity * 0.24 * smoothstep(0.0, 0.10, lungIn);
 
                 return col;
             }
@@ -2080,8 +2144,11 @@
             // Phase 16: Microscopic 3D Alveoli Sac Clusters, Breathing Inflation & Capillary Gas Exchange
             vec3 renderRealisticAlveoli(vec2 uv, float z) {
                 float tAlv = clamp((z - 965.0) / 60.0, 0.0, 1.0);
-                float aScale = exp2(-mod(tAlv * 3.6, 3.0)) * 5.8;
+                // Single monotonic zoom that settles. Starts close to the calibre of the
+                // terminal bronchioles we just left, then swells into a true sac close-up.
+                float aScale = mix(4.2, 2.6, smoothstep(0.0, 1.0, tAlv));
                 vec2 ap = uv * aScale;
+                ap += vec2(sin(uTime * 0.045), cos(uTime * 0.037)) * 0.08;
 
                 // Rhythmic respiration tidal breathing (~3.9s period)
                 float breathPhase = uTime * 1.6;
@@ -2138,19 +2205,21 @@
                 float septum = max(0.0, secondDist - minDist);
                 float creviceAO = smoothstep(0.0, 0.18, septum);
 
-                // Base alveolar membrane color (stretches & thins on inhale)
-                vec3 membraneCol = mix(vec3(0.52, 0.14, 0.20), vec3(0.92, 0.54, 0.62), (1.0 - rNorm * 0.6));
-                membraneCol = mix(membraneCol, vec3(0.98, 0.72, 0.78), breath * 0.35);
+                // Thin translucent respiratory membrane stretched over the capillary bed.
+                // Colour varies with the underlying wall tissue, not with a breathing pulse.
+                float wallTex = fbm(bestOffset * 9.0 + bestId * 3.0, 0.70);
+                vec3 membraneCol = mix(vec3(0.42, 0.13, 0.15), vec3(0.78, 0.40, 0.42),
+                                       0.45 + 0.55 * wallTex);
+                vec3 col = membraneCol * (0.30 + 0.70 * diff) * creviceAO;
+                // Subsurface scattering: light bleeds through the thin wall at grazing angles
+                col += vec3(0.80, 0.30, 0.26) * pow(1.0 - normZ, 2.2) * 0.30;
+                // Broad wet specular (single soft lobe), not a pinpoint highlight
+                col += vec3(0.95, 0.86, 0.84) * spec * 0.45;
 
-                vec3 col = membraneCol * (0.35 + 0.65 * diff) * creviceAO;
-                col += vec3(1.0, 0.95, 0.98) * spec * (0.75 + 0.25 * breath);
-                col += vec3(0.95, 0.55, 0.65) * fresnel * 0.85;
-
-                // Bright septal rims with darker cell interiors — the alveolar walls read
-                // as polyhedral septae rather than the edges of overlapping spheres.
-                float septaRim = smoothstep(0.055, 0.015, septum);
-                col = mix(col, vec3(0.95, 0.76, 0.78), septaRim * 0.55);
-                col *= mix(1.0, 0.86, smoothstep(0.02, 0.16, septum));
+                // Septal walls: thin pale rims, deep occlusion in the fold between sacs
+                float septaRim = smoothstep(0.030, 0.006, septum);
+                col = mix(col, vec3(0.78, 0.56, 0.54), septaRim * 0.38);
+                col *= mix(0.70, 1.0, smoothstep(0.0, 0.22, septum));
 
                 // 2. Voronoi-edge capillary mesh (irregular web, D≈1.5 in 2D section)
                 // Real alveolar capillaries follow Voronoi-like septa, NOT a trig grid
@@ -2171,7 +2240,7 @@
                 }
                 // Voronoi edge = thin band where minD ≈ min2D (equidistant from two cells)
                 float capEdgeD  = capMin2D - capMinD; // → 0 at Voronoi edge
-                float isCapillary = smoothstep(0.10, 0.0, capEdgeD);
+                float isCapillary = smoothstep(0.055, 0.0, capEdgeD);
 
                 // 3. Micro-Circulation: RBCs travelling along Voronoi edge capillaries
                 // Blood converts from deoxygenated (blue-purple) to oxygenated (scarlet)
@@ -2179,15 +2248,15 @@
                 float capFlow   = fract(capMinD * 3.8 + uTime * 0.42 + bestId * 2.1);
                 float rbcCell   = pow(0.5 + 0.5 * sin(capFlow * 22.0 - uTime * 11.0), 4.0);
 
-                vec3 deoxBlood = vec3(0.24, 0.03, 0.16);
-                vec3 oxBlood   = vec3(0.98, 0.07, 0.12);
+                vec3 deoxBlood = vec3(0.20, 0.04, 0.12);
+                vec3 oxBlood   = vec3(0.72, 0.09, 0.11);
                 // Exchange progress: blood entering the capillary bed is deox, leaving is ox
                 float exchProg  = smoothstep(0.1, 0.9, fract(capMinD * 1.6 + bestId));
                 vec3 bloodCol   = mix(deoxBlood, oxBlood, exchProg);
 
                 if (isCapillary > 0.01) {
-                    vec3 capCol = mix(bloodCol * 0.65, bloodCol * 1.4, rbcCell);
-                    col = mix(col, capCol, isCapillary * (0.80 + 0.20 * normZ));
+                    vec3 capCol = mix(bloodCol * 0.78, bloodCol * 1.15, rbcCell);
+                    col = mix(col, capCol, isCapillary * (0.50 + 0.20 * normZ));
                 }
 
                 // 4. O₂ diffusion LOCALISED to thin inter-alveolar septa
@@ -2195,19 +2264,14 @@
                 // → show O2 flux only where capEdgeD is very small (membrane zone)
                 float septumThin = smoothstep(0.08, 0.0, capEdgeD); // at the septum boundary
                 float o2Noise    = vnoise(bestOffset * 42.0 + vec2(0.0, uTime * 3.2));
-                float o2Flux     = pow(smoothstep(0.62, 0.90, o2Noise), 3.5) * septumThin;
+                float o2Flux     = pow(smoothstep(0.70, 0.93, o2Noise), 5.0) * septumThin;
                 float o2Intensity = (0.55 + 0.45 * breath);
-                // O₂ glow: cyan-white, only at septa (not randomly over whole sac)
-                col += vec3(0.30, 0.90, 1.00) * o2Flux * o2Intensity * 1.40;
+                // O₂ flux: faint cyan-white cross-fade, only across the respiratory membrane
+                col += vec3(0.30, 0.78, 0.85) * o2Flux * o2Intensity * 0.45;
 
-                // Surfactant iridescent sheen on the air-facing dome (reduces surface tension)
-                // Thin-film interference → rainbow shimmer, strongest at dome apex (normZ high)
-                float sheen = pow(normZ, 3.5) * (0.4 + 0.6 * breath);
-                float iridPhase = normZ * 6.28 + bestId * 3.14;
-                vec3 iridCol = vec3(0.5 + 0.5 * sin(iridPhase),
-                                   0.5 + 0.5 * sin(iridPhase + 2.094),
-                                   0.5 + 0.5 * sin(iridPhase + 4.189));
-                col = mix(col, iridCol * 1.1, sheen * 0.18);
+                // Surfactant film: a soft, desaturated wet sheen at the dome apex.
+                // (No rainbow thin-film iridescence — real surfactant is optically clear.)
+                col += vec3(0.55, 0.38, 0.36) * pow(normZ, 2.2) * 0.07;
 
                 // 5. Pores of Kohn (Inter-alveolar collateral ventilation pores)
                 vec2 poreCenter = (hash22(vec2(bestId, 4.39)) - 0.5) * bestRadius * 0.7;
@@ -2216,8 +2280,13 @@
                 if (dPore < poreR) {
                     float poreRim = smoothstep(poreR, poreR - 0.012, dPore);
                     vec3 poreLumenCol = vec3(0.12, 0.03, 0.06);
-                    col = mix(col, poreLumenCol, poreRim * 0.85);
+                    col = mix(col, poreLumenCol, poreRim * 0.60);
                 }
+
+                // Optical grain, depth recession for farther sacs, and a soft field vignette
+                col *= 0.94 + 0.12 * fbm(ap * 30.0, 0.80);
+                col = mix(col, vec3(0.10, 0.035, 0.045), smoothstep(0.0, 0.55, bestId) * 0.18);
+                col *= 1.0 - 0.28 * smoothstep(0.35, 1.05, length(uv));
 
                 return col;
             }
@@ -2534,23 +2603,32 @@
                 // Close-up Beach Crowd, Central Hero Head & Cortex (z = 718..905)
                 if (z < 905.0) {
                     vec3 cCol = renderCrowdHeadAndBrain(uv, z);
-                    // Smooth cross-dissolve from cerebral connectome down into the thoracic lungs
-                    if (z > 885.0) {
-                        float wLungs = smoothstep(885.0, 905.0, z);
+                    // Smooth dive from the cerebral connectome into the thoracic cavity.
+                    // Passing through a warm veil at the midpoint hides the change in
+                    // spatial scale, so it reads as moving through tissue, not a cut.
+                    if (z > 878.0) {
+                        float wLungs = smoothstep(878.0, 910.0, z);
                         vec3 lCol = renderBronchialLungs(uv, z);
-                        return mix(cCol, lCol, wLungs);
+                        float veil = sin(wLungs * PI);
+                        vec3 mixed = mix(cCol, lCol, wLungs);
+                        mixed = mix(mixed, vec3(0.14, 0.05, 0.045), veil * 0.55);
+                        return mixed;
                     }
                     return cCol;
                 }
 
-                // Phase 15: Anatomical Dual Lung Lobes & Bronchial Airway Tree (z = 905..965)
-                if (z < 965.0) {
+                // Phase 15: Anatomical Dual Lung Lobes & Bronchial Airway Tree (z = 905..972)
+                if (z < 972.0) {
                     vec3 lCol = renderBronchialLungs(uv, z);
-                    // Smooth zoom from terminal bronchiole down into 3D Alveoli Sac Clusters
-                    if (z > 952.0) {
-                        float wAlv = smoothstep(952.0, 965.0, z);
+                    // Terminal bronchiole opening into the acinus: longer dissolve with a
+                    // paler tissue veil so the change of scale never snaps.
+                    if (z > 946.0) {
+                        float wAlv = smoothstep(946.0, 972.0, z);
                         vec3 alvCol = renderRealisticAlveoli(uv, z);
-                        return mix(lCol, alvCol, wAlv);
+                        float veil = sin(wAlv * PI);
+                        vec3 mixed = mix(lCol, alvCol, wAlv);
+                        mixed = mix(mixed, vec3(0.30, 0.12, 0.11), veil * 0.45);
+                        return mixed;
                     }
                     return lCol;
                 }
@@ -3125,6 +3203,8 @@
 
         function setCruiseSpeed(spd) {
             state.cruiseSpeed = parseFloat(spd);
+            // The Stage I score is Bach's Cello Suite No. 1 Prelude; each speed has its own loop length.
+            if (typeof morphAudio !== 'undefined') morphAudio.setSpeedPreset(state.cruiseSpeed);
             const map = { 0.5: 'spd05', 1.0: 'spd10', 2.0: 'spd20', 4.0: 'spd40' };
             Object.entries(map).forEach(([k, id]) => {
                 const el = document.getElementById(id);
@@ -3279,26 +3359,89 @@
             document.getElementById('copyConfirm').textContent = 'Copied ' + activeFlyKey + ' to clipboard!';
         }
 
-        // Mouse Wheel, Drag, Zen Wakeup & Keyboard Input
+        // Mouse Wheel, Trackpad Pinch, Touch Gestures, Drag, Zen Wakeup & Keyboard Input
+        const Z_PER_PINCH_OCTAVE = 260.0;   // zoom units per doubling of finger spread
+
         window.addEventListener('wheel', (e) => {
-            if (e.target.closest('#flyModal')) return;
-            const delta = Math.sign(e.deltaY) * 3.8;
+            if (e.target && e.target.closest && e.target.closest('#flyModal')) return;
+            // A trackpad pinch arrives as a wheel event with ctrlKey set. Treat it as
+            // an analogue gesture and suppress the browser's own page zoom.
+            let delta;
+            if (e.ctrlKey) {
+                e.preventDefault();
+                delta = -e.deltaY * 0.5;
+            } else {
+                // Mouse wheels report ~100 per notch, trackpads much smaller values.
+                const notch = Math.max(-1, Math.min(1, e.deltaY / 100));
+                delta = notch * 3.8;
+            }
             state.targetZoomZ = Math.max(0, Math.min(TOTAL_Z, state.targetZoomZ + delta));
             if (state.zenMode) scheduleZenControlAutoHide();
             // Audio: user is actively scrolling → play with idle timer
             morphAudio.notifyActivity(window.currentMorphPhase || 1, false);
-        }, { passive: true });
+        }, { passive: false });
+
+        // Safari reports trackpad pinch as gesture events; block its page zoom too.
+        ['gesturestart', 'gesturechange', 'gestureend'].forEach(type =>
+            document.addEventListener(type, (e) => e.preventDefault(), { passive: false }));
 
         let isDragging = false, lastX = 0, lastY = 0, downTime = 0;
+        const activePointers = new Map();
+        let pinch = null;
+
+        const pinchMetrics = () => {
+            if (activePointers.size < 2) return null;
+            const pts = Array.from(activePointers.values());
+            const [a, b] = pts;
+            return {
+                dist: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+                midX: (a.x + b.x) / 2,
+                midY: (a.y + b.y) / 2,
+            };
+        };
+
+        const startPinch = () => {
+            const m = pinchMetrics();
+            if (!m) return;
+            pinch = { dist: m.dist, midX: m.midX, midY: m.midY, zoom: state.targetZoomZ };
+            isDragging = false;
+        };
+
         glCanvas.addEventListener('pointerdown', (e) => {
-            isDragging = true;
-            lastX = e.clientX;
-            lastY = e.clientY;
-            downTime = performance.now();
+            activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+            if (activePointers.size >= 2) {
+                startPinch();
+            } else {
+                isDragging = true;
+                lastX = e.clientX;
+                lastY = e.clientY;
+                downTime = performance.now();
+            }
             if (state.zenMode) scheduleZenControlAutoHide();
         });
         window.addEventListener('pointermove', (e) => {
             if (state.zenMode) scheduleZenControlAutoHide();
+            if (activePointers.has(e.pointerId)) {
+                activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+            }
+
+            // Two fingers: pinch to zoom (log-distance, so in/out are symmetric)
+            // and drag the midpoint to pan.
+            if (activePointers.size >= 2) {
+                const m = pinchMetrics();
+                if (!m) return;
+                if (!pinch) startPinch();
+                const ratio = Math.log2(m.dist / pinch.dist);
+                state.targetZoomZ = Math.max(0, Math.min(TOTAL_Z,
+                    pinch.zoom + ratio * Z_PER_PINCH_OCTAVE));
+                state.targetPanX -= ((m.midX - pinch.midX) / window.innerWidth) * 1.5;
+                state.targetPanY += ((m.midY - pinch.midY) / window.innerHeight) * 1.5;
+                pinch.midX = m.midX;
+                pinch.midY = m.midY;
+                morphAudio.notifyActivity(window.currentMorphPhase || 1, false);
+                return;
+            }
+
             if (!isDragging) return;
             const dx = (e.clientX - lastX) / window.innerWidth;
             const dy = (e.clientY - lastY) / window.innerHeight;
@@ -3309,12 +3452,24 @@
             // Audio: user is actively dragging/panning → play with idle timer
             morphAudio.notifyActivity(window.currentMorphPhase || 1, false);
         });
-        window.addEventListener('pointerup', () => {
-            if (isDragging && state.zenMode && (performance.now() - downTime < 220)) {
-                scheduleZenControlAutoHide();
+        const endPointer = (e) => {
+            activePointers.delete(e.pointerId);
+            if (activePointers.size < 2) pinch = null;
+            if (activePointers.size === 0) {
+                if (isDragging && state.zenMode && (performance.now() - downTime < 220)) {
+                    scheduleZenControlAutoHide();
+                }
+                isDragging = false;
+            } else if (!pinch) {
+                // One finger lifted from a pinch: resume dragging from the other one.
+                const p = activePointers.values().next().value;
+                lastX = p.x;
+                lastY = p.y;
+                isDragging = true;
             }
-            isDragging = false;
-        });
+        };
+        window.addEventListener('pointerup', endPointer);
+        window.addEventListener('pointercancel', endPointer);
 
         window.addEventListener('keydown', (e) => {
             if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
@@ -3350,10 +3505,10 @@
 // label:     human-readable note for tuning — edit me!
 const PHASE_AUDIO_CUES = {
   //  id  What you see                             Track          Seek-to (jump)   Note
-  1:  { track: "seaWaves",    cuePoint:  0,    label: "Sierpinski 2D — open cosmos" },
-  2:  { track: "seaWaves",    cuePoint:  5.4,  label: "Pyramid 3D — continue seamlessly" },
-  3:  { track: "seaWaves",    cuePoint: 11.5,  label: "Menger Sponge" },
-  4:  { track: "seaWaves",    cuePoint: 17.7,  label: "Mandelbulb" },
+  1:  { track: "bachCello",  cuePoint:  0,    label: "Sierpinski 2D — Bach Prelude, organ (whole 42-bar loop)" },
+  2:  { track: "bachCello",  cuePoint:  6.86, label: "Pyramid 3D — Bach Prelude continues" },
+  3:  { track: "bachCello",  cuePoint: 13.71, label: "Menger Sponge — Bach Prelude, later phrase" },
+  4:  { track: "bachCello",  cuePoint: 20.57, label: "Mandelbulb — Bach Prelude, closing phrase" },
   5:  { track: "bladeSlice",  cuePoint:  0,    label: "Facet Plane — blade intro CUT HERE" },
   6:  { track: "bladeSlice",  cuePoint: 15.0,  label: "Einstein Hat 0/1 — aperiodic edge" },
   7:  { track: "bladeSlice",  cuePoint: 30.0,  label: "3D Hat Slab — geometric tension" },
@@ -3373,6 +3528,13 @@ const PHASE_AUDIO_CONFIG = {
   masterVolume:  0.75,
   manualIdleSec: 2.0,   // seconds of scroll/pan inactivity before audio fades out
   tracks: {
+    // "bachCello" is a virtual key: it resolves to bachCello05/10/20/40 by zoom
+    // speed, each rendered as a bar-aligned seamless organ loop of the Prelude
+    // from Bach's Cello Suite No. 1 (BWV 1007).
+    bachCello05: "/sounds/outputs/bach_cello_prelude_organ_slow_144.0s.ogg",
+    bachCello10: "/sounds/outputs/bach_cello_prelude_organ_1x_109.7s.ogg",
+    bachCello20: "/sounds/outputs/bach_cello_prelude_organ_2x_54.9s.ogg",
+    bachCello40: "/sounds/outputs/bach_cello_prelude_organ_4x_27.4s.ogg",
     seaWaves:    "/sounds/outputs/morph_881293__oolita__sea-waves-los-escullos_fast_50.0s.wav",
     bladeSlice:  "/sounds/outputs/morph_209073__lukesharples__blade-slice2_fast_70.0s.wav",
     streetOrgan: "/sounds/outputs/morph_881518__klankbeeld__street-organ-vegetable-market-markt-s-hertogenbosch-nertherlands-1040-am-261121_00071_fast_138.0s.wav",
@@ -3391,6 +3553,32 @@ class MorphAudioEngine {
     this.wanted      = false;
     this._idleTimer  = null;
     this._lastPhaseId = null;
+    this.speedKey    = "10";   // 0.5x / 1x / 2x / 4x → bachCello05 / 10 / 20 / 40
+  }
+
+  // ── Resolve virtual track names (speed-dependent Bach Prelude variants) ────
+  _resolveTrack(name) {
+    return name === "bachCello" ? "bachCello" + this.speedKey : name;
+  }
+
+  // ── Zoom speed picks which Bach Prelude loop length plays ───────────────────
+  setSpeedPreset(speed) {
+    const key = speed <= 0.5 ? "05" : speed <= 1.0 ? "10" : speed <= 2.0 ? "20" : "40";
+    if (key === this.speedKey) return;
+    this.speedKey = key;
+    if (!this.playing) return;
+    if (!this.activeTrack || !this.activeTrack.startsWith("bachCello")) return;
+
+    // All loops are bar-aligned, so keep the same absolute musical position
+    // when swapping lengths (modulo the new duration).
+    const outgoing = this.nodes[this.activeTrack];
+    const incoming = this.nodes[this._resolveTrack("bachCello")];
+    if (outgoing && incoming) {
+      const dur = incoming.audioEl.duration;
+      const pos = outgoing.audioEl.currentTime || 0;
+      incoming.audioEl.currentTime = Number.isFinite(dur) && dur > 0 ? pos % dur : 0;
+    }
+    this.updatePhase(this._lastPhaseId, true, false, false);
   }
 
   // ── Lazy AudioContext init (must happen inside a user-gesture handler) ──────
@@ -3448,8 +3636,9 @@ class MorphAudioEngine {
   //    Seeks the target track to its cue point so the right musical moment plays.
   seekToPhase(phaseId) {
     const cue = this.cues[phaseId] || this.cues[1];
-    if (cue.cuePoint !== null && this.nodes[cue.track]) {
-      this.nodes[cue.track].audioEl.currentTime = cue.cuePoint;
+    const targetTrack = this._resolveTrack(cue.track);
+    if (cue.cuePoint !== null && this.nodes[targetTrack]) {
+      this.nodes[targetTrack].audioEl.currentTime = cue.cuePoint;
     }
     if (this.playing) this.updatePhase(phaseId, true, true);
   }
@@ -3459,11 +3648,11 @@ class MorphAudioEngine {
 
   // ── Called every frame from updateHUDReadouts ─────────────────────────────
   //    isJump=true means the user clicked a phase button (cuePoint seek applies)
-  updatePhase(phaseId, force = false, isJump = false) {
+  updatePhase(phaseId, force = false, isJump = false, seekCue = true) {
     if (!this.playing || !this.ctx) return;
 
     const cue = this.cues[phaseId] || this.cues[1];
-    const targetTrack   = cue.track;
+    const targetTrack   = this._resolveTrack(cue.track);
     const isTrackChange = targetTrack !== this.activeTrack;
 
     // Skip if nothing changed
@@ -3475,7 +3664,7 @@ class MorphAudioEngine {
     // Seek the incoming track when:
     //  • it's a different track (always seek so we start at a musical moment)
     //  • OR it's the same track but the user jumped (not sequential scrolling)
-    if (cue.cuePoint !== null && (isTrackChange || isJump)) {
+    if (seekCue && cue.cuePoint !== null && (isTrackChange || isJump)) {
       const incoming = this.nodes[targetTrack];
       if (incoming) incoming.audioEl.currentTime = cue.cuePoint;
     }
