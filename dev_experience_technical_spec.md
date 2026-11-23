@@ -1,6 +1,8 @@
 # Dev experience technical spec: continuous world, discrete representations
 
-Status: proposed for implementation in the development HTML only. The production `index.html` remains the reference experience until the dev changes are reviewed. Companion concept spec: [deferred_human_decision_spec.md](deferred_human_decision_spec.md).
+Status: implemented in the development HTML for review. The production `index.html` remains the reference experience. Companion concept spec: [deferred_human_decision_spec.md](deferred_human_decision_spec.md).
+
+Implementation note: the reference boundary uses a seeded illustrative screen-space gradient, not the coastline height field. The same field expression drives the coast contour and initial tile states. The current Hat geometry and biological scenes remain illustrative. Viewer comprehension and extended performance checks are still needed before promotion. The revised prelude follows the crowd through a raised platform and a leader's hair roots; its handoff to tiles is an intentional hard cut.
 
 ## Intent and scope
 
@@ -15,7 +17,7 @@ Add a **coastal prelude (P5b)** between existing phase 5 and phase 6. Keep exist
 | Segment | New Z range | Duration at 1× | Content |
 |---|---:|---:|---|
 | Existing P1–P5 | 0–180 | 27.7 s | Koch/Sierpinski through facet plane |
-| New P5b | 180–310 | 20.0 s | Coastline, treeline, beach, people and crowd |
+| New P5b | 180–310 | 20.0 s | Coastline, treeline, beach crowd, raised platform, leaders, hair roots |
 | Existing P6–P9 | 310–700 | 60.0 s | Hat-based binary interpretation, extrusion, city |
 | Existing P10–P16 | 700–1155 | 70.0 s | Return to coast, individual, brain, lungs, alveoli |
 
@@ -23,13 +25,13 @@ All existing P6–P16 thresholds shift by +130 Z. For example P6 = 310–407.5, 
 
 ## Coastal prelude and recurring place
 
-Reuse the existing procedural coast, surf, sand, crowd, and canopy functions where possible. P5b is an **overview of one seeded place**: aerial coastline and bathymetry, beach and treeline, then enough human silhouettes to read as a gathering. It ends back at an aerial scale so the same coast can be abstracted into tiles. The later P10–P12 visit should use the same seed, shoreline anchor, treeline layout, and crowd landmarks; it is a return to that place, not a second unrelated coast. Scrubbing backward must reproduce the same layout. Movement of surf and people can remain time-dependent.
+Reuse the existing procedural coast, surf, sand, crowd, and canopy functions where possible. P5b begins with an **overview of one seeded place**: aerial coastline and bathymetry, beach and treeline, then enough human silhouettes to read as a gathering. The camera continues toward a raised timber platform close to the crowd. Three leaders stand on it. The camera then approaches the centre leader's head and reveals hair strands and roots at close range. There is no pullback to an aerial view before the tile cut. The later P10–P12 visit should use the same seed and shoreline anchor. Scrubbing backward must reproduce the platform and leaders in stable positions. Movement of surf and people can remain time-dependent.
 
 Use an identifiable headland, cove, treeline gap, and crowd cluster as spatial anchors. Render them before and after the Hat passage. Avoid an unexplained hard cut between procedural scenes. During P5b, explicitly show a continuous field such as elevation or distance from the water through color and contour. The field is an illustrative visualization; do not present it as measured geography or risk data.
 
 ## Boundary motif and transitions
 
-Introduce one **reference boundary** as a visible line over the coastal field. Initially it follows a contour and varies smoothly with the shore. At the P5b→P6 transition, sample/classify that field into two tile states using a stated threshold. Keep the original contour visible faintly for the first portion of P6 so the loss of detail is visible. The Hat tiling is a visual representation of the sampled field; do not imply the coastline itself becomes tiled. Do not call the threshold a human decision yet.
+Introduce one **reference boundary** as a visible line over the coastal field. Initially it follows a contour and varies smoothly with the shore. At P5b→P6, cut directly from the organic hair-root close-up to the dark, rigid two-state tile scene. The initial tile states still sample/classify the previously shown illustrative coastal field using a stated threshold. The initial P6 caption should explain that relationship so the cut reads as a change of representation. The Hat tiling is a visual representation of the sampled field; do not imply the coastline itself becomes tiled. Do not call the threshold a human decision yet.
 
 At P9→P10, reverse the mapping: retain selected tile edges while the same seeded coastal field reappears. Let the reference contour persist over the coast and fade only as the camera approaches the beach. At P10→P12, use a camera move toward the previously visible crowd cluster, maintain the headland/treeline orientation, and reveal person-scale details before removing the aerial map. Keep a recognizable anchor visible through each handoff. Prefer spatial alignment and overlapping imagery to a full-screen color veil. Verify both forward cruise and reverse scrub across each boundary.
 
@@ -57,10 +59,10 @@ The existing `/dev` entry point, seed/mutate, scrubber, manual zoom, auto cruise
 
 1. At 1×, P5b lasts roughly 20 seconds and visibly includes coastline, treeline, beach, individual people, and a crowd before P6 starts.
 2. A viewer can identify the same headland, treeline gap, and crowd cluster on the return in P10–P12; seed reset/replay and reverse scrub preserve their locations.
-3. The continuous field, its threshold contour, and the resulting two tile states are simultaneously visible during part of P5b→P6. The inverse relationship is visible during P9→P10.
+3. The continuous field and threshold contour appear in the coastal overview, followed by a stable approach to the crowd, platform, leader head, and hair roots. P6 cuts sharply to two classified tile states and names the illustrative threshold. The inverse relationship remains visible during P9→P10.
 4. No phase jump, scrub, reverse cruise, or audio cue points to an old Z range. Phase labels, total runtime, and stage highlights agree at every boundary.
 5. Neither dev HUD nor banners present a computed `10³⁵×` magnification, measured biological D, standard Conway rule, or validated zero-gap tiling without corresponding evidence.
-6. Capture frames and a short video around P5b→P6, P9→P10, and P10→P12 at desktop and phone widths. Check WebGL errors and basic controls on `/dev`. Ask several viewers what changed when the field became tiles; they should describe lost detail or classification without reading a long explanation.
+6. Capture frames and a short video around the coast→platform→hair move, P5b→P6 cut, P9→P10, and P10→P12 at desktop and phone widths. Check WebGL errors and basic controls on `/dev`. Ask several viewers what changed when the field became tiles; they should describe lost detail or classification without reading a long explanation.
 
 ## Open design choices before implementation
 

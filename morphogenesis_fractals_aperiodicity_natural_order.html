@@ -122,7 +122,17 @@
             gap: 8px;
             pointer-events: none;
             transition: opacity 0.3s ease;
+            flex-direction: row;
+            align-items: flex-start;
+            max-height: 100px;
         }
+        #topHeaderBar > .glass-panel:first-child { width: 43%; max-height: 100px; overflow: hidden; }
+        #topHeaderBar > .glass-panel:last-child { width: 55%; max-height: 100px; overflow: hidden; }
+        #topHeaderBar h1 { font-size: 14px; line-height: 1.15; margin: 0; }
+        #topHeaderBar span, #topHeaderBar button, #topHeaderBar select { font-size: 10px; line-height: 1.2; }
+        #topHeaderBar button, #bottomHudContainer button { color: #e2e8f0; background-color: #172033; border: 1px solid #334155; border-radius: 5px; }
+        #topHeaderBar .glass-panel { padding: 7px; }
+        #topHeaderBar .glass-panel > div { gap: 6px; }
         #bottomHudContainer {
             position: fixed;
             bottom: 12px;
@@ -230,7 +240,7 @@
 
     <!-- Multi-Scale Hierarchical Einstein Hat, Game of Life & 3D Monotile Canvas (Z = 165 .. 582) -->
     <canvas id="hatCanvas"></canvas>
-    <div id="fieldLegend" role="status" style="display:none;position:fixed;top:75px;left:50%;transform:translateX(-50%);z-index:10;background:rgba(5,12,20,.82);border:1px solid #fb923c;border-radius:8px;padding:7px 11px;color:#fed7aa;font:11px 'JetBrains Mono',monospace;pointer-events:none;text-align:center">Orange: illustrative threshold over a continuous field</div>
+    <div id="fieldLegend" role="status" style="display:none;position:fixed;top:120px;left:50%;transform:translateX(-50%);z-index:10;background:rgba(5,12,20,.82);border:1px solid #fb923c;border-radius:8px;padding:7px 11px;color:#fed7aa;font:11px 'JetBrains Mono',monospace;pointer-events:none;text-align:center">Orange: illustrative threshold over a continuous field</div>
 
     <!-- Subtle Atmospheric Vignette -->
     <div class="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_center,transparent_58%,rgba(2,6,23,0.78)_100%)] z-10"></div>
@@ -407,7 +417,7 @@
                 <button type="button" onclick="jumpToStage(95)" id="stepP3" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">3.Menger3D</button>
                 <button type="button" onclick="jumpToStage(135)" id="stepP4" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">4.Mandelbulb</button>
                 <button type="button" onclick="jumpToStage(168)" id="stepP5" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer">5.FacetPlane</button>
-                <button type="button" onclick="jumpToStage(225)" id="stepP5b" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="The same seeded coast before classification">5b.Living Coast</button>
+                <button type="button" onclick="jumpToStage(225)" id="stepP5b" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Coast, crowd, platform leaders and hair roots before classification">5b.Coast→Leaders</button>
                 <button type="button" onclick="jumpToStage(350)" id="stepP6" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Einstein Hat 0/1 Conway's Game of Life Cellular Automaton">6.Hat 0/1 Life</button>
                 <button type="button" onclick="jumpToStage(450)" id="stepP7" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Standard 3D Prismatic Extrusion of Einstein Hat Plane">7.3D Hat Slab</button>
                 <button type="button" onclick="jumpToStage(550)" id="stepP8" class="px-1 py-1 rounded bg-slate-900/70 border border-slate-800 text-slate-400 truncate text-center transition cursor-pointer" title="Skyscraper City Skyline Extrusion">8.CitySkyline</button>
@@ -1829,6 +1839,95 @@
                 return vec4(col, alpha);
             }
 
+            vec4 evalPreludeLeader(vec2 world, vec2 position) {
+                vec2 local = world - position;
+                if (abs(local.x) > 0.46 || abs(local.y) > 0.46) return vec4(0.0);
+                float shadow;
+                return evalPersonLayer(local, vec2(0.0), 1.0, 1.0, shadow);
+            }
+
+            // A single stable beach-space set. The camera moves through this scene;
+            // the leaders do not jump between unrelated coastal and portrait renders.
+            vec3 renderPreludePlatform(vec2 uv, float progress) {
+                float approach = smoothstep(64.0, 111.0, progress);
+                float cameraScale = exp2(mix(-2.0, 3.3, approach));
+                vec2 world = uv / cameraScale + mix(vec2(0.0, -0.15), vec2(0.0, 0.10), smoothstep(66.0, 90.0, progress));
+                vec2 sandP = world * 6.0 + uShoreAnchor * 20.0;
+                float grain = fbm(sandP, 0.72);
+                vec3 col = mix(vec3(0.74, 0.59, 0.39), vec3(0.94, 0.80, 0.55), grain);
+
+                // Water, crowd and treeline stay in the same coordinate frame as
+                // the platform while they leave the camera's field of view.
+                float shore = world.x + 2.85 + 0.13 * sin(world.y * 2.6 + uShoreAnchor.y * 8.0);
+                float water = 1.0 - smoothstep(-0.08, 0.05, shore);
+                float foam = 1.0 - smoothstep(0.0, 0.10, abs(shore));
+                col = mix(col, vec3(0.08, 0.34, 0.45) + foam * vec3(0.56, 0.54, 0.40), water);
+                float trees = smoothstep(1.65, 1.82, world.x);
+                float canopy = fbm(world * 3.0 + uSeed * 0.01, 0.65);
+                col = mix(col, vec3(0.12, 0.29, 0.18) + canopy * 0.12, trees * (0.70 + 0.3 * canopy));
+
+                if (cameraScale < 2.2) {
+                    vec2 crowdGrid = world * 1.7 + vec2(0.27, 0.18);
+                    vec2 cell = floor(crowdGrid + 0.5);
+                    vec2 jitter = (hash22(cell + uSeed * 0.02) - 0.5) * 0.34;
+                    float crowdZone = smoothstep(0.78, 1.18, abs(world.y)) * (1.0 - trees);
+                    crowdZone *= 1.0 - smoothstep(2.1, 2.6, abs(world.x));
+                    vec2 dotP = (crowdGrid - cell - jitter) / vec2(0.12, 0.18);
+                    float crowdDot = 1.0 - smoothstep(0.72, 1.0, length(dotP));
+                    float dotShade = hash21(cell + 3.7);
+                    col = mix(col, mix(vec3(0.12, 0.13, 0.16), vec3(0.57, 0.28, 0.17), dotShade), crowdDot * crowdZone);
+                }
+
+                // Raised timber dais: the offset shadow, riser, deck and steps
+                // make its height legible from the overhead approach.
+                vec2 deckP = abs(world - vec2(0.0, 0.02));
+                float shadow = (1.0 - smoothstep(0.0, 0.13, max(deckP.x - 1.92, deckP.y - 0.69))) * 0.48;
+                col *= 1.0 - shadow;
+                vec2 riserP = abs(world - vec2(-0.06, 0.10));
+                float riser = 1.0 - smoothstep(0.0, 0.035, max(riserP.x - 1.84, riserP.y - 0.62));
+                col = mix(col, vec3(0.30, 0.19, 0.13), riser);
+                vec2 topP = abs(world - vec2(0.0, 0.18));
+                float deck = 1.0 - smoothstep(0.0, 0.028, max(topP.x - 1.75, topP.y - 0.54));
+                float planks = 0.5 + 0.5 * sin(world.y * 54.0);
+                vec3 deckCol = mix(vec3(0.48, 0.30, 0.20), vec3(0.66, 0.44, 0.27), planks * 0.23 + 0.35);
+                col = mix(col, deckCol, deck);
+                float steps = 1.0 - smoothstep(0.0, 0.04, max(abs(world.x) - 0.56, abs(world.y + 0.55) - 0.25));
+                col = mix(col, vec3(0.54, 0.35, 0.22) + 0.08 * sin(world.y * 38.0), steps * (1.0 - deck));
+
+                vec4 leftLeader = evalPreludeLeader(world, vec2(-0.72, 0.12));
+                col = mix(col, leftLeader.rgb * vec3(0.85, 0.95, 1.05), leftLeader.a);
+                vec4 rightLeader = evalPreludeLeader(world, vec2(0.72, 0.12));
+                col = mix(col, rightLeader.rgb * vec3(1.08, 0.92, 0.84), rightLeader.a);
+                vec4 centerLeader = evalPreludeLeader(world, vec2(0.0, 0.10));
+                col = mix(col, centerLeader.rgb, centerLeader.a);
+
+                // The last camera move enters the centre leader's hair. Follicles
+                // and curved fibres are drawn in the same world coordinates as the
+                // head, so scrubbing or reversing remains deterministic.
+                float macro = smoothstep(2.5, 6.0, cameraScale);
+                if (macro > 0.0) {
+                    vec2 scalp = world - vec2(0.0, 0.10);
+                    vec2 grid = scalp * 43.0;
+                    vec3 roots = vec3(0.41, 0.27, 0.21) + 0.055 * fbm(grid * 0.24, 0.72);
+                    for (int ix = -1; ix <= 1; ix++) {
+                        for (int iy = -1; iy <= 1; iy++) {
+                            vec2 cell = floor(grid) + vec2(float(ix), float(iy));
+                            vec2 root = cell + 0.18 + 0.64 * hash22(cell + uSeed * 0.02);
+                            vec2 d = grid - root;
+                            float follicle = 1.0 - smoothstep(0.055, 0.15, length(d));
+                            roots = mix(roots, vec3(0.12, 0.075, 0.065), follicle);
+                            float bend = 0.22 * sin(d.y * 1.8 + hash21(cell) * 6.28);
+                            float fibre = (1.0 - smoothstep(0.025, 0.085, abs(d.x - bend)))
+                                        * smoothstep(-0.10, 0.08, d.y) * (1.0 - smoothstep(1.0, 1.55, d.y));
+                            roots = mix(roots, vec3(0.09, 0.055, 0.045), fibre * 0.85);
+                        }
+                    }
+                    float scalpMask = 1.0 - smoothstep(0.155, 0.175, length(scalp));
+                    col = mix(col, roots, macro * scalpMask);
+                }
+                return col;
+            }
+
             vec3 renderCrowdHeadAndBrain(vec2 uv, float z) {
                 float tUnified = clamp((z - 710.0) / 120.0, 0.0, 1.0);
                 float crowdScale = 34.0 * exp2(-8.2 * tUnified);
@@ -2712,16 +2811,21 @@
                 vec3 col = vec3(0.03, 0.04, 0.07);
                 if (uPrelude > 0.5) {
                     float progress = z - 180.0;
-                    // Descend to the beach and crowd, then return to an aerial view
-                    // before the field is sampled into binary tiles.
-                    float coastZ = progress < 95.0
-                        ? 570.0 + progress * (140.0 / 95.0)
-                        : mix(710.0, 570.0, smoothstep(95.0, 130.0, progress));
-                    col = renderStage3(uv, coastZ);
+                    // One forward camera move: coast → crowd → raised platform →
+                    // centre leader's hair roots. No aerial pullback before tiles.
+                    float platformMix = smoothstep(58.0, 78.0, progress);
+                    if (platformMix > 0.0) {
+                        vec3 platform = renderPreludePlatform(uv, progress);
+                        col = platform;
+                    }
+                    if (platformMix < 1.0) {
+                        float coastZ = 570.0 + min(progress, 76.0) * (140.0 / 76.0);
+                        col = mix(renderStage3(uv, coastZ), col, platformMix);
+                    }
                     if (z < 193.0) {
                         col = mix(renderStage1(uv, 179.9), col, smoothstep(180.0, 193.0, z));
                     }
-                } else if (z < 192.0) {
+                } else if (z < 180.0) {
                     col = renderStage1(uv, z);
                 } else if (z > 550.0) {
                     col = renderStage3(uv, z);
@@ -2732,9 +2836,6 @@
                     col += vec3(scan, -scan * 0.5, 0.0);
                 }
 
-                if (uPrelude < 0.5 && z >= 180.0 && z < 205.0) {
-                    col = mix(renderStage3(uv, 570.0), col, smoothstep(180.0, 205.0, z));
-                }
                 if (uPrelude < 0.5 && z >= 530.0 && z < 570.0) {
                     col = mix(col, renderStage3(uv, 570.0), smoothstep(530.0, 570.0, z));
                 }
@@ -3102,7 +3203,7 @@
             { id: 3, zStart: 75.0,  zEnd: 115.0,  dim: 'Illustrative scene', tag: 'STAGE I // ORTHOGONAL 3D SPONGE', title: 'Phase 3: 3D Menger Sponge', desc: 'Tetrahedral folds morph into the orthogonal cubic cross-tunnels of a 3D Menger Sponge (D = ln 20 / ln 3 ≈ 2.727).' },
             { id: 4, zStart: 115.0, zEnd: 155.0,  dim: 'Illustrative scene', tag: 'STAGE I // SPHERICAL POWER-BULB', title: 'Phase 4: 3D Mandelbulb', desc: 'Cubic tunnels warp into spherical-coordinate 3D Mandelbulb filaments before approaching a flat terrace edge.' },
             { id: 5, zStart: 155.0, zEnd: 180.0,  dim: 'Illustrative scene', tag: 'STAGE I → II // FACET PLANE BRIDGE', title: 'Phase 5: Fractal Terrace Facet Plane', desc: 'Camera lands on a single flat terrace facet etched with polykite seams that lock into the Einstein Hat monotile.' },
-            { id: "5b", zStart: 180, zEnd: 310, dim: "Illustrative field", tag: "COASTAL PRELUDE // BEFORE CLASSIFICATION", title: "The living coast", desc: "A seeded shoreline, treeline and gathering of people appear before the field is classified into two tile states." },
+            { id: "5b", zStart: 180, zEnd: 310, dim: "Illustrative scene", tag: "COASTAL PRELUDE // CONTINUOUS LIFE", title: "Coast, crowd and leaders", desc: "The camera follows the beach crowd to leaders on a raised platform, then enters one leader's hair and roots before a sharp cut to binary tiles." },
             { id: 6, zStart: 310.0, zEnd: 407.5,  dim: 'Illustrative scene', tag: 'STAGE II // LIFE-INSPIRED TILE RULE', title: 'Phase 6: Coastal Field → Binary Tile Model', desc: 'A Hat-inspired tile patch samples the illustrative coastal field into two states; a Life-inspired neighbor rule then evolves them.' },
             { id: 7, zStart: 407.5, zEnd: 505.0,  dim: 'Illustrative scene', tag: 'STAGE II // STANDARD 3D HAT EXTRUSION', title: 'Phase 7: Standard 3D Prismatic Einstein Hat Extrusion', desc: 'The tile patch rises into illustrative 3D columns for the two classified states.' },
             { id: 8, zStart: 505.0, zEnd: 602.5,  dim: 'Illustrative scene', tag: 'STAGE II // APERIODIC URBAN SKYLINE', title: 'Phase 8: 3D Skyscraper City Skyline', desc: 'The extruded Einstein Hat prisms rise into an oblique 3D high-rise skyscraper city skyline with illuminated curtain-wall windows.' },
@@ -3850,13 +3951,12 @@ audioBtn.addEventListener("click", () => {
 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-            const showLegend = (state.zoomZ >= 180 && state.zoomZ < 335) ||
+            const showLegend = (state.zoomZ >= 180 && state.zoomZ < 238) ||
+                               (state.zoomZ >= 310 && state.zoomZ < 335) ||
                                (state.zoomZ >= 660 && state.zoomZ < 745);
             document.getElementById('fieldLegend').style.display = showLegend && !state.zenMode ? 'block' : 'none';
 
-            const tileZ = state.zoomZ < HAT_START
-                ? (state.zoomZ < 300 ? -1 : state.zoomZ - 132)
-                : sceneZ(state.zoomZ);
+            const tileZ = state.zoomZ < HAT_START ? -1 : sceneZ(state.zoomZ);
             renderStage2EinsteinCanvas(tileZ, now);
 
             updateHUDReadouts();
