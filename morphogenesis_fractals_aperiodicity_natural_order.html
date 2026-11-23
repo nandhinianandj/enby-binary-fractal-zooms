@@ -1687,10 +1687,16 @@
                 vec2 jitter = mix((rnd - 0.5) * 0.34, vec2(0.0), isHero);
                 vec2 p = local - jitter;
 
-                // Ambient & directional shadow cast on the beach sand (sun from top-left)
-                vec2 shadowP = (p - vec2(0.08, -0.09)) / vec2(0.36, 0.22);
+                // Ambient & directional shadow cast on the beach sand (sun from top-left),
+                // elongated away from the figure like a late-afternoon beach shadow.
+                vec2 shadowP = (p - vec2(0.10, -0.14)) / vec2(0.42, 0.19);
                 float dShadow = length(shadowP) - 1.0;
-                shadowOut = smoothstep(0.06, -0.12, dShadow) * 0.45;
+                // Paired footprints trailing behind the standing figure
+                vec2 fp1 = (p - vec2( 0.04, -0.30)) / vec2(0.045, 0.075);
+                vec2 fp2 = (p - vec2(-0.03, -0.44)) / vec2(0.045, 0.075);
+                float footprints = max(smoothstep(0.15, -0.35, length(fp1) - 1.0),
+                                       smoothstep(0.15, -0.35, length(fp2) - 1.0));
+                shadowOut = max(smoothstep(0.06, -0.12, dShadow) * 0.45, footprints * 0.28);
 
                 float yaw = mix((rnd.x - 0.5) * 1.4, 0.0, isHero);
                 float c = cos(yaw), s = sin(yaw);
@@ -1704,6 +1710,11 @@
 
                 vec2 shP = p / vec2(0.34, 0.20);
                 float dShoulders = length(shP) - 1.0;
+
+                // Torso capsule below the shoulders: elongates the silhouette from a
+                // radially symmetric pill into a standing figure (~1:4 head : body).
+                vec2 torP = (p - vec2(0.0, -0.24)) / vec2(0.19, 0.28);
+                float dTorso = length(torP) - 1.0;
 
                 float headRad = mix(0.24, 0.165, detailLOD);
                 headRad = mix(headRad, 0.165, isHero);
@@ -1720,6 +1731,14 @@
                     float collar = smoothstep(0.03, 0.0, abs(length(p) - headRad * 1.18));
                     col = jacketCol * (0.45 + 0.55 * shZ) + vec3(0.18) * collar;
                     alpha = smoothstep(0.0, -0.04, dShoulders);
+                }
+
+                if (dTorso < 0.0) {
+                    float tz = sqrt(clamp(1.0 - dot(torP, torP), 0.0, 1.0));
+                    // The body drops away as the camera locks onto the hero crown (detailLOD → 1)
+                    float torsoFade = 1.0 - smoothstep(0.20, 0.70, detailLOD);
+                    col = mix(col, jacketCol * (0.30 + 0.55 * tz), torsoFade);
+                    alpha = max(alpha, torsoFade * smoothstep(0.0, -0.05, dTorso));
                 }
 
                 if ((dEars < 0.0 || dNose < 0.0) && detailLOD > 0.15) {
@@ -1803,10 +1822,25 @@
                     vec2 hp = crowdUV / 0.165;
                     float r = length(hp);
                     float mask = smoothstep(1.05, 0.75, r);
-                    float fissure = smoothstep(0.04, 0.0, abs(hp.x));
-                    float gyri = sin(hp.x * 18.0 + fbm(hp * 6.0, 0.7) * 5.0) * 0.5 + 0.5;
-                    vec3 cortexCol = mix(vec3(0.28, 0.12, 0.22), vec3(0.92, 0.55, 0.68), gyri) * (1.0 - 0.65 * fissure);
-                    cortexCol += vec3(0.25, 0.75, 1.0) * pow(gyri, 5.0) * 0.6;
+                    // Multi-resolution sulcal pattern (cortical D ≈ 2.73–2.79): broad primary
+                    // folds (H=0.3), secondary gyri (H=0.5) and fine tertiary dimpling (H=0.7).
+                    float sulcalDepth = fbm(hp * 3.0, 0.3) * 0.5
+                                      + fbm(hp * 8.0, 0.5) * 0.3
+                                      + fbm(hp * 22.0, 0.7) * 0.2;
+                    float gyri = smoothstep(0.43, 0.55, sulcalDepth);
+                    // Primary sulci (longitudinal fissure + Sylvian lateral sulcus) are wider/deeper
+                    float fissure = smoothstep(0.045, 0.0, abs(hp.x));
+                    float sylvian = smoothstep(0.035, 0.0, abs(hp.y - 0.12 + hp.x * 0.30));
+                    float primarySulci = max(fissure, sylvian * 0.85);
+                    // Crown = warm, well-perfused pink-red; sulcal floor = paler grey-beige
+                    vec3 crownCol = vec3(0.90, 0.42, 0.47);
+                    vec3 floorCol = vec3(0.58, 0.50, 0.47);
+                    vec3 cortexCol = mix(floorCol, crownCol, gyri);
+                    cortexCol *= (1.0 - 0.60 * primarySulci);
+                    // Pial vessels: thin red threads coursing over the gyral crowns
+                    float pial = smoothstep(0.014, 0.0, abs(fbm(hp * 5.0 + 2.3, 0.55) - 0.5));
+                    cortexCol = mix(cortexCol, vec3(0.72, 0.10, 0.14), pial * gyri * 0.55);
+                    cortexCol += vec3(0.12) * pow(gyri, 4.0);
                     col = mix(col, cortexCol, cortexReveal * mask);
                 }
 
@@ -2084,6 +2118,11 @@
                 }
 
                 float rNorm = length(bestOffset) / max(0.01, bestRadius);
+                // Angular facet modulation → polyhedral (Kelvin tetrakaidecahedra-like)
+                // alveolar mouths instead of perfectly circular spheres.
+                float facetAng = atan(bestOffset.y, bestOffset.x);
+                float facet = 1.0 + 0.045 * cos(facetAng * 7.0) + 0.025 * cos(facetAng * 11.0 + 1.7);
+                rNorm = clamp(rNorm * facet, 0.0, 1.0);
                 float normZ = sqrt(max(0.0, 1.0 - min(1.0, rNorm * rNorm)));
                 vec3 N = normalize(vec3(bestOffset / max(0.01, bestRadius), normZ));
 
@@ -2106,6 +2145,12 @@
                 vec3 col = membraneCol * (0.35 + 0.65 * diff) * creviceAO;
                 col += vec3(1.0, 0.95, 0.98) * spec * (0.75 + 0.25 * breath);
                 col += vec3(0.95, 0.55, 0.65) * fresnel * 0.85;
+
+                // Bright septal rims with darker cell interiors — the alveolar walls read
+                // as polyhedral septae rather than the edges of overlapping spheres.
+                float septaRim = smoothstep(0.055, 0.015, septum);
+                col = mix(col, vec3(0.95, 0.76, 0.78), septaRim * 0.55);
+                col *= mix(1.0, 0.86, smoothstep(0.02, 0.16, septum));
 
                 // 2. Voronoi-edge capillary mesh (irregular web, D≈1.5 in 2D section)
                 // Real alveolar capillaries follow Voronoi-like septa, NOT a trig grid
@@ -2218,24 +2263,47 @@
             // Domain-warped fBm coastline (Hausdorff D ≈ 1.25)
             // Returns raw fBm height – subtract baseline & add slope externally
             float coastHeight(vec2 p, float H) {
+                // Self-affine anisotropy: real coastlines are ~2× smoother along-shore (y)
+                // than cross-shore (x), so the warp domain is stretched along the shore axis.
+                vec2 pa = vec2(p.x, p.y * 0.55);
                 // First warp pass – large-scale headlands & bays
-                vec2 warp1 = vec2(fbm(p * 1.8 + vec2(3.1, 7.4), H),
-                                  fbm(p * 1.8 + vec2(8.3, 2.1), H));
+                vec2 warp1 = vec2(fbm(pa * 1.8 + vec2(3.1, 7.4), H),
+                                  fbm(pa * 1.8 + vec2(8.3, 2.1), H));
                 // Second warp pass – small coves & inlets (fractal self-similarity)
-                vec2 warp2 = vec2(fbm(p * 3.6 + warp1 * 0.9 + vec2(1.7, 5.3), H * 0.85),
-                                  fbm(p * 3.6 + warp1 * 0.9 + vec2(9.2, 0.6), H * 0.85));
-                return fbm(p * 2.2 + warp2 * 0.55, H);
+                vec2 warp2 = vec2(fbm(pa * 3.6 + warp1 * 0.9 + vec2(1.7, 5.3), H * 0.85),
+                                  fbm(pa * 3.6 + warp1 * 0.9 + vec2(9.2, 0.6), H * 0.85));
+                return fbm(pa * 2.2 + warp2 * 0.55, H);
             }
 
             // Spectral ocean wave field (additive sinusoidal bands + capillary fBm)
+            // Fetch-limited directional spreading: a per-pixel fBm warp fans the crests
+            // so they refract and interfere instead of staying perfectly parallel.
             float oceanWaves(vec2 p, float t) {
+                vec2 spread = vec2(fbm(p * 2.6 + vec2(t * 0.11, 0.0), 0.72),
+                                   fbm(p * 2.6 + vec2(4.7, t * 0.09), 0.72)) - 0.5;
+                vec2 wp = p + spread * 0.85;
                 float w = 0.0;
-                w += 0.42 * sin(p.x *  6.2 + p.y *  1.8 + t * 0.80);
-                w += 0.28 * sin(p.x * 11.5 + p.y *  4.3 + t * 1.10 + 1.3);
-                w += 0.14 * sin(p.x * 23.0 + p.y *  9.1 + t * 1.60 + 2.7);
-                w += 0.09 * sin(p.x * 47.0 + p.y * 19.7 + t * 2.20 + 0.5);
-                w += 0.05 * fbm(p * 60.0 + vec2(t * 0.3, 0.0), 0.65);
+                w += 0.42 * sin(wp.x *  6.2 + wp.y *  1.8 + t * 0.80);
+                w += 0.28 * sin(wp.x * 11.5 + wp.y *  4.3 + t * 1.10 + 1.3);
+                w += 0.14 * sin(wp.x * 23.0 + wp.y *  9.1 + t * 1.60 + 2.7);
+                w += 0.09 * sin(wp.x * 47.0 + wp.y * 19.7 + t * 2.20 + 0.5);
+                w += 0.05 * fbm(wp * 60.0 + vec2(t * 0.3, 0.0), 0.65);
                 return w; // range ~ [-1, +1]
+            }
+
+            // Fractal foam laciness (D ≈ 1.3 along a crest) via iterative abs() domain folding.
+            // Each fold/rotate/zoom pass exposes a thinner self-similar filament network.
+            float foamLace(vec2 p, float t) {
+                vec2 q = p;
+                float lace = 0.0;
+                for (int i = 0; i < 4; i++) {
+                    q = abs(q) - vec2(0.430, 0.265);
+                    q = mat2(0.8, 0.6, -0.6, 0.8) * q;
+                    q *= 1.92;
+                    float f = fbm(q + vec2(t * 0.05, float(i) * 1.7), 0.62);
+                    lace = max(lace, smoothstep(0.055, 0.0, abs(f - 0.5)));
+                }
+                return lace;
             }
 
             // Fractal tree canopy: three recursive crown tiers (macro / meso / micro)
@@ -2270,8 +2338,11 @@
                     float t = uTime * 0.55; // animation time
 
                     // ── Terrain height (domain-warped fractal coastline) ──────
-                    float hBase = coastHeight(uShoreAnchor, uHurst);
-                    float h = coastHeight(p, uHurst) - hBase
+                    // H = 2 − D for a 2D self-affine profile: D = 1.25 (Mandelbrot 1967)
+                    // ⇒ Hurst exponent H = 0.75 for the coastline passes.
+                    float coastH = 0.75;
+                    float hBase = coastHeight(uShoreAnchor, coastH);
+                    float h = coastHeight(p, coastH) - hBase
                               + 0.018
                               + (p.x - uShoreAnchor.x) * 0.38;
                     // h < 0 = ocean, [0, sandWidth] = beach sand, > sandWidth = land
@@ -2310,8 +2381,18 @@
                         float shoalFoam  = smoothstep(0.055, 0.0, abs(h + 0.008 * wv));
                         float swash      = smoothstep(0.025, 0.0,
                                            abs(h + 0.018 * sin(p.y * 28.0 + t * 2.1)));
-                        float totalFoam = max(foamCrest * 0.55, max(shoalFoam, swash));
+                        // Iterative domain-folded foam lace gives fractal, lacy breakers
+                        float crestLace  = foamLace(p * 26.0 + vec2(t * 0.06, 0.0), t)
+                                         * smoothstep(0.16, 0.02, -h);
+                        float totalFoam = max(max(foamCrest * 0.55, max(shoalFoam, swash)),
+                                              crestLace * 0.85);
                         colCoast = mix(colCoast, vec3(0.96, 0.99, 1.00), totalFoam);
+
+                        // Langmuir circulation streaks — faint wind rows aligned with the swell
+                        float streakWarp = oceanWaves(p * vec2(0.35, 0.16), t * 0.65) * 2.4;
+                        float streak = pow(0.5 + 0.5 * sin(p.y * 34.0 + streakWarp * 5.0), 10.0);
+                        colCoast = mix(colCoast, vec3(0.10, 0.34, 0.42),
+                                       streak * 0.28 * smoothstep(0.02, 0.30, -h));
 
                         // Sun glint (sparkle)
                         float glint = smoothstep(0.92, 1.0,
@@ -2354,6 +2435,10 @@
                         // Foam lace / swash tongue near water edge
                         float laceFoam = smoothstep(0.045, 0.012, abs(h - 0.012))
                                        * (0.5 + 0.5 * sin(p.y * 310.0 + t * 1.8));
+                        // Fractal lace fringe where the swash sheet is thinnest
+                        float laceFringe = foamLace(p * 140.0 + vec2(t * 0.12, 0.0), t)
+                                         * smoothstep(0.05, 0.0, abs(h - 0.012));
+                        laceFoam = max(laceFoam * 0.85, laceFringe);
                         colCoast = mix(colCoast, vec3(0.97, 0.98, 0.99), laceFoam * 0.70);
 
                     } else {
@@ -2385,11 +2470,19 @@
 
                     // ── Bathymetric / topo contour isolines (Phase 10) ───────
                     if (chartFade > 0.01) {
-                        float iso    = smoothstep(0.025, 0.0, abs(fract(h * 16.0 + 0.5) - 0.5));
+                        // Gradient-magnitude-driven density: charts bunch isolines on steep
+                        // slopes (cliffs, shelf breaks) and space them out across flats.
+                        float e  = 0.02 * max(zoomScale, 0.02);
+                        float hx = coastHeight(p + vec2(e, 0.0), coastH) - h;
+                        float hy = coastHeight(p + vec2(0.0, e), coastH) - h;
+                        float slope  = length(vec2(hx, hy)) / e;
+                        float isoFreq = 10.0 + 30.0 * clamp(slope * 0.35, 0.0, 1.0);
+
+                        float iso    = smoothstep(0.025, 0.0, abs(fract(h * isoFreq + 0.5) - 0.5));
                         vec3 isoCol  = (h < 0.0) ? vec3(0.60, 0.88, 1.0) : vec3(0.70, 0.90, 0.60);
                         colCoast = mix(colCoast, isoCol, iso * chartFade * 0.60);
                         // Secondary (coarser) contour band
-                        float iso2 = smoothstep(0.012, 0.0, abs(fract(h * 8.0 + 0.5) - 0.5));
+                        float iso2 = smoothstep(0.012, 0.0, abs(fract(h * isoFreq * 0.5 + 0.5) - 0.5));
                         colCoast = mix(colCoast, vec3(0.80, 0.95, 1.0), iso2 * chartFade * 0.25);
                     }
 
